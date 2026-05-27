@@ -1,0 +1,40 @@
+# ============= Données reconstructibles =============
+# Index vectoriel : régénéré par `python build_index.py`
+chroma_db/
+
+# Doc Python : téléchargeable depuis docs.python.org
+python-3.14-docs-text/
+
+# ============= Python =============
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ============= Environnements virtuels =============
+.venv/
+venv/
+env/
+
+# ============= Caches HuggingFace / modèles =============
+.cache/
+*.bin
+*.safetensors
+
+# ============= IDE et OS =============
+.idea/
+.vscode/
+.claude/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ============= Logs et temp =============
+*.log
+*.tmp
+.env
+.env.local
