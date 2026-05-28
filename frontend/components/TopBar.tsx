@@ -8,7 +8,12 @@ const API_BASE =
 
 type Health = "checking" | "online" | "offline";
 
-export function TopBar() {
+type Props = {
+  sidebarOpen: boolean;
+  onToggleSidebar: () => void;
+};
+
+export function TopBar({ sidebarOpen, onToggleSidebar }: Props) {
   const [health, setHealth] = useState<Health>("checking");
 
   useEffect(() => {
@@ -42,8 +47,23 @@ export function TopBar() {
   }[health];
 
   return (
-    <header className="fixed top-0 right-0 left-sidebar-width z-30 h-16 px-gutter bg-background/80 backdrop-blur-md border-b border-outline-variant flex justify-between items-center">
-      <div className="flex items-center gap-4">
+    <header
+      className={`fixed top-0 right-0 z-30 h-16 px-gutter bg-background/80 backdrop-blur-md border-b border-outline-variant flex justify-between items-center transition-[left] duration-200 ${
+        sidebarOpen ? "left-sidebar-width" : "left-0"
+      }`}
+    >
+      <div className="flex items-center gap-3">
+        <button
+          onClick={onToggleSidebar}
+          className="p-2 rounded-lg hover:bg-surface-container-high text-on-surface-variant transition-colors"
+          title={sidebarOpen ? "Masquer le parcours (Ctrl+B)" : "Afficher le parcours (Ctrl+B)"}
+          aria-label={sidebarOpen ? "Masquer la sidebar" : "Afficher la sidebar"}
+        >
+          <MaterialIcon
+            name={sidebarOpen ? "menu_open" : "menu"}
+            className="text-[22px]"
+          />
+        </button>
         <h1 className="text-[20px] font-semibold text-primary-fixed-dim">Python Expert</h1>
         <div className="h-4 w-px bg-outline-variant" />
         <div className="flex items-center gap-2 text-on-surface-variant">

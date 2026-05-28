@@ -45,7 +45,7 @@ class RAGEngine:
         logger.info(
             "Modèle d'embedding chargé en %.2fs (dim=%d)",
             time.perf_counter() - t0,
-            self.embed_model.get_sentence_embedding_dimension(),
+            _embed_dim(self.embed_model),
         )
 
         logger.info("Connexion à ChromaDB : %s", settings.chroma_dir)
@@ -114,3 +114,16 @@ class RAGEngine:
 
 def _truncate(s: str, n: int) -> str:
     return s if len(s) <= n else s[: n - 1] + "…"
+
+
+def _embed_dim(model: SentenceTransformer) -> int:
+    """Récupère la dimension d'embedding, en supportant l'ancien et le nouveau nom.
+
+    sentence-transformers a renommé ``get_sentence_embedding_dimension`` en
+    ``get_embedding_dimension`` (FutureWarning sinon).
+    """
+    for attr in ("get_embedding_dimension", "get_sentence_embedding_dimension"):
+        fn = getattr(model, attr, None)
+        if callable(fn):
+            return int(fn())
+    return -1

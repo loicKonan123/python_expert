@@ -11,7 +11,9 @@ Exemples :
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Literal
 
+from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -39,12 +41,28 @@ class Settings(BaseSettings):
     chunk_overlap: int = 300
     min_chunk_size: int = 200
 
-    # --- LLM ---
+    # --- LLM provider sélectionné ---
+    # "ollama" = local, autonome.
+    # "deepseek" = API DeepSeek (qualité + vitesse, payant ~0.0008$/question).
+    llm_provider: Literal["ollama", "deepseek"] = "ollama"
+
+    # --- Provider Ollama ---
     ollama_model: str = "qwen2.5-coder:7b"
     ollama_url: str = "http://localhost:11434/api/generate"
     ollama_keep_alive: str = "30m"
     ollama_temperature: float = 0.2
     ollama_timeout_s: int = 300
+
+    # --- Provider DeepSeek ---
+    # Modèles disponibles :
+    #   - "deepseek-chat" : V4-Flash non-thinking (recommandé pour ce projet)
+    #   - "deepseek-reasoner" : V4-Flash thinking (raisonne, plus lent)
+    #   - "deepseek-v4-pro" : qualité max (~5x plus cher)
+    deepseek_api_key: SecretStr | None = None
+    deepseek_model: str = "deepseek-chat"
+    deepseek_url: str = "https://api.deepseek.com/v1/chat/completions"
+    deepseek_temperature: float = 0.2
+    deepseek_timeout_s: int = 120
 
     # --- Retrieval ---
     top_k: int = 7

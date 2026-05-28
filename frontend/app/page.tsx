@@ -9,13 +9,39 @@ import { WelcomeHero } from "@/components/WelcomeHero";
 import { askStream, type Source } from "@/lib/api";
 import type { Concept, Level } from "@/lib/curriculum";
 
+const SIDEBAR_STORAGE_KEY = "pyexpert.sidebarOpen";
+
 export default function Home() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [busy, setBusy] = useState(false);
   const [activeLevelNum, setActiveLevelNum] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const cancelRef = useRef<(() => void) | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  // Restaure l'état de la sidebar depuis localStorage au mount.
+  useEffect(() => {
+    const saved = localStorage.getItem(SIDEBAR_STORAGE_KEY);
+    if (saved !== null) setSidebarOpen(saved === "1");
+  }, []);
+
+  // Persiste à chaque changement.
+  useEffect(() => {
+    localStorage.setItem(SIDEBAR_STORAGE_KEY, sidebarOpen ? "1" : "0");
+  }, [sidebarOpen]);
+
+  // Raccourci Ctrl+B (ou Cmd+B sur Mac) pour toggler la sidebar.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") {
+        e.preventDefault();
+        setSidebarOpen((v) => !v);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   // Scroll au bas à chaque update du dernier message.
   useEffect(() => {
@@ -112,13 +138,24 @@ export default function Home() {
 
   return (
     <>
-      <Sidebar activeLevelNum={activeLevelNum} onPickConcept={pickConcept} />
+      <Sidebar
+        open={sidebarOpen}
+        activeLevelNum={activeLevelNum}
+        onPickConcept={pickConcept}
+      />
 
-      <main className="ml-sidebar-width min-h-screen flex flex-col">
-        <TopBar />
+      <main
+        className={`min-h-screen flex flex-col transition-[margin-left] duration-200 ${
+          sidebarOpen ? "ml-sidebar-width" : "ml-0"
+        }`}
+      >
+        <TopBar
+          sidebarOpen={sidebarOpen}
+          onToggleSidebar={() => setSidebarOpen((v) => !v)}
+        />
 
         <div className="pt-16 pb-40 flex-1 flex flex-col items-center">
-          <div className="w-full max-w-chat-max-width px-6 py-stack-lg space-y-10">
+          <div className="w-full max-w-chat-max-width px-8 py-stack-lg space-y-10">
             {messages.length === 0 ? (
               <WelcomeHero />
             ) : (
@@ -138,6 +175,7 @@ export default function Home() {
           onSubmit={() => submit(input)}
           onCancel={cancel}
           busy={busy}
+          sidebarOpen={sidebarOpen}
         />
       </main>
     </>

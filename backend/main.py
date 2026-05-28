@@ -17,10 +17,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from .config import settings
+from .llm_providers import get_provider
 from .logging_config import setup_logging
-from .ollama_client import warmup as warmup_ollama
 from .rag import RAGEngine
-from .routes import ask, health
+from .routes import ask, health, usage
 
 
 # Le logger principal du module est configuré au démarrage.
@@ -36,22 +36,29 @@ async def lifespan(app: FastAPI):
     logger.info("Démarrage du backend Python Expert")
     logger.info("=" * 60)
     logger.info("Paramètres :")
-    logger.info("  ollama_model       = %s", settings.ollama_model)
+    logger.info("  llm_provider       = %s", settings.llm_provider)
+    if settings.llm_provider == "ollama":
+        logger.info("  ollama_model       = %s", settings.ollama_model)
+        logger.info("  ollama_keep_alive  = %s", settings.ollama_keep_alive)
+    elif settings.llm_provider == "deepseek":
+        logger.info("  deepseek_model     = %s", settings.deepseek_model)
+        logger.info("  deepseek_api_key   = %s",
+                    "***" if settings.deepseek_api_key else "(NON DÉFINIE)")
     logger.info("  embedding_model    = %s", settings.embedding_model)
     logger.info("  top_k              = %d", settings.top_k)
     logger.info("  chunk_size         = %d (overlap %d)",
                 settings.chunk_size, settings.chunk_overlap)
-    logger.info("  ollama_keep_alive  = %s", settings.ollama_keep_alive)
     logger.info("  cors_origins       = %s", settings.cors_origins)
     logger.info("  host:port          = %s:%d", settings.host, settings.port)
     logger.info("  log_level          = %s", settings.log_level)
 
     t0 = time.perf_counter()
     app.state.rag = RAGEngine()
+    app.state.llm = get_provider()
     app.state.started_at = time.time()
     logger.info("RAG engine prêt (total %.1fs)", time.perf_counter() - t0)
 
-    warmup_ollama()
+    app.state.llm.warmup()
 
     logger.info("Backend prêt sur http://%s:%d", settings.host, settings.port)
     logger.info("Docs OpenAPI : http://%s:%d/docs", settings.host, settings.port)
@@ -84,14 +91,14 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         method = request.method
         origin = request.headers.get("origin", "-")
 
-        self._http_logger.info("← %s %s (origin=%s)", method, path, origin)
+        self._http_logger.info(">>> %s %s (origin=%s)", method, path, origin)
 
         try:
             response = await call_next(request)
         except Exception as exc:
             elapsed_ms = (time.perf_counter() - start) * 1000
             self._http_logger.exception(
-                "✗ %s %s ERREUR %.0fms (%s)", method, path, elapsed_ms, exc,
+                "!!! %s %s ERREUR %.0fms (%s)", method, path, elapsed_ms, exc,
             )
             raise
 
@@ -99,7 +106,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         is_stream = response.media_type == "text/event-stream"
         marker = " [SSE]" if is_stream else ""
         self._http_logger.info(
-            "→ %s %s %d %.0fms%s", method, path, response.status_code, elapsed_ms, marker,
+            "<<< %s %s %d %.0fms%s", method, path, response.status_code, elapsed_ms, marker,
         )
         return response
 
@@ -121,6 +128,7 @@ app.add_middleware(
 # Routes
 app.include_router(ask.router)
 app.include_router(health.router)
+app.include_router(usage.router)
 
 
 @app.get("/", tags=["root"])

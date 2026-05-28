@@ -5,11 +5,12 @@ import { CURRICULUM, TOTAL_CONCEPTS, type Concept, type Level } from "@/lib/curr
 import { MaterialIcon } from "./MaterialIcon";
 
 type Props = {
+  open: boolean;
   activeLevelNum: string | null;
   onPickConcept: (concept: Concept, level: Level) => void;
 };
 
-export function Sidebar({ activeLevelNum, onPickConcept }: Props) {
+export function Sidebar({ open, activeLevelNum, onPickConcept }: Props) {
   const [filter, setFilter] = useState("");
   const [expanded, setExpanded] = useState<Set<string>>(
     () => new Set([CURRICULUM[0].num]),
@@ -26,7 +27,12 @@ export function Sidebar({ activeLevelNum, onPickConcept }: Props) {
   }
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-sidebar-width z-40 bg-surface-container-low border-r border-outline-variant flex flex-col py-gutter">
+    <aside
+      className={`fixed left-0 top-0 h-screen w-sidebar-width z-40 bg-surface-container-low border-r border-outline-variant flex flex-col py-gutter transition-transform duration-200 ease-in-out ${
+        open ? "translate-x-0" : "-translate-x-full"
+      }`}
+      aria-hidden={!open}
+    >
       {/* En-tête de la sidebar */}
       <div className="px-6 mb-4">
         <div className="flex items-center gap-3 mb-2">

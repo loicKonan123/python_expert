@@ -22,8 +22,8 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from ..config import settings
-from ..ollama_client import OllamaError, stream as ollama_stream
-from ..prompts import build_prompt
+from ..llm_providers.base import LLMProviderError
+from ..prompts import SYSTEM_PROMPT, build_user_message
 
 
 logger = logging.getLogger(__name__)
@@ -74,12 +74,20 @@ def _strip_thinking(piece_buffer: str, in_thinking: bool) -> tuple[str, str, boo
 
 @router.post("/ask")
 async def ask(req: AskRequest, request: Request) -> StreamingResponse:
-    """Pipeline RAG complet : retrieval → prompt → Ollama → streaming SSE."""
+    """Pipeline RAG complet : retrieval → prompt → LLM provider → streaming SSE.
+
+    Le provider LLM (Ollama ou DeepSeek) est sélectionné au démarrage via
+    PYEXPERT_LLM_PROVIDER. Il vit dans ``app.state.llm``.
+    """
     rag = request.app.state.rag
+    llm = request.app.state.llm
     k = req.k or settings.top_k
     t_start = time.perf_counter()
 
-    logger.info("Question reçue (k=%d) : %s", k, _truncate(req.question, 80))
+    logger.info(
+        "Question reçue (k=%d, provider=%s) : %s",
+        k, llm.name, _truncate(req.question, 80),
+    )
 
     def generator() -> Iterator[bytes]:
         # ===== Phase 1 : RETRIEVAL =====
@@ -118,26 +126,28 @@ async def ask(req: AskRequest, request: Request) -> StreamingResponse:
             )
 
         # ===== Phase 2 : PROMPT BUILD =====
-        prompt = build_prompt(req.question, [c.to_dict() for c in chunks])
-        logger.info("[PROMPT] %d caractères assemblés (système + sources + question)",
-                    len(prompt))
+        user_message = build_user_message(req.question, [c.to_dict() for c in chunks])
+        logger.info(
+            "[PROMPT] système=%d chars + utilisateur=%d chars",
+            len(SYSTEM_PROMPT), len(user_message),
+        )
 
         # ===== Phase 3 : GENERATION =====
-        logger.info("[GENERATION] début avec %s", settings.ollama_model)
+        logger.info("[GENERATION] début avec %s/%s", llm.name, llm.model)
         buffer = ""
         in_thinking = False
         total_chars = 0
         first_token_at: float | None = None
 
         try:
-            for piece in ollama_stream(prompt):
+            for piece in llm.stream(SYSTEM_PROMPT, user_message):
                 buffer += piece
                 to_emit, buffer, in_thinking = _strip_thinking(buffer, in_thinking)
                 if to_emit:
                     if first_token_at is None:
                         first_token_at = time.perf_counter()
                         logger.info(
-                            "[GENERATION] premier token reçu après %.1fs",
+                            "[GENERATION] premier token après %.2fs",
                             first_token_at - t_start,
                         )
                     total_chars += len(to_emit)
@@ -145,9 +155,9 @@ async def ask(req: AskRequest, request: Request) -> StreamingResponse:
             if buffer and not in_thinking:
                 yield _sse("token", buffer)
                 total_chars += len(buffer)
-        except OllamaError as exc:
-            logger.error("[GENERATION] erreur Ollama : %s", exc)
-            yield _sse("token", f"\n\n[Erreur Ollama : {exc}]")
+        except LLMProviderError as exc:
+            logger.error("[GENERATION] erreur provider %s : %s", llm.name, exc)
+            yield _sse("token", f"\n\n[Erreur LLM ({llm.name}) : {exc}]")
         except Exception as exc:
             logger.exception("[GENERATION] erreur inattendue : %s", exc)
             yield _sse("token", f"\n\n[Erreur serveur : {exc}]")

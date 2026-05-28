@@ -23,17 +23,18 @@ Règles de réponse :
 """
 
 
-def build_prompt(question: str, chunks: list[dict]) -> str:
-    """Assemble le prompt envoyé à Ollama.
+def build_user_message(question: str, chunks: list[dict]) -> str:
+    """Construit le message utilisateur avec les extraits de doc + la question.
 
-    Format : [Système] + [Extraits numérotés] + [Question utilisateur].
+    Le prompt système est passé séparément (cf SYSTEM_PROMPT) — ça permet
+    aux providers OpenAI-like (DeepSeek) de bénéficier du cache automatique
+    sur le system message, et c'est plus propre que tout concaténer.
     """
     context = "\n\n---\n\n".join(
         f"[Source {i} — {c['source']} §{c['section']}]\n{c['text']}"
         for i, c in enumerate(chunks, 1)
     )
     return (
-        f"{SYSTEM_PROMPT}\n\n"
         f"===== EXTRAITS DE DOCUMENTATION =====\n\n{context}\n\n"
         f"===== QUESTION =====\n\n{question}\n\n"
         f"Réponds en français, en respectant strictement les règles."

@@ -15,6 +15,16 @@ _DATE_FORMAT = "%H:%M:%S"
 
 def setup_logging(level: str = "INFO") -> None:
     """Configure le root logger. À appeler une fois au démarrage."""
+    # Force l'encodage stdout/stderr en UTF-8 pour éviter les UnicodeEncodeError
+    # sur Windows (console par défaut en cp1252) avec les caractères français
+    # ou les symboles unicode.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            try:
+                stream.reconfigure(encoding="utf-8")
+            except Exception:
+                pass
+
     root = logging.getLogger()
     # Réinitialise les handlers (utile en dev / reload).
     for h in list(root.handlers):

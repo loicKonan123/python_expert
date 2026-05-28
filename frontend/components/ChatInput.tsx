@@ -9,6 +9,7 @@ type Props = {
   onSubmit: () => void;
   onCancel?: () => void;
   busy?: boolean;
+  sidebarOpen: boolean;
 };
 
 export function ChatInput({
@@ -17,6 +18,7 @@ export function ChatInput({
   onSubmit,
   onCancel,
   busy,
+  sidebarOpen,
 }: Props) {
   const ref = useRef<HTMLTextAreaElement | null>(null);
 
@@ -36,16 +38,20 @@ export function ChatInput({
   }
 
   return (
-    <div className="fixed bottom-0 right-0 left-sidebar-width p-gutter flex justify-center pointer-events-none z-20">
+    <div
+      className={`fixed bottom-0 right-0 p-gutter flex justify-center pointer-events-none z-20 transition-[left] duration-200 ${
+        sidebarOpen ? "left-sidebar-width" : "left-0"
+      }`}
+    >
       <div className="w-full max-w-chat-max-width glass-input p-4 rounded-2xl border border-outline-variant shadow-2xl pointer-events-auto">
         <div className="relative flex items-end gap-3">
-          <div className="flex-1 bg-surface-container-highest rounded-xl px-4 py-3 min-h-[56px] flex flex-col justify-center border border-transparent focus-within:border-primary transition-colors">
+          <div className="flex-1 bg-surface-container-highest rounded-xl px-4 py-3 min-h-14 flex flex-col justify-center border border-transparent focus-within:border-primary transition-colors">
             <textarea
               ref={ref}
               value={value}
               onChange={(e) => onChange(e.target.value)}
               onKeyDown={handleKey}
-              placeholder="Pose une question Python en anglais — ex: How do decorators work?"
+              placeholder="Pose ta question..."
               rows={1}
               className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-[16px] leading-[1.6] p-0 resize-none custom-scrollbar max-h-40 placeholder:text-on-surface-variant/60"
               disabled={busy}
@@ -72,11 +78,6 @@ export function ChatInput({
               </button>
             )}
           </div>
-        </div>
-        <div className="mt-2 flex justify-center">
-          <p className="text-[10px] font-mono text-on-surface-variant opacity-50 uppercase tracking-widest">
-            Python 3.14 · RAG local · Ollama qwen2.5-coder
-          </p>
         </div>
       </div>
     </div>

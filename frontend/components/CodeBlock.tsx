@@ -47,15 +47,13 @@ export function CodeBlock({ code, lang = "python", filename }: Props) {
     <div className="rounded-xl overflow-hidden border border-outline-variant bg-[#010409] my-3">
       {/* Header */}
       <div className="px-4 py-2 bg-surface-container-highest flex justify-between items-center border-b border-outline-variant">
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-secondary opacity-60" />
-          <span className="font-mono text-[11px] text-on-surface-variant uppercase tracking-wider">
-            {filename ?? `snippet.${extOf(lang)}`}
-          </span>
-        </div>
+        <span className="font-mono text-[11px] text-on-surface-variant uppercase tracking-wider">
+          {filename ?? prettyLangLabel(lang)}
+        </span>
         <button
           onClick={copy}
           className="flex items-center gap-1 text-[11px] font-mono text-primary hover:text-primary-fixed transition-colors"
+          aria-label={copied ? "Code copié" : "Copier le code"}
         >
           <MaterialIcon
             name={copied ? "check" : "content_copy"}
@@ -81,6 +79,11 @@ export function CodeBlock({ code, lang = "python", filename }: Props) {
           lineHeight: 22,
           padding: { top: 12, bottom: 12 },
           renderLineHighlight: "none",
+          lineNumbers: "off",
+          lineDecorationsWidth: 0,
+          lineNumbersMinChars: 0,
+          glyphMargin: false,
+          folding: false,
           scrollbar: {
             verticalScrollbarSize: 8,
             horizontalScrollbarSize: 8,
@@ -91,7 +94,6 @@ export function CodeBlock({ code, lang = "python", filename }: Props) {
           wordWrap: "on",
         }}
         onMount={(editor) => {
-          // Désactive le focus auto pour ne pas scroller la page.
           editor.updateOptions({ readOnly: true });
         }}
       />
@@ -108,15 +110,24 @@ function normalizeLang(lang: string): string {
   return l;
 }
 
-function extOf(lang: string): string {
+function prettyLangLabel(lang: string): string {
   const l = lang.toLowerCase();
   return (
     {
-      python: "py",
-      javascript: "js",
-      typescript: "ts",
-      shell: "sh",
-      bash: "sh",
-    }[l] ?? "txt"
+      python: "Python",
+      py: "Python",
+      javascript: "JavaScript",
+      js: "JavaScript",
+      typescript: "TypeScript",
+      ts: "TypeScript",
+      shell: "Shell",
+      sh: "Shell",
+      bash: "Bash",
+      html: "HTML",
+      css: "CSS",
+      json: "JSON",
+      yaml: "YAML",
+      sql: "SQL",
+    }[l] ?? "Code"
   );
 }

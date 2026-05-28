@@ -61,7 +61,7 @@
 
   /* ---------- Espacements custom ---------- */
   --spacing-sidebar-width: 280px;
-  --spacing-chat-max-width: 800px;
+  --spacing-chat-max-width: 1024px;
   --spacing-gutter: 1.5rem;
   --spacing-stack-sm: 0.5rem;
   --spacing-stack-md: 1rem;
