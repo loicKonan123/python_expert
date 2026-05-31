@@ -1,8 +1,19 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CURRICULUM, TOTAL_CONCEPTS, type Concept, type Level } from "@/lib/curriculum";
+import { CURRICULUM, TOTAL_CONCEPTS, type Concept, type Corpus, type Level } from "@/lib/curriculum";
 import { MaterialIcon } from "./MaterialIcon";
+
+
+/** Couleurs et icônes par techno — sert aux séparateurs et accents. */
+const CORPUS_META: Record<Corpus, { label: string; color: string; icon: string }> = {
+  python:     { label: "Python",      color: "text-[#FFD43B]", icon: "terminal" },        // jaune Python
+  fastapi:    { label: "FastAPI",     color: "text-[#009688]", icon: "bolt" },            // teal FastAPI
+  pydantic:   { label: "Pydantic",    color: "text-[#E92063]", icon: "schema" },          // rose Pydantic
+  nextjs:     { label: "Next.js",     color: "text-on-surface", icon: "web" },            // blanc (Vercel)
+  typescript: { label: "TypeScript",  color: "text-[#3178C6]", icon: "code" },            // bleu TS
+  tailwind:   { label: "Tailwind CSS",color: "text-[#06B6D4]", icon: "format_paint" },    // cyan Tailwind
+};
 
 type Props = {
   open: boolean;
@@ -44,7 +55,7 @@ export function Sidebar({ open, activeLevelNum, onPickConcept }: Props) {
               Curriculum
             </h2>
             <p className="text-[14px] text-on-surface-variant leading-tight">
-              {CURRICULUM.length} niveaux · {TOTAL_CONCEPTS} concepts
+              {TOTAL_CONCEPTS} concepts · {new Set(CURRICULUM.map((l) => l.corpus)).size} technos
             </p>
           </div>
         </div>
@@ -69,12 +80,23 @@ export function Sidebar({ open, activeLevelNum, onPickConcept }: Props) {
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto custom-scrollbar px-3 space-y-1">
-        {filtered.map((level) => {
+        {filtered.map((level, i) => {
           const isExpanded = expanded.has(level.num) || filter.length > 0;
           const isActive = activeLevelNum === level.num;
+          const isFirstOfCorpus = i === 0 || filtered[i - 1].corpus !== level.corpus;
+          const meta = CORPUS_META[level.corpus];
 
           return (
             <div key={level.num} className="space-y-1">
+              {isFirstOfCorpus && (
+                <div className="flex items-center gap-2 px-2 pt-4 pb-1 select-none">
+                  <MaterialIcon name={meta.icon} className={`text-[14px] ${meta.color}`} filled />
+                  <span className={`text-[11px] font-mono uppercase tracking-widest ${meta.color}`}>
+                    {meta.label}
+                  </span>
+                  <div className="flex-1 h-px bg-outline-variant/40 ml-1" />
+                </div>
+              )}
               <button
                 onClick={() => toggle(level.num)}
                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all text-left ${
@@ -141,7 +163,7 @@ export function Sidebar({ open, activeLevelNum, onPickConcept }: Props) {
       {/* Pied : version / lien GitHub */}
       <div className="px-4 mt-auto pt-2">
         <div className="text-[10px] font-mono text-on-surface-variant/60 text-center uppercase tracking-widest">
-          Python 3.14 · RAG local
+          RAG local · doc officielle
         </div>
       </div>
     </aside>

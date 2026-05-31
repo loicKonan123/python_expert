@@ -14,7 +14,7 @@ import urllib.request
 from typing import Iterator
 
 from ..config import settings
-from .base import LLMProviderError
+from .base import LLMProviderError, Message
 
 
 logger = logging.getLogger(__name__)
@@ -32,11 +32,6 @@ class OllamaProvider:
 
     # ---------------------------------------------------------------- warmup
     def warmup(self) -> None:
-        """Force Ollama à charger le modèle en RAM avant la première requête.
-
-        Sans ça, le premier visiteur attend 10-30s qu'Ollama charge le modèle.
-        Avec ça, le serveur démarre prêt à répondre.
-        """
         logger.info("Pré-chauffage Ollama : %s", self.model)
         t0 = time.perf_counter()
         payload = json.dumps({
@@ -63,19 +58,21 @@ class OllamaProvider:
         logger.info("Ollama prêt (%.1fs)", time.perf_counter() - t0)
 
     # ---------------------------------------------------------------- stream
-    def stream(self, system: str, user: str) -> Iterator[str]:
-        """Streame la réponse d'Ollama.
+    def stream(
+        self,
+        messages: list[Message],
+        model_override: str | None = None,
+    ) -> Iterator[str]:
+        """Streame via /api/chat (qui accepte le format messages).
 
-        Ollama supporte l'endpoint /api/chat avec messages — on l'utilise
-        pour bénéficier du KV-cache côté Ollama sur le system prompt.
+        ``model_override`` ignoré côté Ollama (un seul modèle local). On
+        accepte le paramètre pour rester compatible avec l'interface DeepSeek.
         """
+        model = model_override or self.model
         chat_url = self.url.replace("/api/generate", "/api/chat")
         payload = json.dumps({
-            "model": self.model,
-            "messages": [
-                {"role": "system", "content": system},
-                {"role": "user", "content": user},
-            ],
+            "model": model,
+            "messages": list(messages),
             "stream": True,
             "keep_alive": self.keep_alive,
             "options": {"temperature": self.temperature},
@@ -101,7 +98,6 @@ class OllamaProvider:
             except json.JSONDecodeError:
                 logger.debug("Ligne JSON invalide ignorée : %r", line[:80])
                 continue
-            # /api/chat renvoie {message: {content: "..."}, done: bool}
             piece = data.get("message", {}).get("content", "")
             if piece:
                 total_tokens += 1
@@ -115,3 +111,11 @@ class OllamaProvider:
             "Ollama: %d tokens en %.1fs (%.1f tok/s)",
             total_tokens, elapsed, rate,
         )
+
+    # -------------------------------------------------------------- complete
+    def complete(
+        self,
+        messages: list[Message],
+        model_override: str | None = None,
+    ) -> str:
+        return "".join(self.stream(messages, model_override=model_override))

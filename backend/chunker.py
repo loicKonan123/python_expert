@@ -1,14 +1,18 @@
-"""Segmentation des fichiers de documentation Python en chunks RAG.
+"""Segmentation des fichiers de documentation en chunks RAG.
 
-Stratégie en deux niveaux :
-  1. Découpage prioritaire sur les frontières sémantiques naturelles
-     (titres soulignés par ===, ---, ***, séparateurs ==========).
-  2. Découpage par paquets de paragraphes si une section dépasse encore
-     CHUNK_SIZE. Un chevauchement (CHUNK_OVERLAP) préserve le contexte.
+Supporte plusieurs formats :
+  - sphinx-text : titres soulignés par ===/---/*** (doc Python officielle)
+  - markdown : titres `# / ## / ###` (FastAPI, Pydantic, Next.js, TypeScript)
+  - rst : reStructuredText (Pytest, Django, SQLAlchemy)
+  - mdx : Markdown + JSX (Tailwind) — traité comme markdown, balises JSX ignorées
 
-Chaque chunk est enrichi de métadonnées dérivées du chemin du fichier :
-catégorie (library, tutorial, reference...), module ou sujet, et le titre
-de section quand on peut l'extraire.
+Chaque chunk reçoit des métadonnées :
+  - corpus : identifiant ("python", "fastapi"...)
+  - source : chemin relatif depuis local_path du corpus
+  - category : premier segment du chemin (ex: "library" pour Python)
+  - module : nom du fichier sans extension
+  - section : titre Sphinx/markdown détecté (peut être vide)
+  - start : offset entier (utilisé pour l'id stable du chunk)
 """
 from __future__ import annotations
 
@@ -19,6 +23,7 @@ from pathlib import Path
 from typing import Iterator
 
 from .config import settings
+from .corpora import Corpus
 
 
 logger = logging.getLogger(__name__)
@@ -31,40 +36,48 @@ class Chunk:
 
     @property
     def id(self) -> str:
-        return f"{self.metadata['source']}::{self.metadata['start']}"
+        # ID stable : corpus + chemin + offset → unique entre corpus.
+        return f"{self.metadata['corpus']}::{self.metadata['source']}::{self.metadata['start']}"
 
 
-# Titres Sphinx en texte brut : ligne de contenu suivie d'une ligne de
-# soulignement composée d'un seul caractère répété.
-_SECTION_HEADER = re.compile(
+# ----------------------------------------------------------------------------
+# Regex de détection des titres selon le format
+# ----------------------------------------------------------------------------
+
+# Sphinx text : "Titre\n=====" (la ligne du dessous est composée d'un seul char)
+_SPHINX_HEADER = re.compile(
     r"^(?P<title>\S[^\n]{0,200})\n(?P<underline>[*=\-^\"]{3,})\s*$",
     re.MULTILINE,
 )
 
+# Markdown : "# Titre", "## Titre", "### Titre" (jusqu'à 6 #)
+_MARKDOWN_HEADER = re.compile(
+    r"^(?P<hashes>#{1,6})\s+(?P<title>.+?)\s*$",
+    re.MULTILINE,
+)
 
-def _extract_path_metadata(path: Path) -> dict:
-    """Dérive catégorie + module à partir du chemin du fichier."""
-    rel = path.relative_to(settings.docs_dir)
-    parts = rel.parts
-    category = parts[0] if len(parts) > 1 else "root"
-    module = path.stem
-    return {
-        "source": str(rel).replace("\\", "/"),
-        "category": category,
-        "module": module,
-    }
+# RST : identique à Sphinx text (RST → Sphinx text est juste une question de rendu)
+_RST_HEADER = _SPHINX_HEADER
 
 
-def _split_on_sections(text: str) -> list[tuple[str, str]]:
-    """Découpe sur les titres Sphinx. Renvoie [(titre, contenu), ...].
+def _split_on_sections(text: str, fmt: str) -> list[tuple[str, str]]:
+    """Découpe le texte en sections. Retourne [(titre, contenu), ...].
 
-    Le contenu inclut le titre et son soulignement pour rester lisible.
+    Le contenu inclut le titre lui-même (pour rester lisible dans le chunk).
     """
-    matches = list(_SECTION_HEADER.finditer(text))
+    if fmt == "markdown" or fmt == "mdx":
+        pattern = _MARKDOWN_HEADER
+    elif fmt == "rst":
+        pattern = _RST_HEADER
+    else:
+        pattern = _SPHINX_HEADER
+
+    matches = list(pattern.finditer(text))
     if not matches:
         return [("", text)]
 
     sections: list[tuple[str, str]] = []
+    # Préambule (avant le premier titre)
     if matches[0].start() > 0:
         preamble = text[: matches[0].start()].strip()
         if preamble:
@@ -80,7 +93,7 @@ def _split_on_sections(text: str) -> list[tuple[str, str]]:
 
 
 def _split_long_text(text: str) -> Iterator[str]:
-    """Découpe un bloc trop long en morceaux ~CHUNK_SIZE avec chevauchement."""
+    """Découpe un bloc trop long en morceaux ~chunk_size avec chevauchement."""
     if len(text) <= settings.chunk_size:
         yield text
         return
@@ -106,16 +119,51 @@ def _split_long_text(text: str) -> Iterator[str]:
         yield buffer
 
 
-def chunk_file(path: Path) -> list[Chunk]:
-    """Lit un fichier .txt et renvoie la liste de ses chunks."""
+def _extract_path_metadata(path: Path, corpus: Corpus) -> dict:
+    """Dérive corpus + catégorie + module à partir du chemin relatif."""
+    try:
+        rel = path.relative_to(corpus.local_path)
+    except ValueError:
+        # Le fichier n'est pas sous local_path — on stocke le chemin absolu en repli.
+        rel = path
+    parts = rel.parts
+    category = parts[0] if len(parts) > 1 else "root"
+    module = path.stem
+    return {
+        "corpus": corpus.name,
+        "source": str(rel).replace("\\", "/"),
+        "category": category,
+        "module": module,
+    }
+
+
+def _strip_mdx_jsx(text: str) -> str:
+    """Pour les fichiers MDX : retire grossièrement les balises JSX inline.
+
+    On garde les blocs markdown classiques. Les composants JSX (<Card>, etc.)
+    sont remplacés par des espaces pour ne pas polluer les embeddings.
+    """
+    # Composants auto-fermants <Foo />
+    text = re.sub(r"<[A-Z][^>]*?/>", "", text)
+    # Balises ouvrantes/fermantes <Foo>...</Foo> (non gourmand)
+    text = re.sub(r"<[A-Z][^>]*?>", "", text)
+    text = re.sub(r"</[A-Z][^>]*?>", "", text)
+    return text
+
+
+def chunk_file(path: Path, corpus: Corpus) -> list[Chunk]:
+    """Lit un fichier et le découpe en chunks selon le format du corpus."""
     try:
         text = path.read_text(encoding="utf-8")
     except UnicodeDecodeError:
         logger.warning("Encodage non-UTF8 dans %s, fallback errors='replace'", path)
         text = path.read_text(encoding="utf-8", errors="replace")
 
-    base_meta = _extract_path_metadata(path)
-    sections = _split_on_sections(text)
+    if corpus.format == "mdx":
+        text = _strip_mdx_jsx(text)
+
+    base_meta = _extract_path_metadata(path, corpus)
+    sections = _split_on_sections(text, corpus.format)
 
     chunks: list[Chunk] = []
     cursor = 0
@@ -134,12 +182,16 @@ def chunk_file(path: Path) -> list[Chunk]:
     return chunks
 
 
-def iter_all_files(root: Path | None = None) -> Iterator[Path]:
-    """Itère sur tous les fichiers .txt de la documentation, triés."""
-    yield from sorted((root or settings.docs_dir).rglob("*.txt"))
+def iter_corpus_files(corpus: Corpus) -> Iterator[Path]:
+    """Itère sur tous les fichiers du corpus correspondant à ses extensions."""
+    if not corpus.local_path.exists():
+        logger.warning("Corpus '%s' introuvable : %s", corpus.name, corpus.local_path)
+        return
+    for ext in corpus.file_extensions:
+        yield from sorted(corpus.local_path.rglob(f"*{ext}"))
 
 
-def chunk_all() -> Iterator[Chunk]:
-    """Génère tous les chunks de toute la doc."""
-    for path in iter_all_files():
-        yield from chunk_file(path)
+def chunk_corpus(corpus: Corpus) -> Iterator[Chunk]:
+    """Génère tous les chunks d'un corpus."""
+    for path in iter_corpus_files(corpus):
+        yield from chunk_file(path, corpus)

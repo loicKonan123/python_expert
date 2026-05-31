@@ -1,32 +1,33 @@
-"""Construit l'index vectoriel ChromaDB à partir des chunks de la doc Python.
+"""Construit l'index vectoriel ChromaDB à partir de TOUS les corpus actifs.
 
 Pipeline :
-  1. Génération des chunks via backend.chunker.chunk_all().
-  2. Encodage par lots avec sentence-transformers (local, CPU).
-  3. Insertion dans ChromaDB persistant (`chroma_db/`).
+  1. Itère sur les corpus dont le local_path existe (cf backend/corpora.py).
+  2. Chunke chaque fichier selon le format du corpus.
+  3. Encode par lots avec sentence-transformers (local, CPU).
+  4. Insère dans ChromaDB persistant (`chroma_db/`).
 
-Idempotent : si la collection existe déjà, on la supprime et on la
-recrée à zéro. C'est plus simple et plus sûr qu'un upsert partiel pour
-un premier dataset stable comme la doc Python.
+Idempotent : recrée la collection à zéro à chaque exécution.
 
 Usage :
     python -m backend.scripts.build_index
-    python -m backend.scripts.build_index --limit 50      # test rapide
     python -m backend.scripts.build_index --batch-size 64
+    python -m backend.scripts.build_index --corpus fastapi   # un seul corpus
 """
 from __future__ import annotations
 
 import argparse
 import logging
 import time
+from collections import Counter
 from typing import Iterable
 
 import chromadb
 from sentence_transformers import SentenceTransformer
 from tqdm import tqdm
 
-from ..chunker import Chunk, chunk_file, iter_all_files
+from ..chunker import Chunk, chunk_corpus, iter_corpus_files
 from ..config import settings
+from ..corpora import get_active_corpora
 from ..logging_config import setup_logging
 
 
@@ -38,27 +39,56 @@ def _batched(items: list, size: int) -> Iterable[list]:
         yield items[i : i + size]
 
 
-def collect_chunks(limit: int | None = None) -> list[Chunk]:
-    """Parcourt la doc et retourne tous les chunks en mémoire."""
-    files = list(iter_all_files())
-    if limit is not None:
-        files = files[:limit]
-        logger.info("Mode limité : %d fichiers seulement", limit)
+def collect_chunks(corpora_names: list[str] | None = None) -> list[Chunk]:
+    """Collecte tous les chunks des corpus actifs (ou ceux filtrés)."""
+    corpora = get_active_corpora()
+    if corpora_names:
+        corpora = [c for c in corpora if c.name in corpora_names]
 
-    chunks: list[Chunk] = []
-    for path in tqdm(files, desc="Chunking", unit="fichier"):
-        chunks.extend(chunk_file(path))
-    return chunks
+    if not corpora:
+        logger.error(
+            "Aucun corpus actif. Lance d'abord : python -m backend.scripts.fetch_docs"
+        )
+        return []
+
+    all_chunks: list[Chunk] = []
+    for corpus in corpora:
+        file_count = sum(1 for _ in iter_corpus_files(corpus))
+        logger.info(
+            "Corpus '%s' (%s) : %d fichiers depuis %s",
+            corpus.name, corpus.format, file_count, corpus.local_path,
+        )
+        before = len(all_chunks)
+        for chunk in tqdm(
+            chunk_corpus(corpus),
+            desc=f"Chunking {corpus.name}",
+            unit="chunk",
+        ):
+            all_chunks.append(chunk)
+        added = len(all_chunks) - before
+        logger.info("  → %d chunks générés (moyenne %.0f chars)",
+                    added,
+                    sum(len(c.text) for c in all_chunks[before:]) / max(added, 1))
+
+    return all_chunks
 
 
-def build_index(batch_size: int = 64, limit: int | None = None) -> None:
+def build_index(
+    batch_size: int = 64,
+    corpora_names: list[str] | None = None,
+) -> None:
     setup_logging(settings.log_level)
     start = time.perf_counter()
 
-    logger.info("Source : %s", settings.docs_dir)
-    chunks = collect_chunks(limit=limit)
-    files_count = len({c.metadata["source"] for c in chunks})
-    logger.info("%d chunks générés depuis %d fichiers", len(chunks), files_count)
+    chunks = collect_chunks(corpora_names)
+    if not chunks:
+        return
+
+    # Statistiques par corpus
+    counter = Counter(c.metadata["corpus"] for c in chunks)
+    logger.info("Total : %d chunks", len(chunks))
+    for name, count in counter.most_common():
+        logger.info("  %s : %d chunks", name, count)
 
     logger.info("Chargement du modèle d'embedding : %s", settings.embedding_model)
     model = SentenceTransformer(settings.embedding_model)
@@ -110,11 +140,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument(
-        "--limit", type=int, default=None,
-        help="N'indexer que les N premiers fichiers (test rapide).",
+        "--corpus",
+        action="append",
+        help="Limiter à ce(s) corpus (option répétable). "
+             "Par défaut : tous les corpus actifs.",
     )
     args = parser.parse_args()
-    build_index(batch_size=args.batch_size, limit=args.limit)
+    build_index(batch_size=args.batch_size, corpora_names=args.corpus)
 
 
 if __name__ == "__main__":

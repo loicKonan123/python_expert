@@ -1,7 +1,16 @@
 """Interface commune à tous les providers LLM."""
 from __future__ import annotations
 
-from typing import Iterator, Protocol, runtime_checkable
+from typing import Iterator, Literal, Protocol, TypedDict, runtime_checkable
+
+
+Role = Literal["system", "user", "assistant"]
+
+
+class Message(TypedDict):
+    """Un message dans le fil de conversation."""
+    role: Role
+    content: str
 
 
 @runtime_checkable
@@ -10,9 +19,13 @@ class LLMProvider(Protocol):
 
     Tous les providers exposent :
       - ``name`` : nom court pour les logs (ex: "ollama", "deepseek")
-      - ``model`` : nom du modèle effectivement utilisé (ex: "qwen2.5-coder:7b")
+      - ``model`` : nom du modèle effectivement utilisé
       - ``warmup()`` : pré-chargement / vérification (appelé une fois au startup)
-      - ``stream(system, user)`` : génère la réponse en streaming, yield-by-token
+      - ``stream(messages)`` : génère la réponse en streaming, yield-by-token
+
+    L'argument ``messages`` est la conversation complète, dans l'ordre
+    chronologique : système d'abord, puis user/assistant en alternance,
+    et le dernier message est toujours user (la question à répondre).
     """
 
     name: str
@@ -26,12 +39,19 @@ class LLMProvider(Protocol):
         """
         ...
 
-    def stream(self, system: str, user: str) -> Iterator[str]:
-        """Génère la réponse au prompt et yield les morceaux de texte.
+    def stream(
+        self,
+        messages: list[Message],
+        model_override: str | None = None,
+    ) -> Iterator[str]:
+        """Génère la réponse à partir de la conversation et yield les morceaux.
 
         Args:
-            system: prompt système (instructions, rôle).
-            user: message utilisateur (avec le contexte RAG déjà intégré).
+            messages: liste ordonnée [system, user, assistant, user, ...] —
+                le dernier doit être un user.
+            model_override: si fourni, utilise ce modèle au lieu de
+                ``self.model`` (utile pour l'auto-routing flash/reasoner).
+                Les providers locaux peuvent l'ignorer.
 
         Yields:
             Fragments de texte au fur et à mesure de la génération.
@@ -39,6 +59,14 @@ class LLMProvider(Protocol):
         Raises:
             LLMProviderError: si la communication avec le LLM échoue.
         """
+        ...
+
+    def complete(
+        self,
+        messages: list[Message],
+        model_override: str | None = None,
+    ) -> str:
+        """Version non-streamée — utile pour query rewriting et appels courts."""
         ...
 
 

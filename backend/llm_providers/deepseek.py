@@ -18,7 +18,7 @@ from typing import Iterator
 
 from ..config import settings
 from ..usage_tracker import tracker
-from .base import LLMProviderError
+from .base import LLMProviderError, Message
 
 
 logger = logging.getLogger(__name__)
@@ -43,11 +43,7 @@ class DeepSeekProvider:
 
     # ---------------------------------------------------------------- warmup
     def warmup(self) -> None:
-        """Vérifie que la clé API est valide avec un appel minimal.
-
-        On envoie une requête non-stream de 1 token max — coût négligeable
-        et confirme la connectivité + l'authentification au démarrage.
-        """
+        """Vérifie que la clé API est valide avec un appel minimal."""
         logger.info("Vérification de la connectivité DeepSeek...")
         t0 = time.perf_counter()
         payload = json.dumps({
@@ -87,18 +83,21 @@ class DeepSeekProvider:
         )
 
     # ---------------------------------------------------------------- stream
-    def stream(self, system: str, user: str) -> Iterator[str]:
+    def stream(
+        self,
+        messages: list[Message],
+        model_override: str | None = None,
+    ) -> Iterator[str]:
         """Streame la réponse de DeepSeek via Server-Sent Events.
 
-        Format de chaque ligne reçue : ``data: {...JSON...}\\n``.
-        Le stream se termine par ``data: [DONE]``.
+        ``model_override`` permet à l'auto-routing de choisir un autre modèle
+        (ex: passer à ``deepseek-reasoner`` pour une question complexe) sans
+        reconfigurer le provider.
         """
+        model = model_override or self.model
         payload = json.dumps({
-            "model": self.model,
-            "messages": [
-                {"role": "system", "content": system},
-                {"role": "user", "content": user},
-            ],
+            "model": model,
+            "messages": messages,
             "stream": True,
             "temperature": self.temperature,
         }).encode("utf-8")
@@ -115,9 +114,7 @@ class DeepSeekProvider:
             response = urllib.request.urlopen(request, timeout=self.timeout)
         except urllib.error.HTTPError as exc:
             body = exc.read().decode("utf-8", errors="replace")[:500]
-            raise LLMProviderError(
-                f"DeepSeek HTTP {exc.code} : {body}"
-            ) from exc
+            raise LLMProviderError(f"DeepSeek HTTP {exc.code} : {body}") from exc
         except urllib.error.URLError as exc:
             raise LLMProviderError(f"Connexion à DeepSeek échouée : {exc}") from exc
 
@@ -138,7 +135,6 @@ class DeepSeekProvider:
                 logger.debug("Ligne JSON DeepSeek invalide ignorée : %r", data[:80])
                 continue
 
-            # Token : choices[0].delta.content (peut être vide pendant un keepalive)
             choices = obj.get("choices", [])
             if choices:
                 delta = choices[0].get("delta", {})
@@ -147,7 +143,6 @@ class DeepSeekProvider:
                     total_chunks += 1
                     yield content
 
-            # En fin de stream, DeepSeek envoie un dernier message avec `usage`
             if obj.get("usage"):
                 usage = obj["usage"]
 
@@ -158,14 +153,13 @@ class DeepSeekProvider:
             cached_t = usage.get("prompt_cache_hit_tokens", 0)
             rate = completion_t / elapsed if elapsed else 0
             logger.info(
-                "DeepSeek: prompt=%d (cached=%d) completion=%d en %.1fs (%.1f tok/s)",
-                prompt_t, cached_t, completion_t, elapsed, rate,
+                "DeepSeek (%s): prompt=%d (cached=%d) completion=%d en %.1fs (%.1f tok/s)",
+                model, prompt_t, cached_t, completion_t, elapsed, rate,
             )
 
-            # Mise à jour du compteur session + log coût (réel + cumulé)
             entry = tracker.record(
                 provider=self.name,
-                model=self.model,
+                model=model,
                 prompt=prompt_t,
                 cached=cached_t,
                 completion=completion_t,
@@ -185,3 +179,12 @@ class DeepSeekProvider:
                 "DeepSeek: %d chunks en %.1fs (pas d'usage rapporté)",
                 total_chunks, elapsed,
             )
+
+    # -------------------------------------------------------------- complete
+    def complete(
+        self,
+        messages: list[Message],
+        model_override: str | None = None,
+    ) -> str:
+        """Version non-streamée — efficace pour le query rewriting."""
+        return "".join(self.stream(messages, model_override=model_override))

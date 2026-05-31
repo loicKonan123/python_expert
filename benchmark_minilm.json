@@ -1,0 +1,405 @@
+[
+  {
+    "query": "How do Python decorators work and the @decorator syntax",
+    "category": "EN-easy",
+    "top_score": 0.707,
+    "avg_top_3": 0.6886666666666666,
+    "expected_corpus": "python",
+    "actual_corpora": [
+      "python",
+      "fastapi",
+      "typescript"
+    ],
+    "expected_path_contains": "reference/compound_stmts",
+    "expected_hit": true,
+    "top_3_paths": [
+      "python/whatsnew/2.5.txt",
+      "typescript/reference/Decorators.md",
+      "python/whatsnew/2.6.txt"
+    ],
+    "quality": "excellent"
+  },
+  {
+    "query": "How do Python dataclasses work with frozen and field()",
+    "category": "EN-easy",
+    "top_score": 0.67,
+    "avg_top_3": 0.6243333333333333,
+    "expected_corpus": "python",
+    "actual_corpora": [
+      "python",
+      "pydantic"
+    ],
+    "expected_path_contains": "library/dataclasses",
+    "expected_hit": true,
+    "top_3_paths": [
+      "python/library/dataclasses.txt",
+      "pydantic/concepts/fields.md",
+      "pydantic/concepts/fields.md"
+    ],
+    "quality": "bon"
+  },
+  {
+    "query": "How does Python asyncio gather work for concurrent tasks",
+    "category": "EN-easy",
+    "top_score": 0.806,
+    "avg_top_3": 0.7813333333333334,
+    "expected_corpus": "python",
+    "actual_corpora": [
+      "python"
+    ],
+    "expected_path_contains": "library/asyncio",
+    "expected_hit": true,
+    "top_3_paths": [
+      "python/howto/a-conceptual-overview-of-asyncio.txt",
+      "python/whatsnew/3.7.txt",
+      "python/library/asyncio-sync.txt"
+    ],
+    "quality": "excellent"
+  },
+  {
+    "query": "FastAPI dependencies with Depends function injection",
+    "category": "EN-easy",
+    "top_score": 0.752,
+    "avg_top_3": 0.7336666666666667,
+    "expected_corpus": "fastapi",
+    "actual_corpora": [
+      "fastapi"
+    ],
+    "expected_path_contains": "tutorial/dependencies",
+    "expected_hit": true,
+    "top_3_paths": [
+      "fastapi/release-notes.md",
+      "fastapi/tutorial/dependencies/index.md",
+      "fastapi/reference/dependencies.md"
+    ],
+    "quality": "excellent"
+  },
+  {
+    "query": "Pydantic field validators and model_validator decorator",
+    "category": "EN-easy",
+    "top_score": 0.784,
+    "avg_top_3": 0.7786666666666667,
+    "expected_corpus": "pydantic",
+    "actual_corpora": [
+      "pydantic"
+    ],
+    "expected_path_contains": "concepts/validators",
+    "expected_hit": true,
+    "top_3_paths": [
+      "pydantic/migration.md",
+      "pydantic/why.md",
+      "pydantic/migration.md"
+    ],
+    "quality": "excellent"
+  },
+  {
+    "query": "Next.js App Router layout.tsx and nested layouts",
+    "category": "EN-easy",
+    "top_score": 0.707,
+    "avg_top_3": 0.6993333333333333,
+    "expected_corpus": "nextjs",
+    "actual_corpora": [
+      "nextjs"
+    ],
+    "expected_path_contains": "layouts",
+    "expected_hit": false,
+    "top_3_paths": [
+      "nextjs/01-app/01-getting-started/01-installation.md",
+      "nextjs/01-app/04-glossary.md",
+      "nextjs/01-app/01-getting-started/01-installation.md"
+    ],
+    "quality": "excellent"
+  },
+  {
+    "query": "TypeScript generic type constraints with extends",
+    "category": "EN-easy",
+    "top_score": 0.736,
+    "avg_top_3": 0.721,
+    "expected_corpus": "typescript",
+    "actual_corpora": [
+      "typescript"
+    ],
+    "expected_path_contains": "handbook",
+    "expected_hit": true,
+    "top_3_paths": [
+      "typescript/release-notes/TypeScript 1.8.md",
+      "typescript/release-notes/TypeScript 3.9.md",
+      "typescript/handbook-v2/Type Manipulation/Conditional Types.md"
+    ],
+    "quality": "excellent"
+  },
+  {
+    "query": "Tailwind responsive design with sm md lg breakpoints",
+    "category": "EN-easy",
+    "top_score": 0.642,
+    "avg_top_3": 0.6163333333333333,
+    "expected_corpus": "tailwind",
+    "actual_corpora": [
+      "tailwind"
+    ],
+    "expected_path_contains": null,
+    "expected_hit": null,
+    "top_3_paths": [
+      "tailwind/docs/responsive-design.mdx",
+      "tailwind/docs/responsive-design.mdx",
+      "tailwind/docs/max-width.mdx"
+    ],
+    "quality": "bon"
+  },
+  {
+    "query": "How do I read and parse JSON files in Python",
+    "category": "EN-medium",
+    "top_score": 0.661,
+    "avg_top_3": 0.655,
+    "expected_corpus": "python",
+    "actual_corpora": [
+      "python",
+      "pydantic"
+    ],
+    "expected_path_contains": "library/json",
+    "expected_hit": true,
+    "top_3_paths": [
+      "python/library/json.txt",
+      "python/library/json.txt",
+      "python/library/json.txt"
+    ],
+    "quality": "bon"
+  },
+  {
+    "query": "FastAPI background tasks running after response",
+    "category": "EN-medium",
+    "top_score": 0.789,
+    "avg_top_3": 0.715,
+    "expected_corpus": "fastapi",
+    "actual_corpora": [
+      "fastapi"
+    ],
+    "expected_path_contains": "background-tasks",
+    "expected_hit": true,
+    "top_3_paths": [
+      "fastapi/reference/background.md",
+      "fastapi/tutorial/background-tasks.md",
+      "fastapi/release-notes.md"
+    ],
+    "quality": "excellent"
+  },
+  {
+    "query": "Pydantic Settings reading environment variables and .env",
+    "category": "EN-medium",
+    "top_score": 0.837,
+    "avg_top_3": 0.7866666666666666,
+    "expected_corpus": "pydantic",
+    "actual_corpora": [
+      "pydantic",
+      "fastapi"
+    ],
+    "expected_path_contains": null,
+    "expected_hit": null,
+    "top_3_paths": [
+      "fastapi/advanced/settings.md",
+      "pydantic/concepts/pydantic_settings.md",
+      "fastapi/advanced/settings.md"
+    ],
+    "quality": "excellent"
+  },
+  {
+    "query": "Next.js Server Actions and use server form mutations",
+    "category": "EN-medium",
+    "top_score": 0.709,
+    "avg_top_3": 0.6880000000000001,
+    "expected_corpus": "nextjs",
+    "actual_corpora": [
+      "nextjs"
+    ],
+    "expected_path_contains": null,
+    "expected_hit": null,
+    "top_3_paths": [
+      "nextjs/02-pages/03-building-your-application/03-data-fetching/03-forms-and-mutations.md",
+      "nextjs/01-app/03-api-reference/05-config/01-next-config-js/serverActions.md",
+      "nextjs/01-app/02-guides/data-security.md"
+    ],
+    "quality": "excellent"
+  },
+  {
+    "query": "TypeScript discriminated unions for type narrowing",
+    "category": "EN-medium",
+    "top_score": 0.793,
+    "avg_top_3": 0.766,
+    "expected_corpus": "typescript",
+    "actual_corpora": [
+      "typescript"
+    ],
+    "expected_path_contains": null,
+    "expected_hit": null,
+    "top_3_paths": [
+      "typescript/release-notes/TypeScript 2.0.md",
+      "typescript/release-notes/TypeScript 5.1.md",
+      "typescript/release-notes/TypeScript 5.5.md"
+    ],
+    "quality": "excellent"
+  },
+  {
+    "query": "Tailwind dark mode strategy class vs media",
+    "category": "EN-medium",
+    "top_score": 0.627,
+    "avg_top_3": 0.5963333333333333,
+    "expected_corpus": "tailwind",
+    "actual_corpora": [
+      "tailwind"
+    ],
+    "expected_path_contains": null,
+    "expected_hit": null,
+    "top_3_paths": [
+      "tailwind/docs/dark-mode.mdx",
+      "tailwind/blog/tailwindcss-v2/index.mdx",
+      "tailwind/blog/tailwindcss-v2/index.mdx"
+    ],
+    "quality": "bon"
+  },
+  {
+    "query": "What are the basic data types in Python",
+    "category": "EN-hard",
+    "top_score": 0.747,
+    "avg_top_3": 0.7153333333333333,
+    "expected_corpus": "python",
+    "actual_corpora": [
+      "python",
+      "pydantic"
+    ],
+    "expected_path_contains": null,
+    "expected_hit": null,
+    "top_3_paths": [
+      "python/library/datatypes.txt",
+      "python/reference/datamodel.txt",
+      "python/library/typing.txt"
+    ],
+    "quality": "excellent"
+  },
+  {
+    "query": "How do I structure a FastAPI project",
+    "category": "EN-hard",
+    "top_score": 0.707,
+    "avg_top_3": 0.6803333333333333,
+    "expected_corpus": "fastapi",
+    "actual_corpora": [
+      "fastapi"
+    ],
+    "expected_path_contains": null,
+    "expected_hit": null,
+    "top_3_paths": [
+      "fastapi/history-design-future.md",
+      "fastapi/tutorial/index.md",
+      "fastapi/reference/index.md"
+    ],
+    "quality": "excellent"
+  },
+  {
+    "query": "How do I organize a Next.js project",
+    "category": "EN-hard",
+    "top_score": 0.723,
+    "avg_top_3": 0.7136666666666667,
+    "expected_corpus": "nextjs",
+    "actual_corpora": [
+      "nextjs"
+    ],
+    "expected_path_contains": null,
+    "expected_hit": null,
+    "top_3_paths": [
+      "nextjs/01-app/01-getting-started/02-project-structure.md",
+      "nextjs/02-pages/03-building-your-application/06-configuring/index.md",
+      "nextjs/04-community/index.md"
+    ],
+    "quality": "excellent"
+  },
+  {
+    "query": "What are TypeScript best practices for typing",
+    "category": "EN-hard",
+    "top_score": 0.68,
+    "avg_top_3": 0.6763333333333333,
+    "expected_corpus": "typescript",
+    "actual_corpora": [
+      "typescript"
+    ],
+    "expected_path_contains": null,
+    "expected_hit": null,
+    "top_3_paths": [
+      "typescript/release-notes/TypeScript 4.7.md",
+      "typescript/get-started/TS for OOPers.md",
+      "typescript/handbook-v2/Type Declarations.md"
+    ],
+    "quality": "bon"
+  },
+  {
+    "query": "Comment fonctionne un décorateur Python avec exemple",
+    "category": "FR",
+    "top_score": 0.491,
+    "avg_top_3": 0.46799999999999997,
+    "expected_corpus": "python",
+    "actual_corpora": [
+      "python",
+      "pydantic"
+    ],
+    "expected_path_contains": "reference/compound_stmts",
+    "expected_hit": false,
+    "top_3_paths": [
+      "pydantic/concepts/validation_decorator.md",
+      "python/contents.txt",
+      "pydantic/concepts/validation_decorator.md"
+    ],
+    "quality": "moyen"
+  },
+  {
+    "query": "FastAPI authentification JWT et OAuth2",
+    "category": "FR",
+    "top_score": 0.678,
+    "avg_top_3": 0.6693333333333333,
+    "expected_corpus": "fastapi",
+    "actual_corpora": [
+      "fastapi"
+    ],
+    "expected_path_contains": "security",
+    "expected_hit": true,
+    "top_3_paths": [
+      "fastapi/tutorial/security/oauth2-jwt.md",
+      "fastapi/tutorial/security/first-steps.md",
+      "fastapi/release-notes.md"
+    ],
+    "quality": "bon"
+  },
+  {
+    "query": "TypeScript types génériques et contraintes",
+    "category": "FR",
+    "top_score": 0.734,
+    "avg_top_3": 0.7213333333333333,
+    "expected_corpus": "typescript",
+    "actual_corpora": [
+      "typescript"
+    ],
+    "expected_path_contains": null,
+    "expected_hit": null,
+    "top_3_paths": [
+      "typescript/handbook-v2/Object Types.md",
+      "typescript/release-notes/TypeScript 2.8.md",
+      "typescript/handbook-v2/Type Declarations.md"
+    ],
+    "quality": "excellent"
+  },
+  {
+    "query": "Comment utiliser Pydantic pour valider du JSON",
+    "category": "FR",
+    "top_score": 0.653,
+    "avg_top_3": 0.6236666666666667,
+    "expected_corpus": "pydantic",
+    "actual_corpora": [
+      "pydantic"
+    ],
+    "expected_path_contains": null,
+    "expected_hit": null,
+    "top_3_paths": [
+      "pydantic/concepts/json.md",
+      "pydantic/concepts/json.md",
+      "pydantic/examples/files.md"
+    ],
+    "quality": "bon"
+  }
+]

@@ -1,7 +1,14 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import { MaterialIcon } from "./MaterialIcon";
+import { CorpusFilter } from "./CorpusFilter";
+import type { Corpus } from "@/lib/curriculum";
+
+
+export type ChatInputHandle = {
+  focus: () => void;
+};
 
 type Props = {
   value: string;
@@ -10,21 +17,34 @@ type Props = {
   onCancel?: () => void;
   busy?: boolean;
   sidebarOpen: boolean;
+  selectedCorpora: Corpus[];
+  onCorporaChange: (next: Corpus[]) => void;
 };
 
-export function ChatInput({
-  value,
-  onChange,
-  onSubmit,
-  onCancel,
-  busy,
-  sidebarOpen,
-}: Props) {
-  const ref = useRef<HTMLTextAreaElement | null>(null);
+export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
+  {
+    value,
+    onChange,
+    onSubmit,
+    onCancel,
+    busy,
+    sidebarOpen,
+    selectedCorpora,
+    onCorporaChange,
+  },
+  ref,
+) {
+  const taRef = useRef<HTMLTextAreaElement | null>(null);
+
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      taRef.current?.focus();
+    },
+  }));
 
   // Auto-resize en fonction du contenu.
   useEffect(() => {
-    const ta = ref.current;
+    const ta = taRef.current;
     if (!ta) return;
     ta.style.height = "auto";
     ta.style.height = Math.min(ta.scrollHeight, 200) + "px";
@@ -43,15 +63,19 @@ export function ChatInput({
         sidebarOpen ? "left-sidebar-width" : "left-0"
       }`}
     >
-      <div className="w-full max-w-chat-max-width glass-input p-4 rounded-2xl border border-outline-variant shadow-2xl pointer-events-auto">
+      <div className="w-full max-w-chat-max-width glass-input p-4 rounded-2xl border border-outline-variant shadow-2xl pointer-events-auto space-y-3">
+        {/* Filtre par corpus */}
+        <CorpusFilter selected={selectedCorpora} onChange={onCorporaChange} />
+
+        {/* Zone de saisie */}
         <div className="relative flex items-end gap-3">
           <div className="flex-1 bg-surface-container-highest rounded-xl px-4 py-3 min-h-14 flex flex-col justify-center border border-transparent focus-within:border-primary transition-colors">
             <textarea
-              ref={ref}
+              ref={taRef}
               value={value}
               onChange={(e) => onChange(e.target.value)}
               onKeyDown={handleKey}
-              placeholder="Pose ta question..."
+              placeholder="Pose ta question... (Ctrl+K pour focus)"
               rows={1}
               className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-[16px] leading-[1.6] p-0 resize-none custom-scrollbar max-h-40 placeholder:text-on-surface-variant/60"
               disabled={busy}
@@ -72,7 +96,7 @@ export function ChatInput({
                 onClick={onSubmit}
                 disabled={!value.trim() || busy}
                 className="p-3 bg-primary text-on-primary rounded-xl hover:opacity-90 transition-all shadow-lg disabled:opacity-40 disabled:cursor-not-allowed"
-                title="Envoyer"
+                title="Envoyer (Entrée)"
               >
                 <MaterialIcon name="send" />
               </button>
@@ -82,4 +106,4 @@ export function ChatInput({
       </div>
     </div>
   );
-}
+});

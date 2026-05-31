@@ -1,9 +1,11 @@
 "use client";
 
+import { useRef, useState } from "react";
 import { MaterialIcon } from "./MaterialIcon";
 import { CodeBlock } from "./CodeBlock";
-import { Sources } from "./Sources";
-import { parseMarkdown, renderInlineMarkdown } from "@/lib/markdown";
+import { Sources, type SourcesHandle } from "./Sources";
+import { parseMarkdown } from "@/lib/markdown";
+import { metaForCorpus } from "@/lib/corpus-meta";
 import type { Source } from "@/lib/api";
 
 export type Message = {
@@ -13,11 +15,19 @@ export type Message = {
   sources?: Source[];
   /** En cours de streaming ? affiche un curseur */
   streaming?: boolean;
+  /** Question réécrite par le LLM (si rewriting actif). */
+  rewrittenQuery?: string;
+  /** Modèle choisi par l'auto-routing (si non-défaut). */
+  modelOverride?: string;
 };
 
-type Props = { message: Message };
+type Props = {
+  message: Message;
+  /** Appelé quand l'utilisateur clique sur « Régénérer ». */
+  onRegenerate?: () => void;
+};
 
-export function ChatMessage({ message }: Props) {
+export function ChatMessage({ message, onRegenerate }: Props) {
   if (message.role === "user") {
     return (
       <div className="flex justify-end">
@@ -28,13 +38,90 @@ export function ChatMessage({ message }: Props) {
     );
   }
 
+  return <BotMessage message={message} onRegenerate={onRegenerate} />;
+}
+
+function BotMessage({
+  message,
+  onRegenerate,
+}: {
+  message: Message;
+  onRegenerate?: () => void;
+}) {
   const blocks = parseMarkdown(message.content);
+  const sourcesRef = useRef<SourcesHandle | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  // Liste unique des corpus présents dans les sources
+  const usedCorpora = uniqueCorpora(message.sources);
+
+  function jumpToSource(idx: number) {
+    sourcesRef.current?.openSource(idx);
+  }
+
+  async function copyAnswer() {
+    try {
+      await navigator.clipboard.writeText(message.content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* ignore */
+    }
+  }
 
   return (
     <div className="flex justify-start gap-4">
       <div className="w-1 self-stretch bg-primary rounded-full shrink-0" />
       <div className="flex-1 min-w-0 space-y-4">
         <div className="bg-surface-container p-6 rounded-2xl border border-outline-variant space-y-4">
+          {/* Bandeau meta : modèle choisi par auto-routing + rewrite éventuel */}
+          {(message.modelOverride || message.rewrittenQuery) && (
+            <div className="flex flex-wrap items-center gap-3 text-[11px] font-mono text-on-surface-variant/80">
+              {message.modelOverride && (
+                <span
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md border border-secondary/40 bg-secondary/10 text-secondary"
+                  title="Modèle de raisonnement choisi par l'auto-routing"
+                >
+                  <MaterialIcon name="psychology" className="text-[12px]" />
+                  {message.modelOverride}
+                </span>
+              )}
+              {message.rewrittenQuery && (
+                <span
+                  className="inline-flex items-center gap-1.5 italic"
+                  title="Question réécrite par le LLM pour optimiser la recherche"
+                >
+                  <MaterialIcon name="auto_fix_high" className="text-[12px] text-secondary" />
+                  <span className="opacity-70">Recherché :</span>
+                  <span className="text-on-surface-variant not-italic">
+                    {message.rewrittenQuery}
+                  </span>
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Badges des technos utilisées */}
+          {usedCorpora.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5 -mt-1">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant/70">
+                puise dans :
+              </span>
+              {usedCorpora.map((corpus) => {
+                const m = metaForCorpus(corpus);
+                return (
+                  <span
+                    key={corpus}
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[11px] ${m.bgColor} ${m.color}`}
+                  >
+                    <MaterialIcon name={m.icon} className="text-[11px]" />
+                    {m.label}
+                  </span>
+                );
+              })}
+            </div>
+          )}
+
           {message.content === "" && message.streaming ? (
             <div className="flex items-center gap-2 text-on-surface-variant text-[14px]">
               <MaterialIcon
@@ -48,20 +135,14 @@ export function ChatMessage({ message }: Props) {
               {blocks.map((block, i) => {
                 if (block.kind === "code") {
                   return (
-                    <CodeBlock
-                      key={i}
-                      code={block.code}
-                      lang={block.lang}
-                    />
+                    <CodeBlock key={i} code={block.code} lang={block.lang} />
                   );
                 }
                 return (
-                  <div
+                  <InlineText
                     key={i}
-                    className="md text-[16px] text-on-surface leading-[1.6] whitespace-pre-wrap"
-                    dangerouslySetInnerHTML={{
-                      __html: renderInlineMarkdown(block.text),
-                    }}
+                    text={block.text}
+                    onCitationClick={jumpToSource}
                   />
                 );
               })}
@@ -72,10 +153,162 @@ export function ChatMessage({ message }: Props) {
           )}
 
           {message.sources && message.sources.length > 0 && (
-            <Sources sources={message.sources} />
+            <Sources ref={sourcesRef} sources={message.sources} />
+          )}
+
+          {/* Actions sur la réponse */}
+          {!message.streaming && message.content && (
+            <div className="flex items-center gap-1 pt-2 border-t border-outline-variant/40 -mb-2 -mx-1">
+              <ActionButton
+                icon={copied ? "check" : "content_copy"}
+                label={copied ? "Copié" : "Copier"}
+                onClick={copyAnswer}
+              />
+              {onRegenerate && (
+                <ActionButton
+                  icon="refresh"
+                  label="Régénérer"
+                  onClick={onRegenerate}
+                />
+              )}
+            </div>
           )}
         </div>
       </div>
     </div>
   );
+}
+
+function ActionButton({
+  icon,
+  label,
+  onClick,
+}: {
+  icon: string;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[12px] text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-colors"
+    >
+      <MaterialIcon name={icon} className="text-[14px]" />
+      {label}
+    </button>
+  );
+}
+
+/** Bloc de texte markdown avec citations [Source N] cliquables. */
+function InlineText({
+  text,
+  onCitationClick,
+}: {
+  text: string;
+  onCitationClick: (idx: number) => void;
+}) {
+  // On rend le markdown léger en HTML puis on ré-injecte les citations comme
+  // composants React via un split sur la regex.
+  const parts = splitWithCitations(text);
+  return (
+    <div className="md text-[16px] text-on-surface leading-[1.6] whitespace-pre-wrap">
+      {parts.map((part, i) => {
+        if (part.kind === "citation") {
+          return (
+            <CitationLink
+              key={i}
+              idx={part.idx}
+              onClick={() => onCitationClick(part.idx - 1)}
+            />
+          );
+        }
+        return (
+          <span
+            key={i}
+            dangerouslySetInnerHTML={{ __html: renderInline(part.text) }}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+function CitationLink({ idx, onClick }: { idx: number; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="inline-flex items-baseline align-baseline mx-0.5 px-1.5 py-0.5 rounded-md bg-primary-container/60 text-on-primary-container text-[12px] font-mono font-medium hover:bg-primary-container hover:scale-105 transition-all"
+      title={`Aller à la source ${idx}`}
+    >
+      [{idx}]
+    </button>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+type TextPart =
+  | { kind: "text"; text: string }
+  | { kind: "citation"; idx: number };
+
+/** Sépare un bloc de texte en {text, citation, text, citation, ...}. */
+function splitWithCitations(text: string): TextPart[] {
+  // Match [Source 1], [Source 2], etc. (case-insensitive) ainsi que [1], [2].
+  const re = /\[(?:source\s*)?(\d{1,2})\]/gi;
+  const parts: TextPart[] = [];
+  let cursor = 0;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text)) !== null) {
+    const start = m.index;
+    if (start > cursor) {
+      parts.push({ kind: "text", text: text.slice(cursor, start) });
+    }
+    const idx = parseInt(m[1], 10);
+    if (!Number.isNaN(idx)) {
+      parts.push({ kind: "citation", idx });
+    }
+    cursor = start + m[0].length;
+  }
+  if (cursor < text.length) {
+    parts.push({ kind: "text", text: text.slice(cursor) });
+  }
+  return parts.length ? parts : [{ kind: "text", text }];
+}
+
+/** Rendu inline markdown sans les citations (gérées séparément). */
+function renderInline(text: string): string {
+  let s = escapeHTML(text);
+  s = s.replace(/^#{1,6}\s+(.+)$/gm, "<strong>$1</strong>");
+  s = s.replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>");
+  s = s.replace(/`([^`\n]+)`/g, "<code>$1</code>");
+  return s;
+}
+
+function escapeHTML(s: string): string {
+  return s.replace(/[&<>"']/g, (c) =>
+    ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+    })[c]!,
+  );
+}
+
+/** Récupère la liste unique des corpus présents dans les sources, ordre conservé. */
+function uniqueCorpora(sources: Source[] | undefined): string[] {
+  if (!sources) return [];
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const s of sources) {
+    const c = s.corpus || "unknown";
+    if (!seen.has(c)) {
+      seen.add(c);
+      out.push(c);
+    }
+  }
+  return out;
 }

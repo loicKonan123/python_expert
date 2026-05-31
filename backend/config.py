@@ -55,14 +55,19 @@ class Settings(BaseSettings):
 
     # --- Provider DeepSeek ---
     # Modèles disponibles :
-    #   - "deepseek-chat" : V4-Flash non-thinking (recommandé pour ce projet)
+    #   - "deepseek-chat" : V4-Flash non-thinking (recommandé par défaut)
     #   - "deepseek-reasoner" : V4-Flash thinking (raisonne, plus lent)
     #   - "deepseek-v4-pro" : qualité max (~5x plus cher)
     deepseek_api_key: SecretStr | None = None
-    deepseek_model: str = "deepseek-chat"
+    deepseek_model: str = "deepseek-chat"  # modèle "Flash" par défaut
+    deepseek_reasoner_model: str = "deepseek-reasoner"  # pour l'auto-routing
     deepseek_url: str = "https://api.deepseek.com/v1/chat/completions"
     deepseek_temperature: float = 0.2
     deepseek_timeout_s: int = 120
+
+    # --- Auto-routing (questions complexes → reasoner, simples → flash) ---
+    enable_auto_routing: bool = False
+    complexity_threshold: float = 0.4  # 0..1, au-dessus = reasoner
 
     # --- Retrieval ---
     top_k: int = 7
@@ -74,6 +79,10 @@ class Settings(BaseSettings):
         "http://localhost:3000",
         "http://127.0.0.1:3000",
     ]
+
+    # --- Sandbox d'exécution Python ---
+    sandbox_timeout_s: float = 10.0
+    sandbox_max_output_kb: int = 8
 
     # --- Logs ---
     log_level: str = "INFO"

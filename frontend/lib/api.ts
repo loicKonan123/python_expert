@@ -11,9 +11,28 @@ export type Source = {
   section: string;  // titre de section (ex: "Module contents")
   text: string;     // contenu du chunk
   score: number;    // similarité (0..1)
+  corpus: string;   // nom du corpus ("python", "fastapi", "pydantic", ...)
+};
+
+export type HistoryMessage = {
+  role: "user" | "assistant";
+  content: string;
+};
+
+export type AskOptions = {
+  /** Historique de conversation (sans le system, sans les chunks). */
+  history?: HistoryMessage[];
+  /** Restreindre à ces corpus. Liste vide / undefined = tous. */
+  corpora?: string[];
+  /** Demander au LLM de réécrire la question (utile FR / follow-ups). */
+  rewriteQuery?: boolean;
 };
 
 export type AskEvents = {
+  /** Modèle effectivement choisi par l'auto-routing (envoyé si non-défaut). */
+  onModel?: (model: string) => void;
+  /** Question réécrite par le LLM (envoyée une fois si rewriting actif). */
+  onRewrite?: (rewritten: string) => void;
   /** Sources récupérées (envoyées une fois, avant les tokens) */
   onSources: (sources: Source[]) => void;
   /** Chaque token / morceau de texte généré */
@@ -25,18 +44,28 @@ export type AskEvents = {
 };
 
 /**
- * Lance une requête /ask et streame les événements SSE au fur et à mesure.
+ * Lance une requête /api/ask et streame les événements SSE au fur et à mesure.
  * Renvoie une fonction d'annulation.
  */
-export function askStream(question: string, events: AskEvents): () => void {
+export function askStream(
+  question: string,
+  events: AskEvents,
+  options: AskOptions = {},
+): () => void {
   const controller = new AbortController();
 
   (async () => {
     try {
+      const body = {
+        question,
+        history: options.history ?? [],
+        corpora: options.corpora && options.corpora.length > 0 ? options.corpora : null,
+        rewrite_query: options.rewriteQuery ?? true,
+      };
       const resp = await fetch(`${API_BASE}/api/ask`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question }),
+        body: JSON.stringify(body),
         signal: controller.signal,
       });
       if (!resp.ok || !resp.body) {
@@ -59,14 +88,17 @@ export function askStream(question: string, events: AskEvents): () => void {
           const evt = parseSSE(raw);
           if (!evt) continue;
 
-          if (evt.event === "sources") {
+          if (evt.event === "model") {
+            events.onModel?.(evt.data);
+          } else if (evt.event === "rewrite") {
+            events.onRewrite?.(evt.data.replace(/\\n/g, "\n"));
+          } else if (evt.event === "sources") {
             try {
               events.onSources(JSON.parse(evt.data));
             } catch {
               /* ignore parse errors */
             }
           } else if (evt.event === "token") {
-            // Le backend échappe les \n en "\\n" car SSE utilise \n comme séparateur.
             events.onToken(evt.data.replace(/\\n/g, "\n"));
           } else if (evt.event === "done") {
             events.onDone();
@@ -83,6 +115,33 @@ export function askStream(question: string, events: AskEvents): () => void {
 
   return () => controller.abort();
 }
+
+export type RunResult = {
+  stdout: string;
+  stderr: string;
+  exit_code: number;
+  elapsed_ms: number;
+  timeout: boolean;
+  truncated: boolean;
+};
+
+/**
+ * Exécute du code Python dans le sandbox backend et retourne le résultat.
+ * Aucun streaming — le code tourne, puis on récupère stdout/stderr d'un coup.
+ */
+export async function runPython(code: string, timeoutS?: number): Promise<RunResult> {
+  const resp = await fetch(`${API_BASE}/api/run`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code, timeout_s: timeoutS ?? null }),
+  });
+  if (!resp.ok) {
+    const text = await resp.text();
+    throw new Error(`Sandbox HTTP ${resp.status} : ${text.slice(0, 200)}`);
+  }
+  return resp.json();
+}
+
 
 type SSEEvent = { event: string; data: string };
 

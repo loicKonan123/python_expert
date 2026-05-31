@@ -1,14 +1,19 @@
 """Endpoint POST /api/ask — pipeline RAG complet en streaming SSE.
 
+Pipeline complet (multi-turn + rewriting + filtre corpus) :
+  1. RETRIEVAL : encode (potentiellement réécrit) la question, ChromaDB top-K
+  2. PROMPT : assemble system + history + (chunks + question)
+  3. GENERATION : streamée par le provider LLM (Ollama ou DeepSeek)
+
 Flux d'événements SSE renvoyés :
-  - event: sources   data: [{source, section, text, score}, ...]
+  - event: rewrite   data: "version anglaise de la question" (si appliqué)
+  - event: sources   data: [{source, section, text, score, corpus}, ...]
   - event: token     data: "fragment de texte..."
   - event: token     data: "..."
   - ...
   - event: done      data: ""
 
-Les sauts de ligne dans `data:` sont échappés en "\\n" car SSE utilise '\n'
-comme séparateur de champs.
+Les sauts de ligne dans `data:` sont échappés en "\\n".
 """
 from __future__ import annotations
 
@@ -22,8 +27,9 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from ..config import settings
-from ..llm_providers.base import LLMProviderError
-from ..prompts import SYSTEM_PROMPT, build_user_message
+from ..llm_providers.base import LLMProviderError, Message
+from ..prompts import build_messages, build_rewrite_messages
+from ..routing import choose_model
 
 
 logger = logging.getLogger(__name__)
@@ -31,13 +37,25 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["ask"])
 
 
+class HistoryMessage(BaseModel):
+    role: str = Field(..., pattern="^(user|assistant)$")
+    content: str = Field(..., max_length=20000)
+
+
 class AskRequest(BaseModel):
     question: str = Field(..., min_length=1, max_length=4000)
     k: int | None = Field(default=None, ge=1, le=20)
+    # Liste des derniers échanges (sans le system, sans les chunks).
+    # On garde uniquement le contenu lisible humain.
+    history: list[HistoryMessage] = Field(default_factory=list, max_length=20)
+    # Limiter la recherche à certains corpus. None / vide = tous.
+    corpora: list[str] | None = None
+    # Réécrire la question avant retrieval (recommandé pour follow-ups + FR).
+    rewrite_query: bool = True
 
 
 def _sse(event: str, data: str | list | dict) -> bytes:
-    """Encode un événement SSE. data peut être str ou JSON-sérialisable."""
+    """Encode un événement SSE."""
     if isinstance(data, (list, dict)):
         payload = json.dumps(data, ensure_ascii=False)
     else:
@@ -47,10 +65,7 @@ def _sse(event: str, data: str | list | dict) -> bytes:
 
 
 def _strip_thinking(piece_buffer: str, in_thinking: bool) -> tuple[str, str, bool]:
-    """Retire les sections <think>...</think> émises par certains modèles.
-
-    Retourne (à_envoyer, reste_buffer, in_thinking_après).
-    """
+    """Retire les <think>...</think> émis par certains modèles."""
     to_emit = ""
     while True:
         if not in_thinking:
@@ -72,29 +87,107 @@ def _strip_thinking(piece_buffer: str, in_thinking: bool) -> tuple[str, str, boo
     return to_emit, piece_buffer, in_thinking
 
 
+def _maybe_rewrite_query(
+    llm,
+    question: str,
+    history: list[Message],
+    *,
+    should_rewrite: bool,
+) -> tuple[str, str | None]:
+    """Si la conversation contient déjà des échanges OU si la question semble
+    être en français, on demande au LLM de réécrire en anglais autonome.
+
+    Retourne (query_à_utiliser_pour_retrieval, query_réécrite_pour_log).
+    Si pas de réécriture, le 2e élément est None.
+    """
+    if not should_rewrite:
+        return question, None
+
+    # Heuristique simple : si pas d'historique ET question apparemment anglaise,
+    # on évite la réécriture (économie de coût et latence).
+    if not history and _looks_english(question):
+        return question, None
+
+    rewrite_messages = build_rewrite_messages(question, history)
+    try:
+        t0 = time.perf_counter()
+        rewritten = llm.complete(rewrite_messages).strip().strip('"').strip("'")
+        elapsed_ms = (time.perf_counter() - t0) * 1000
+        # Garde-fou : si la réécriture est trop courte / vide, on garde l'originale
+        if len(rewritten) < 5 or len(rewritten) > 500:
+            logger.warning("Réécriture suspecte (%d chars), on ignore.", len(rewritten))
+            return question, None
+        logger.info(
+            "[REWRITE] %.0fms — \"%s\" → \"%s\"",
+            elapsed_ms, _truncate(question, 60), _truncate(rewritten, 60),
+        )
+        return rewritten, rewritten
+    except Exception as exc:
+        logger.warning("Réécriture échouée (%s) — on utilise la question d'origine.", exc)
+        return question, None
+
+
+_ENGLISH_WORDS = {
+    "the", "is", "are", "how", "what", "when", "where", "why", "does", "do",
+    "of", "in", "to", "for", "with", "and", "or", "but", "this", "that",
+    "show", "example", "use", "using", "between", "vs", "vs.",
+}
+
+
+def _looks_english(text: str) -> bool:
+    """Heuristique rapide : si la question contient des mots anglais courants
+    et pas trop de caractères accentués, on la considère anglaise.
+    """
+    words = text.lower().split()
+    if not words:
+        return False
+    english_hits = sum(1 for w in words if w in _ENGLISH_WORDS)
+    accents = sum(1 for c in text if c in "àâäéèêëïîôöùûüÿç")
+    return english_hits >= 2 and accents <= 1
+
+
 @router.post("/ask")
 async def ask(req: AskRequest, request: Request) -> StreamingResponse:
-    """Pipeline RAG complet : retrieval → prompt → LLM provider → streaming SSE.
-
-    Le provider LLM (Ollama ou DeepSeek) est sélectionné au démarrage via
-    PYEXPERT_LLM_PROVIDER. Il vit dans ``app.state.llm``.
-    """
+    """Pipeline RAG complet : (rewrite) → retrieval → prompt → LLM → SSE."""
     rag = request.app.state.rag
     llm = request.app.state.llm
     k = req.k or settings.top_k
     t_start = time.perf_counter()
 
+    # Convertit l'historique Pydantic en messages Message TypedDict.
+    history: list[Message] = [
+        {"role": h.role, "content": h.content}  # type: ignore[typeddict-item]
+        for h in req.history
+    ]
+
     logger.info(
-        "Question reçue (k=%d, provider=%s) : %s",
-        k, llm.name, _truncate(req.question, 80),
+        "Question reçue (k=%d, provider=%s, history=%d, corpora=%s) : %s",
+        k, llm.name, len(history), req.corpora or "ALL",
+        _truncate(req.question, 80),
     )
 
     def generator() -> Iterator[bytes]:
+        # ===== Phase 0a : ROUTING =====
+        # On choisit le modèle avant tout (utilisé pour le rewriting + generation).
+        decision = choose_model(req.question, history_length=len(history))
+        if decision.use_reasoner:
+            yield _sse("model", decision.chosen_model)
+
+        # ===== Phase 0b : QUERY REWRITING =====
+        # On utilise Flash pour le rewriting même quand reasoner est choisi
+        # (le rewriting est une tâche simple, pas la peine de payer le reasoner).
+        retrieval_query, rewritten = _maybe_rewrite_query(
+            llm, req.question, history,
+            should_rewrite=req.rewrite_query,
+        )
+        if rewritten:
+            yield _sse("rewrite", rewritten)
+
         # ===== Phase 1 : RETRIEVAL =====
         logger.info("[RETRIEVAL] début (k=%d)", k)
         try:
             t_retrieve = time.perf_counter()
-            chunks = rag.retrieve(req.question, k=k)
+            chunks = rag.retrieve(retrieval_query, k=k, corpora=req.corpora)
             retrieve_ms = (time.perf_counter() - t_retrieve) * 1000
         except Exception as exc:
             logger.exception("[RETRIEVAL] erreur : %s", exc)
@@ -118,7 +211,6 @@ async def ask(req: AskRequest, request: Request) -> StreamingResponse:
 
         yield _sse("sources", [c.to_dict() for c in chunks])
 
-        # Avertissement si la qualité de récupération est faible.
         if chunks[0].score < 0.5:
             logger.warning(
                 "[RETRIEVAL] qualité faible (top=%.3f) — réponse peu fiable probable",
@@ -126,21 +218,29 @@ async def ask(req: AskRequest, request: Request) -> StreamingResponse:
             )
 
         # ===== Phase 2 : PROMPT BUILD =====
-        user_message = build_user_message(req.question, [c.to_dict() for c in chunks])
+        messages = build_messages(
+            req.question,
+            [c.to_dict() for c in chunks],
+            history=history,
+        )
+        total_prompt_chars = sum(len(m["content"]) for m in messages)
         logger.info(
-            "[PROMPT] système=%d chars + utilisateur=%d chars",
-            len(SYSTEM_PROMPT), len(user_message),
+            "[PROMPT] %d messages assemblés (%d caractères total)",
+            len(messages), total_prompt_chars,
         )
 
         # ===== Phase 3 : GENERATION =====
-        logger.info("[GENERATION] début avec %s/%s", llm.name, llm.model)
+        logger.info(
+            "[GENERATION] début avec %s/%s",
+            llm.name, decision.chosen_model,
+        )
         buffer = ""
         in_thinking = False
         total_chars = 0
         first_token_at: float | None = None
 
         try:
-            for piece in llm.stream(SYSTEM_PROMPT, user_message):
+            for piece in llm.stream(messages, model_override=decision.chosen_model):
                 buffer += piece
                 to_emit, buffer, in_thinking = _strip_thinking(buffer, in_thinking)
                 if to_emit:
@@ -175,7 +275,7 @@ async def ask(req: AskRequest, request: Request) -> StreamingResponse:
         headers={
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
-            "X-Accel-Buffering": "no",  # désactive un éventuel buffering proxy
+            "X-Accel-Buffering": "no",
         },
     )
 

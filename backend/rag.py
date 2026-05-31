@@ -25,6 +25,7 @@ class RetrievedChunk:
     source: str
     section: str
     score: float  # similarité cosinus (1 - distance), arrondie à 3 décimales
+    corpus: str   # nom du corpus d'origine ("python", "fastapi", ...)
 
     def to_dict(self) -> dict:
         return {
@@ -32,6 +33,7 @@ class RetrievedChunk:
             "source": self.source,
             "section": self.section,
             "score": self.score,
+            "corpus": self.corpus,
         }
 
 
@@ -67,8 +69,17 @@ class RAGEngine:
         if count == 0:
             logger.warning("Collection vide — relance build_index pour ré-indexer.")
 
-    def retrieve(self, query: str, k: int | None = None) -> list[RetrievedChunk]:
-        """Récupère les k chunks les plus pertinents pour la question."""
+    def retrieve(
+        self,
+        query: str,
+        k: int | None = None,
+        corpora: list[str] | None = None,
+    ) -> list[RetrievedChunk]:
+        """Récupère les k chunks les plus pertinents pour la question.
+
+        Si ``corpora`` est fourni et non vide, la recherche est restreinte
+        à ces corpus (via le filtre ``where`` de ChromaDB).
+        """
         k = k or settings.top_k
 
         t0 = time.perf_counter()
@@ -79,8 +90,21 @@ class RAGEngine:
         ).tolist()
         embed_ms = (time.perf_counter() - t0) * 1000
 
+        # Filtre par corpus si demandé. ChromaDB attend {"$in": [...]} pour les
+        # disjonctions, ou directement {"corpus": "..."} pour un seul.
+        where: dict | None = None
+        if corpora:
+            if len(corpora) == 1:
+                where = {"corpus": corpora[0]}
+            else:
+                where = {"corpus": {"$in": list(corpora)}}
+
         t1 = time.perf_counter()
-        results = self.collection.query(query_embeddings=embedding, n_results=k)
+        results = self.collection.query(
+            query_embeddings=embedding,
+            n_results=k,
+            where=where,
+        )
         query_ms = (time.perf_counter() - t1) * 1000
 
         docs = results["documents"][0]
@@ -93,6 +117,7 @@ class RAGEngine:
                 source=meta.get("source", "?"),
                 section=meta.get("section") or "(préambule)",
                 score=round(1 - dist, 3),
+                corpus=meta.get("corpus", "?"),
             )
             for doc, meta, dist in zip(docs, metas, distances)
         ]

@@ -20,7 +20,7 @@ from .config import settings
 from .llm_providers import get_provider
 from .logging_config import setup_logging
 from .rag import RAGEngine
-from .routes import ask, health, usage
+from .routes import ask, health, run, usage
 
 
 # Le logger principal du module est configuré au démarrage.
@@ -129,6 +129,7 @@ app.add_middleware(
 app.include_router(ask.router)
 app.include_router(health.router)
 app.include_router(usage.router)
+app.include_router(run.router)
 
 
 @app.get("/", tags=["root"])
