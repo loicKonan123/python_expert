@@ -17,6 +17,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from .config import settings
+from .kernel import get_manager as get_kernel_manager
 from .llm_providers import get_provider
 from .logging_config import setup_logging
 from .rag import RAGEngine
@@ -66,6 +67,9 @@ async def lifespan(app: FastAPI):
 
     yield
 
+    # Tue proprement tous les kernels Python persistants avant de quitter.
+    logger.info("Arrêt : fermeture de tous les kernels Python...")
+    get_kernel_manager().shutdown_all()
     logger.info("Arrêt du backend.")
 
 

@@ -123,23 +123,50 @@ export type RunResult = {
   elapsed_ms: number;
   timeout: boolean;
   truncated: boolean;
+  session_id?: string | null;
+  restarted?: boolean;
 };
 
 /**
- * Exécute du code Python dans le sandbox backend et retourne le résultat.
- * Aucun streaming — le code tourne, puis on récupère stdout/stderr d'un coup.
+ * Exécute du code Python en sandbox.
+ *
+ * Si ``sessionId`` est fourni, le backend utilise un kernel persistant pour
+ * cette session : les variables, classes et imports survivent entre les
+ * appels (comportement notebook). Si absent, exécution one-shot jetable.
  */
-export async function runPython(code: string, timeoutS?: number): Promise<RunResult> {
+export async function runPython(
+  code: string,
+  options: { timeoutS?: number; sessionId?: string } = {},
+): Promise<RunResult> {
   const resp = await fetch(`${API_BASE}/api/run`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ code, timeout_s: timeoutS ?? null }),
+    body: JSON.stringify({
+      code,
+      timeout_s: options.timeoutS ?? null,
+      session_id: options.sessionId ?? null,
+    }),
   });
   if (!resp.ok) {
     const text = await resp.text();
     throw new Error(`Sandbox HTTP ${resp.status} : ${text.slice(0, 200)}`);
   }
   return resp.json();
+}
+
+
+/**
+ * Redémarre le kernel d'une session (vide les variables, recharge un Python frais).
+ */
+export async function restartKernel(sessionId: string): Promise<void> {
+  const resp = await fetch(
+    `${API_BASE}/api/kernel/${encodeURIComponent(sessionId)}/restart`,
+    { method: "POST" },
+  );
+  if (!resp.ok) {
+    const text = await resp.text();
+    throw new Error(`Restart kernel HTTP ${resp.status} : ${text.slice(0, 200)}`);
+  }
 }
 
 

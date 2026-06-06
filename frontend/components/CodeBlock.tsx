@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { MaterialIcon } from "./MaterialIcon";
-import { runPython, type RunResult } from "@/lib/api";
+import { restartKernel, runPython, type RunResult } from "@/lib/api";
 
 // Monaco est lourd (~3 MB) — chargement dynamique côté client uniquement.
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
@@ -19,9 +19,29 @@ type Props = {
   code: string;
   lang?: string;
   filename?: string;
+  /**
+   * Blocs Python qui précèdent celui-ci dans la même réponse bot.
+   * Fallback quand on n'a pas de session kernel — on les concatène pour
+   * que les définitions soient disponibles. Si sessionId est fourni, ce
+   * paramètre n'est utilisé que pour le PREMIER run (le kernel persiste
+   * ensuite l'état pour les runs suivants).
+   */
+  precedingCode?: string[];
+  /**
+   * ID de session pour utiliser un kernel Python persistant. Typiquement
+   * l'ID de la conversation courante. Les variables, classes et imports
+   * survivent entre les Run successifs dans la même session.
+   */
+  sessionId?: string;
 };
 
-export function CodeBlock({ code, lang = "python", filename }: Props) {
+export function CodeBlock({
+  code,
+  lang = "python",
+  filename,
+  precedingCode,
+  sessionId,
+}: Props) {
   const [copied, setCopied] = useState(false);
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState<RunResult | null>(null);
@@ -44,18 +64,44 @@ export function CodeBlock({ code, lang = "python", filename }: Props) {
     }
   }
 
+  // Stratégie d'envoi :
+  //  - SANS sessionId : on concatène les blocs précédents (fallback one-shot)
+  //  - AVEC sessionId : on envoie SEULEMENT le bloc courant. Le kernel
+  //    persiste l'état des runs précédents, donc les définitions des blocs
+  //    antérieurs sont déjà dispo si l'utilisateur les a exécutés. Si pas,
+  //    le bloc échouera proprement avec un NameError — pédagogique.
+  const cumulativeCount = precedingCode?.length ?? 0;
+  const fullCode =
+    !sessionId && cumulativeCount > 0
+      ? precedingCode!.join("\n\n") + "\n\n" + code
+      : code;
+
   async function execute() {
     if (running) return;
     setRunning(true);
     setRunError(null);
     setResult(null);
     try {
-      const r = await runPython(code);
+      const r = await runPython(fullCode, { sessionId });
       setResult(r);
     } catch (err) {
       setRunError(err instanceof Error ? err.message : String(err));
     } finally {
       setRunning(false);
+    }
+  }
+
+  async function resetKernel() {
+    if (!sessionId || running) return;
+    if (!confirm("Redémarrer le kernel ? Toutes les variables définies seront perdues.")) {
+      return;
+    }
+    try {
+      await restartKernel(sessionId);
+      setResult(null);
+      setRunError(null);
+    } catch (err) {
+      setRunError(err instanceof Error ? err.message : String(err));
     }
   }
 
@@ -79,19 +125,51 @@ export function CodeBlock({ code, lang = "python", filename }: Props) {
         </span>
         <div className="flex items-center gap-3">
           {isRunnable && (
-            <button
-              onClick={execute}
-              disabled={running}
-              className="flex items-center gap-1 text-[11px] font-mono text-secondary hover:brightness-125 disabled:opacity-50 disabled:cursor-wait transition-all"
-              aria-label="Exécuter le code"
-              title="Exécuter en sandbox (timeout 10s)"
-            >
-              <MaterialIcon
-                name={running ? "hourglass_empty" : "play_arrow"}
-                className={`text-[14px] ${running ? "animate-spin" : ""}`}
-              />
-              {running ? "Exécution..." : "Run"}
-            </button>
+            <>
+              <button
+                onClick={execute}
+                disabled={running}
+                className="flex items-center gap-1 text-[11px] font-mono text-secondary hover:brightness-125 disabled:opacity-50 disabled:cursor-wait transition-all"
+                aria-label="Exécuter le code"
+                title={
+                  sessionId
+                    ? "Exécute dans le kernel persistant (variables conservées entre les runs)"
+                    : cumulativeCount > 0
+                      ? `Exécute ce bloc + ${cumulativeCount} bloc(s) Python précédent(s)`
+                      : "Exécute ce bloc en sandbox (timeout 10s)"
+                }
+              >
+                <MaterialIcon
+                  name={running ? "hourglass_empty" : "play_arrow"}
+                  className={`text-[14px] ${running ? "animate-spin" : ""}`}
+                />
+                {running ? "Exécution..." : "Run"}
+                {sessionId && !running && (
+                  <span
+                    className="ml-0.5 px-1 rounded bg-primary/20 text-[10px] text-primary"
+                    title="Kernel persistant actif"
+                  >
+                    kernel
+                  </span>
+                )}
+                {!sessionId && cumulativeCount > 0 && !running && (
+                  <span className="ml-0.5 px-1 rounded bg-secondary/20 text-[10px]">
+                    +{cumulativeCount}
+                  </span>
+                )}
+              </button>
+              {sessionId && (
+                <button
+                  onClick={resetKernel}
+                  disabled={running}
+                  className="flex items-center text-[11px] font-mono text-on-surface-variant hover:text-error disabled:opacity-40 transition-colors"
+                  aria-label="Redémarrer le kernel"
+                  title="Redémarrer le kernel (efface toutes les variables)"
+                >
+                  <MaterialIcon name="restart_alt" className="text-[14px]" />
+                </button>
+              )}
+            </>
           )}
           <button
             onClick={copy}

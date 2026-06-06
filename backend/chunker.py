@@ -137,6 +137,86 @@ def _extract_path_metadata(path: Path, corpus: Corpus) -> dict:
     }
 
 
+def _detect_language(path: Path) -> str:
+    """Mappe l'extension d'un fichier vers un nom de langage humain."""
+    ext = path.suffix.lower()
+    return {
+        ".py": "python",
+        ".ts": "typescript",
+        ".tsx": "typescript",
+        ".js": "javascript",
+        ".jsx": "javascript",
+    }.get(ext, "unknown")
+
+
+def _chunk_code(text: str) -> list[tuple[str, str]]:
+    """Découpe un fichier de code en sections logiques (fonctions, classes).
+
+    Heuristique de détection des frontières (commune Python/TypeScript) :
+      - Ligne qui commence par ``def `` / ``class `` / ``async def `` (Python)
+      - Ligne qui commence par ``function ``, ``export function ``,
+        ``class ``, ``export class ``, ``const X = ``, ``export const X = ``,
+        ``interface ``, ``type ``, ``enum `` (TypeScript)
+
+    Si pas de frontière détectée, retourne tout le fichier comme un seul bloc.
+    Le découpage en chunks de taille max se fait ensuite via _split_long_text.
+
+    Retourne [(label, code), ...] où label décrit la section
+    (« function fooBar », « class Sidebar », ou "" pour préambule/global).
+    """
+    lines = text.split("\n")
+    if not lines:
+        return [("", text)]
+
+    # Pattern qui détecte le DÉBUT d'une déclaration de top-level. On exige
+    # indent=0 (pas d'espace en début de ligne) pour ignorer les méthodes
+    # imbriquées qui restent dans le chunk de leur classe parente.
+    boundary_re = re.compile(
+        r"^("
+        r"async\s+def\s+(\w+)"           # Python : async def foo
+        r"|def\s+(\w+)"                  # Python : def foo
+        r"|class\s+(\w+)"                # Python ou TS : class Foo
+        r"|export\s+(?:default\s+)?(?:async\s+)?function\s+(\w+)"  # TS export function
+        r"|export\s+(?:default\s+)?(?:async\s+)?class\s+(\w+)"     # TS export class
+        r"|export\s+const\s+(\w+)"       # TS export const Foo =
+        r"|function\s+(\w+)"             # TS function foo
+        r"|interface\s+(\w+)"            # TS interface Foo
+        r"|export\s+interface\s+(\w+)"   # TS export interface Foo
+        r"|type\s+(\w+)\s*="             # TS type Foo =
+        r"|export\s+type\s+(\w+)\s*="    # TS export type Foo =
+        r"|enum\s+(\w+)"                 # TS enum Foo
+        r"|export\s+enum\s+(\w+)"        # TS export enum Foo
+        r")"
+    )
+
+    sections: list[tuple[str, list[str]]] = []
+    current_label = ""
+    current_lines: list[str] = []
+
+    for line in lines:
+        # Détecte une nouvelle frontière à indent zéro
+        if line and not line[0].isspace():
+            m = boundary_re.match(line)
+            if m:
+                # Flush la section précédente
+                if current_lines:
+                    sections.append((current_label, current_lines))
+                # Prend le nom capturé (le premier groupe non vide après le groupe 1)
+                name = next((g for g in m.groups()[1:] if g), "")
+                current_label = m.group(1).split()[-1] if not name else name
+                # On garde le mot-clé pour mieux décrire la section
+                keyword = m.group(0).split()[0]
+                current_label = f"{keyword} {name}".strip()
+                current_lines = [line]
+                continue
+        current_lines.append(line)
+
+    if current_lines:
+        sections.append((current_label, current_lines))
+
+    return [(label, "\n".join(lns)) for label, lns in sections if lns]
+
+
 def _strip_mdx_jsx(text: str) -> str:
     """Pour les fichiers MDX : retire grossièrement les balises JSX inline.
 
@@ -163,7 +243,14 @@ def chunk_file(path: Path, corpus: Corpus) -> list[Chunk]:
         text = _strip_mdx_jsx(text)
 
     base_meta = _extract_path_metadata(path, corpus)
-    sections = _split_on_sections(text, corpus.format)
+    # Ajoute le langage à la métadonnée pour les fichiers de code
+    if corpus.format == "code":
+        base_meta["language"] = _detect_language(path)
+
+    if corpus.format == "code":
+        sections = _chunk_code(text)
+    else:
+        sections = _split_on_sections(text, corpus.format)
 
     chunks: list[Chunk] = []
     cursor = 0
@@ -183,12 +270,33 @@ def chunk_file(path: Path, corpus: Corpus) -> list[Chunk]:
 
 
 def iter_corpus_files(corpus: Corpus) -> Iterator[Path]:
-    """Itère sur tous les fichiers du corpus correspondant à ses extensions."""
+    """Itère sur tous les fichiers du corpus correspondant à ses extensions.
+
+    Les chemins dont une partie correspond à un ``exclude_patterns`` sont
+    ignorés (utile pour le corpus de code afin d'écarter node_modules, etc.).
+    """
     if not corpus.local_path.exists():
         logger.warning("Corpus '%s' introuvable : %s", corpus.name, corpus.local_path)
         return
+
+    excludes = set(corpus.exclude_patterns)
+
+    def is_excluded(path: Path) -> bool:
+        if not excludes:
+            return False
+        try:
+            rel = path.relative_to(corpus.local_path)
+        except ValueError:
+            return False
+        return any(part in excludes for part in rel.parts)
+
+    seen: set[Path] = set()
     for ext in corpus.file_extensions:
-        yield from sorted(corpus.local_path.rglob(f"*{ext}"))
+        for p in sorted(corpus.local_path.rglob(f"*{ext}")):
+            if p in seen or is_excluded(p):
+                continue
+            seen.add(p)
+            yield p
 
 
 def chunk_corpus(corpus: Corpus) -> Iterator[Chunk]:

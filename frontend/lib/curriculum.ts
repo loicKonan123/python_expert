@@ -21,7 +21,8 @@ export type Corpus =
   | "pydantic"
   | "nextjs"
   | "typescript"
-  | "tailwind";
+  | "tailwind"
+  | "self";
 
 export type Level = {
   /** Identifiant du niveau (ex: "1", "FA1") — sert aussi de clé visuelle */

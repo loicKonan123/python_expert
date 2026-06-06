@@ -52,6 +52,12 @@ export const CORPUS_META: Record<Corpus | "unknown", CorpusMeta> = {
     bgColor: "bg-[#06B6D4]/15 border-[#06B6D4]/40",
     icon: "format_paint",
   },
+  self: {
+    label: "Mon code",
+    color: "text-[#A78BFA]",
+    bgColor: "bg-[#A78BFA]/15 border-[#A78BFA]/40",
+    icon: "folder_code",
+  },
   unknown: {
     label: "Inconnu",
     color: "text-on-surface-variant",

@@ -19,23 +19,27 @@ from typing import Literal
 from .config import PROJECT_ROOT
 
 
-DocFormat = Literal["sphinx-text", "markdown", "rst", "mdx"]
+DocFormat = Literal["sphinx-text", "markdown", "rst", "mdx", "code"]
 
 
 @dataclass(frozen=True)
 class Corpus:
-    """Description d'un corpus documentaire."""
+    """Description d'un corpus documentaire ou de code source."""
 
-    name: str                      # identifiant court ("python", "fastapi", ...)
-    description: str               # nom humain ("Python 3.14", "FastAPI", ...)
+    name: str                      # identifiant court ("python", "fastapi", "self"...)
+    description: str               # nom humain
     local_path: Path               # dossier local où les fichiers vivent
     format: DocFormat              # format des fichiers
-    file_extensions: tuple[str, ...]  # extensions à scanner ((".md",), (".txt",), ...)
+    file_extensions: tuple[str, ...]  # extensions à scanner
 
     # --- Pour fetch_docs.py (optionnel — si non défini, le corpus est local-only) ---
-    source_repo: str | None = None     # URL git (sans .git ok)
-    source_branch: str | None = None   # branche / tag à cloner (défaut : par défaut)
-    source_subpath: str | None = None  # chemin DANS le repo où vit la doc
+    source_repo: str | None = None     # URL git
+    source_branch: str | None = None   # branche / tag
+    source_subpath: str | None = None  # chemin DANS le repo
+
+    # Patterns de chemins à ignorer (récursif). Sert pour le corpus de code
+    # afin d'éviter d'indexer node_modules, .next, etc.
+    exclude_patterns: tuple[str, ...] = ()
 
     @property
     def is_remote(self) -> bool:
@@ -116,6 +120,30 @@ CORPORA: dict[str, Corpus] = {
         source_repo="https://github.com/tailwindlabs/tailwindcss.com.git",
         source_branch="main",
         source_subpath="src",
+    ),
+
+    # ---------------------------------------------------- Code du projet courant
+    # Permet au tuteur de répondre à des questions sur le code que TU as écrit
+    # (« regarde mon backend/rag.py », « est-ce que mon ChatMessage.tsx est
+    # propre ? »). On scanne tout le repo en ignorant les dossiers énormes.
+    "self": Corpus(
+        name="self",
+        description="Code de ce projet (python_expert)",
+        local_path=PROJECT_ROOT,
+        format="code",
+        file_extensions=(".py", ".ts", ".tsx", ".js", ".jsx"),
+        exclude_patterns=(
+            "node_modules",
+            ".next",
+            ".cache",
+            ".git",
+            "__pycache__",
+            "chroma_db",
+            "docs-sources",
+            "python-3.14-docs-text",
+            ".venv",
+            "venv",
+        ),
     ),
 }
 

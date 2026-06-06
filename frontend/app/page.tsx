@@ -369,6 +369,7 @@ export default function Home() {
                         ? () => regenerate(m.id)
                         : undefined
                     }
+                    sessionId={currentId ?? undefined}
                   />
                 ))}
               </div>

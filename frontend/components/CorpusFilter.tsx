@@ -12,6 +12,7 @@ const ALL_CORPORA: Corpus[] = [
   "nextjs",
   "typescript",
   "tailwind",
+  "self",
 ];
 
 type Props = {

@@ -25,9 +25,15 @@ type Props = {
   message: Message;
   /** Appelé quand l'utilisateur clique sur « Régénérer ». */
   onRegenerate?: () => void;
+  /**
+   * ID de session pour le kernel persistant (typiquement la conversation id).
+   * Si fourni, les blocs Python utilisent un kernel partagé entre eux et
+   * entre les messages de la conversation.
+   */
+  sessionId?: string;
 };
 
-export function ChatMessage({ message, onRegenerate }: Props) {
+export function ChatMessage({ message, onRegenerate, sessionId }: Props) {
   if (message.role === "user") {
     return (
       <div className="flex justify-end">
@@ -38,15 +44,19 @@ export function ChatMessage({ message, onRegenerate }: Props) {
     );
   }
 
-  return <BotMessage message={message} onRegenerate={onRegenerate} />;
+  return (
+    <BotMessage message={message} onRegenerate={onRegenerate} sessionId={sessionId} />
+  );
 }
 
 function BotMessage({
   message,
   onRegenerate,
+  sessionId,
 }: {
   message: Message;
   onRegenerate?: () => void;
+  sessionId?: string;
 }) {
   const blocks = parseMarkdown(message.content);
   const sourcesRef = useRef<SourcesHandle | null>(null);
@@ -132,20 +142,37 @@ function BotMessage({
             </div>
           ) : (
             <div className="space-y-3">
-              {blocks.map((block, i) => {
-                if (block.kind === "code") {
+              {(() => {
+                // On accumule le code Python rencontré avant chaque bloc, pour
+                // que cliquer Run sur le bloc N exécute tous les blocs Python
+                // précédents + le bloc N (comportement notebook).
+                const precedingPython: string[] = [];
+                return blocks.map((block, i) => {
+                  if (block.kind === "code") {
+                    const isPython = block.lang.toLowerCase().startsWith("py");
+                    const preceding = isPython
+                      ? precedingPython.slice()
+                      : undefined;
+                    if (isPython) precedingPython.push(block.code);
+                    return (
+                      <CodeBlock
+                        key={i}
+                        code={block.code}
+                        lang={block.lang}
+                        precedingCode={preceding}
+                        sessionId={sessionId}
+                      />
+                    );
+                  }
                   return (
-                    <CodeBlock key={i} code={block.code} lang={block.lang} />
+                    <InlineText
+                      key={i}
+                      text={block.text}
+                      onCitationClick={jumpToSource}
+                    />
                   );
-                }
-                return (
-                  <InlineText
-                    key={i}
-                    text={block.text}
-                    onCitationClick={jumpToSource}
-                  />
-                );
-              })}
+                });
+              })()}
               {message.streaming && (
                 <span className="typing-caret inline-block" aria-hidden="true" />
               )}
