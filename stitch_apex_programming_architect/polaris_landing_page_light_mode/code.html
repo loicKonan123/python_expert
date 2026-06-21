@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Polaris | Le tuteur dev qui ne ment pas</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-dim": "#d8dadc",
+                    "on-secondary": "#ffffff",
+                    "primary-container": "#00d1ff",
+                    "primary-fixed-dim": "#4cd6ff",
+                    "on-tertiary-container": "#005b31",
+                    "secondary-container": "#8d42ff",
+                    "on-tertiary-fixed": "#00210e",
+                    "surface-container-low": "#f2f4f6",
+                    "surface-container-highest": "#e0e3e5",
+                    "on-secondary-fixed": "#270058",
+                    "error-container": "#ffdad6",
+                    "on-primary-fixed": "#001f28",
+                    "tertiary-fixed-dim": "#00e383",
+                    "on-background": "#191c1e",
+                    "tertiary-fixed": "#5bffa1",
+                    "tertiary-container": "#00dc7f",
+                    "secondary": "#731be5",
+                    "on-surface": "#191c1e",
+                    "outline-variant": "#bbc9cf",
+                    "background": "#f7f9fb",
+                    "on-error": "#ffffff",
+                    "on-secondary-container": "#fdf6ff",
+                    "primary-fixed": "#b7eaff",
+                    "inverse-primary": "#4cd6ff",
+                    "surface-bright": "#f7f9fb",
+                    "inverse-surface": "#2d3133",
+                    "outline": "#6c797f",
+                    "surface-tint": "#00677f",
+                    "surface-container": "#eceef0",
+                    "tertiary": "#006d3c",
+                    "secondary-fixed-dim": "#d4bbff",
+                    "on-surface-variant": "#3c494e",
+                    "on-primary-fixed-variant": "#004e60",
+                    "secondary-fixed": "#ebdcff",
+                    "surface": "#f7f9fb",
+                    "on-primary": "#ffffff",
+                    "primary": "#00677f",
+                    "on-secondary-fixed-variant": "#5d00c2",
+                    "surface-variant": "#e0e3e5",
+                    "on-tertiary": "#ffffff",
+                    "on-tertiary-fixed-variant": "#00522c",
+                    "on-error-container": "#93000a",
+                    "surface-container-high": "#e6e8ea",
+                    "surface-container-lowest": "#ffffff",
+                    "error": "#ba1a1a",
+                    "on-primary-container": "#00566a",
+                    "inverse-on-surface": "#eff1f3"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "container-max": "1440px",
+                    "margin-mobile": "20px",
+                    "gutter": "24px",
+                    "margin-desktop": "64px",
+                    "unit": "4px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Inter"],
+                    "label-md": ["JetBrains Mono"],
+                    "body-md": ["Inter"],
+                    "label-sm": ["JetBrains Mono"],
+                    "headline-lg": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "headline-lg-mobile": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.04em", "fontWeight": "800"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #00677f 0%, #00d1ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .tech-grid {
+            background-image: radial-gradient(circle at 1px 1px, rgba(0, 103, 127, 0.05) 1px, transparent 0);
+            background-size: 40px 40px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md selection:bg-primary-container selection:text-on-primary-container tech-grid min-h-screen">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 flex justify-between items-center px-margin-desktop h-16 bg-surface/70 backdrop-blur-xl border-b border-outline-variant/20 shadow-[0_4px_10px_rgba(0,209,255,0.04)]">
+<div class="flex items-center gap-8">
+<span class="text-headline-md font-headline-md font-extrabold text-primary tracking-tight">Polaris</span>
+<div class="hidden md:flex items-center gap-6">
+<a class="text-primary border-b-2 border-primary pb-1 font-label-md text-label-md hover:text-primary transition-colors duration-200" href="#">Documentation</a>
+<a class="text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors duration-200" href="#">Sandbox</a>
+<a class="text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors duration-200" href="#">Forum</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden lg:flex items-center bg-surface-container px-3 py-1.5 rounded-full border border-outline-variant/30">
+<span class="material-symbols-outlined text-outline text-[18px]" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-label-sm font-label-sm w-48 placeholder:text-outline/50" placeholder="Search resources..." type="text"/>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors" data-icon="help">help</span>
+<button class="bg-primary-container text-on-primary-container px-6 py-2 rounded-full font-label-md text-label-md font-bold active:scale-95 transition-transform duration-150">Deploy</button>
+</div>
+</nav>
+<main class="pt-32 pb-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto relative overflow-hidden">
+<!-- Background Animation Layer -->
+<div class="absolute top-0 right-0 -z-10 w-2/3 h-2/3 opacity-30">
+
+</div>
+<!-- Hero Section -->
+<section class="mb-32 text-center md:text-left flex flex-col md:flex-row items-center gap-12">
+<div class="md:w-3/5">
+<div class="inline-flex items-center gap-2 bg-primary-container/10 border border-primary-container/20 px-3 py-1 rounded-full mb-6">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+<span class="text-primary font-label-sm text-label-sm uppercase tracking-widest">Version 3.2.0 Stable</span>
+</div>
+<h1 class="font-display-lg text-display-lg md:text-[72px] leading-tight mb-8">
+<span class="text-on-surface">Le tuteur dev</span><br/>
+<span class="text-gradient">qui ne ment pas.</span>
+</h1>
+<p class="text-on-surface-variant text-body-lg font-body-lg mb-10 max-w-2xl">
+                    Experience deterministic engineering. Polaris cross-references every line of code with verified technical standards, ensuring your high-performance applications are built on truth, not hallucinations.
+                </p>
+<div class="flex flex-wrap gap-4 justify-center md:justify-start">
+<button class="bg-primary-container text-on-primary-container px-8 py-4 rounded-xl font-headline-md text-headline-md font-bold shadow-[0_8px_30px_rgb(0,209,255,0.15)] hover:shadow-[0_8px_40px_rgb(0,209,255,0.25)] transition-all flex items-center gap-3 active:scale-95">
+                        Start Building
+                        <span class="material-symbols-outlined" data-icon="rocket_launch">rocket_launch</span>
+</button>
+<button class="glass-panel text-primary px-8 py-4 rounded-xl font-headline-md text-headline-md font-semibold border border-outline-variant/30 hover:bg-surface-container-high transition-all active:scale-95">
+                        View Sandbox
+                    </button>
+</div>
+</div>
+<!-- Code Visualization Card -->
+<div class="md:w-2/5 w-full">
+<div class="glass-panel p-6 rounded-2xl shadow-xl border border-white/50 relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-br from-primary-container/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex items-center gap-2 mb-4 border-b border-outline-variant/10 pb-4">
+<div class="w-3 h-3 rounded-full bg-red-400"></div>
+<div class="w-3 h-3 rounded-full bg-amber-400"></div>
+<div class="w-3 h-3 rounded-full bg-emerald-400"></div>
+<span class="ml-4 text-label-sm font-label-sm text-outline">main.sh</span>
+</div>
+<div class="space-y-3 font-label-md text-label-md text-on-surface-variant overflow-x-auto whitespace-nowrap">
+<div class="flex gap-4">
+<span class="text-outline/40">01</span>
+<span><span class="text-secondary">const</span> polaris = <span class="text-primary">require</span>(<span class="text-tertiary">'@polaris/core'</span>);</span>
+</div>
+<div class="flex gap-4">
+<span class="text-outline/40">02</span>
+<span></span>
+</div>
+<div class="flex gap-4">
+<span class="text-outline/40">03</span>
+<span class="text-outline-variant italic">// Verifying truth across 13 corpora</span>
+</div>
+<div class="flex gap-4 bg-primary-container/5 -mx-6 px-6 py-1 border-y border-primary-container/10">
+<span class="text-outline/40">04</span>
+<span><span class="text-secondary">await</span> polaris.<span class="text-primary-container font-bold">validate</span>(source_code);</span>
+</div>
+<div class="flex gap-4">
+<span class="text-outline/40">05</span>
+<span><span class="text-secondary">const</span> truth = polaris.<span class="text-primary">getTruth</span>();</span>
+</div>
+<div class="flex gap-4">
+<span class="text-outline/40">06</span>
+<span><span class="text-primary">console</span>.<span class="text-primary">log</span>(<span class="text-tertiary">`Integrity: ${truth.score}%`</span>);</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Bento Grid Features -->
+<section class="grid grid-cols-1 md:grid-cols-12 gap-gutter mb-32">
+<!-- Feature Card 1 -->
+<div class="md:col-span-8 glass-panel p-10 rounded-3xl border border-outline-variant/10 shadow-sm relative group overflow-hidden flex flex-col justify-between">
+<div class="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[120px]" data-icon="terminal">terminal</span>
+</div>
+<div>
+<span class="material-symbols-outlined text-primary text-[40px] mb-6" data-icon="verified">verified</span>
+<h3 class="text-headline-lg font-headline-lg text-on-surface mb-4">Sourced, never invented.</h3>
+<p class="text-body-lg font-body-lg text-on-surface-variant max-w-xl">
+                        Our knowledge base is built on verified documentation and high-quality repositories. Polaris rejects speculative generation, providing only answers rooted in technical documentation and proven patterns.
+                    </p>
+</div>
+<div class="mt-12 flex gap-4">
+<div class="bg-surface-container px-4 py-2 rounded-lg border border-outline-variant/20 flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary" data-icon="source" data-weight="fill" style="font-variation-settings: 'FILL' 1;">source</span>
+<span class="text-label-md font-label-md uppercase tracking-wider text-on-surface">Verified Sources</span>
+</div>
+<div class="bg-surface-container px-4 py-2 rounded-lg border border-outline-variant/20 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container" data-icon="policy" data-weight="fill" style="font-variation-settings: 'FILL' 1;">policy</span>
+<span class="text-label-md font-label-md uppercase tracking-wider text-on-surface">No Hallucinations</span>
+</div>
+</div>
+</div>
+<!-- Feature Card 2 -->
+<div class="md:col-span-4 bg-white border border-outline-variant/10 p-10 rounded-3xl shadow-sm hover:shadow-[0_10px_40px_rgba(0,0,0,0.03)] transition-all flex flex-col items-center text-center justify-center relative overflow-hidden group">
+<div class="absolute inset-0 bg-primary-container/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+<div class="relative z-10">
+<div class="w-20 h-20 rounded-full bg-secondary/10 flex items-center justify-center mb-6 mx-auto">
+<span class="material-symbols-outlined text-secondary text-[32px] animate-pulse" data-icon="bolt">bolt</span>
+</div>
+<h3 class="text-headline-md font-headline-md text-on-surface mb-4">Executed live</h3>
+<p class="text-body-md font-body-md text-on-surface-variant">
+                        Instant validation in our sandbox environment. Test ideas as you code.
+                    </p>
+</div>
+</div>
+<!-- Feature Card 3 -->
+<div class="md:col-span-4 bg-white border border-outline-variant/10 p-10 rounded-3xl shadow-sm hover:shadow-[0_10px_40px_rgba(0,0,0,0.03)] transition-all flex flex-col justify-between group">
+<span class="material-symbols-outlined text-tertiary-container text-[40px] mb-6" data-icon="layers">layers</span>
+<div>
+<h3 class="text-headline-md font-headline-md text-on-surface mb-2">13 corpus</h3>
+<p class="text-body-md font-body-md text-on-surface-variant mb-6">
+                        Deep context across 13 specialized technical domains and languages.
+                    </p>
+<div class="flex flex-wrap gap-2">
+<span class="bg-surface-container-high px-2 py-1 rounded text-label-sm font-label-sm text-outline">RUST</span>
+<span class="bg-surface-container-high px-2 py-1 rounded text-label-sm font-label-sm text-outline">GO</span>
+<span class="bg-surface-container-high px-2 py-1 rounded text-label-sm font-label-sm text-outline">TS</span>
+<span class="bg-surface-container-high px-2 py-1 rounded text-label-sm font-label-sm text-outline">+10</span>
+</div>
+</div>
+</div>
+<!-- Feature Card 4 -->
+<div class="md:col-span-8 glass-panel p-10 rounded-3xl border border-outline-variant/10 shadow-sm flex items-center justify-between group">
+<div class="max-w-md">
+<h3 class="text-headline-md font-headline-md text-on-surface mb-4">Mission Control Center</h3>
+<p class="text-body-md font-body-md text-on-surface-variant">
+                        Visualize your codebase health with real-time analytics and architectural audits. Precision engineering at your fingertips.
+                    </p>
+<button class="mt-8 text-primary font-bold flex items-center gap-2 group-hover:gap-4 transition-all">
+                        Open Dashboard
+                        <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<div class="hidden lg:block w-1/3 aspect-square rounded-2xl bg-surface-container overflow-hidden border border-outline-variant/20 shadow-inner">
+<img class="w-full h-full object-cover" data-alt="A clean, high-tech user interface dashboard showing complex technical data visualizations with cyan line graphs and technical metrics. The aesthetic is crisp and modern light-mode, with glassmorphism panels and high-contrast typography, evoking a sophisticated mission control or laboratory atmosphere with pristine white surfaces and vibrant blue accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCx1OKlGawqcl1qorGJOxYH5Y-yVgzebBGauobnruIVwl5C1sHa4ouEQMYXdKnQQK0XHDRzE5wotpThHCok2Nhp8hOxoyFC-lQ--CmaubaOta2RQZjwo_phiAhdDyVgHfAB4HM2hej83bdgYqeNH3Mc27qRZvgAXDIomZ6TxSZw_vL_qXbQaG4JLosft2PEIhZrpoWIPzkC17qErhCd1SM3XK05XH1ETu4mbfguZf-UyI94ixO9s8JSEJA3c7dwT9aP0YC8cHrrXfPv"/>
+</div>
+</div>
+</section>
+<!-- Technical Stats -->
+<section class="border-t border-outline-variant/10 pt-20">
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-12">
+<div>
+<div class="text-display-lg font-display-lg text-primary mb-2">99.8%</div>
+<div class="text-label-md font-label-md text-outline uppercase tracking-widest">Truth Accuracy</div>
+</div>
+<div>
+<div class="text-display-lg font-display-lg text-on-surface mb-2">0ms</div>
+<div class="text-label-md font-label-md text-outline uppercase tracking-widest">Inference Delay</div>
+</div>
+<div>
+<div class="text-display-lg font-display-lg text-secondary mb-2">12M+</div>
+<div class="text-label-md font-label-md text-outline uppercase tracking-widest">Verified Repos</div>
+</div>
+<div>
+<div class="text-display-lg font-display-lg text-on-surface mb-2">24/7</div>
+<div class="text-label-md font-label-md text-outline uppercase tracking-widest">Active Monitoring</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Project Identity Footer -->
+<footer class="bg-surface-container py-24 px-margin-desktop border-t border-outline-variant/20">
+<div class="max-w-container-max mx-auto flex flex-col md:flex-row justify-between gap-16">
+<div class="md:w-1/3">
+<span class="text-headline-md font-headline-md font-extrabold text-primary tracking-tight mb-6 block">Polaris</span>
+<p class="text-body-md font-body-md text-on-surface-variant mb-8">
+                    The deterministic development tutor designed for engineers who demand absolute precision and verified technical truths.
+                </p>
+<div class="flex gap-4">
+<span class="material-symbols-outlined p-2 glass-panel rounded-lg cursor-pointer hover:text-primary transition-all" data-icon="brand_awareness">brand_awareness</span>
+<span class="material-symbols-outlined p-2 glass-panel rounded-lg cursor-pointer hover:text-primary transition-all" data-icon="terminal">terminal</span>
+<span class="material-symbols-outlined p-2 glass-panel rounded-lg cursor-pointer hover:text-primary transition-all" data-icon="public">public</span>
+</div>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-12 md:w-2/3">
+<div class="space-y-4">
+<h4 class="font-bold text-on-surface uppercase text-label-sm tracking-widest">Platform</h4>
+<ul class="space-y-2 text-on-surface-variant font-label-md text-label-md">
+<li class="hover:text-primary transition-colors cursor-pointer">Curriculum</li>
+<li class="hover:text-primary transition-colors cursor-pointer">Workbench</li>
+<li class="hover:text-primary transition-colors cursor-pointer">Library</li>
+<li class="hover:text-primary transition-colors cursor-pointer">Integrations</li>
+</ul>
+</div>
+<div class="space-y-4">
+<h4 class="font-bold text-on-surface uppercase text-label-sm tracking-widest">Company</h4>
+<ul class="space-y-2 text-on-surface-variant font-label-md text-label-md">
+<li class="hover:text-primary transition-colors cursor-pointer">About Us</li>
+<li class="hover:text-primary transition-colors cursor-pointer">Careers</li>
+<li class="hover:text-primary transition-colors cursor-pointer">Project Alpha</li>
+<li class="hover:text-primary transition-colors cursor-pointer">Open Source</li>
+</ul>
+</div>
+<div class="space-y-4">
+<h4 class="font-bold text-on-surface uppercase text-label-sm tracking-widest">Legal</h4>
+<ul class="space-y-2 text-on-surface-variant font-label-md text-label-md">
+<li class="hover:text-primary transition-colors cursor-pointer">Privacy</li>
+<li class="hover:text-primary transition-colors cursor-pointer">Terms</li>
+<li class="hover:text-primary transition-colors cursor-pointer">License</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="max-w-container-max mx-auto mt-24 pt-12 border-t border-outline-variant/10 flex flex-col md:flex-row justify-between items-center gap-6">
+<span class="text-label-sm font-label-sm text-outline">V3.2.0-STABLE | © 2024 Polaris Engineering Group</span>
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-tertiary-container"></span>
+<span class="text-label-sm font-label-sm text-outline">Systems Operational</span>
+</div>
+<span class="text-label-sm font-label-sm text-primary font-bold cursor-pointer">English (UK)</span>
+</div>
+</div>
+</footer>
+<script>
+        // Micro-interaction for feature cards
+        document.querySelectorAll('.glass-panel').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+
+        // Atmospheric parallax effect
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const heroText = document.querySelector('h1');
+            if(heroText) {
+                heroText.style.transform = `translateY(${scrolled * 0.15}px)`;
+            }
+        });
+    </script>
+</body></html>

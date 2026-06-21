@@ -73,6 +73,73 @@
 }
 
 /* ============================================================
+   Polaris — Light theme
+   Activé via [data-theme="light"] sur <html>. Les variables sont
+   adoucies (fond off-white avec une pointe de bleu, accents identiques
+   pour garder la cohérence de marque).
+   ============================================================ */
+html[data-theme="light"] {
+  --color-background: #f5f7fb;
+  --color-surface: #f5f7fb;
+  --color-surface-dim: #e9eef7;
+  --color-surface-bright: #ffffff;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #eef2f9;
+  --color-surface-container: #e6ecf6;
+  --color-surface-container-high: #dde5f1;
+  --color-surface-container-highest: #d4deec;
+  --color-surface-variant: #d4deec;
+  --color-on-background: #1a2238;
+  --color-on-surface: #1a2238;
+  --color-on-surface-variant: #475064;
+  --color-outline: #6f7689;
+  --color-outline-variant: #c5cddc;
+
+  --color-primary: #1d6296;
+  --color-primary-fixed: #98cbff;
+  --color-primary-fixed-dim: #1d6296;
+  --color-primary-container: #cfe5ff;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #001d33;
+
+  --color-secondary: #8a6d00;
+  --color-secondary-fixed-dim: #8a6d00;
+  --color-secondary-container: #ffe082;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #2a2100;
+}
+
+/* En light, les "frosted" doivent être basés sur du noir transparent
+   plutôt que du blanc transparent, sinon les cartes deviennent invisibles. */
+html[data-theme="light"] .glass-card {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.75),
+    rgba(255, 255, 255, 0.55)
+  );
+  border: 1px solid rgba(26, 34, 56, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 10px 40px rgba(26, 34, 56, 0.08);
+}
+html[data-theme="light"] .glass-card-strong {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.85),
+    rgba(255, 255, 255, 0.65)
+  );
+  border: 1px solid rgba(26, 34, 56, 0.10);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 20px 60px rgba(26, 34, 56, 0.10);
+}
+
+/* Orbes plus discrets et chauds en light */
+html[data-theme="light"] .bg-glow::before { opacity: 0.10; }
+html[data-theme="light"] .bg-glow::after  { opacity: 0.06; }
+html[data-theme="light"] .bg-glow > .orb  { opacity: 0.05; }
+
+/* ============================================================
    Base
    ============================================================ */
 html, body {
@@ -100,6 +167,18 @@ html, body {
   background: rgba(11, 19, 38, 0.85);
 }
 
+/* Polaris — scintillement subtil au hover */
+.polaris-twinkle {
+  transition: transform 0.4s ease, filter 0.4s ease;
+}
+.polaris-twinkle:hover {
+  transform: rotate(22.5deg);
+  filter: drop-shadow(0 0 8px var(--color-primary));
+}
+@media (prefers-reduced-motion: reduce) {
+  .polaris-twinkle:hover { transform: none; filter: none; }
+}
+
 /* Animation curseur streaming */
 .typing-caret::after {
   content: '▍';
@@ -109,7 +188,13 @@ html, body {
 }
 @keyframes blink { 50% { opacity: 0; } }
 
-/* Accents lumineux décoratifs en fond */
+/* ============================================================
+   Polaris — Mesh gradient background (Phase 8, direction Glass+Gradient)
+
+   3 orbes lumineux qui dérivent lentement, créant une atmosphère vivante
+   sans distraire. Les couleurs sont basées sur la palette dark, avec une
+   variante claire qui kicks in via [data-theme="light"] sur <html>.
+   ============================================================ */
 .bg-glow {
   position: fixed;
   inset: 0;
@@ -117,28 +202,103 @@ html, body {
   pointer-events: none;
   overflow: hidden;
 }
-.bg-glow::before, .bg-glow::after {
+
+.bg-glow::before,
+.bg-glow::after,
+.bg-glow > .orb {
   content: '';
   position: absolute;
   border-radius: 9999px;
-  filter: blur(120px);
+  filter: blur(140px);
+  will-change: transform;
 }
+
+/* Orbe primary (bleu) — haut-droite */
 .bg-glow::before {
-  top: -10%;
-  right: -5%;
-  width: 500px;
-  height: 500px;
-  background: var(--color-primary);
-  opacity: 0.03;
+  top: -12%;
+  right: -8%;
+  width: 620px;
+  height: 620px;
+  background: radial-gradient(circle at 30% 30%, var(--color-primary), transparent 70%);
+  opacity: 0.18;
+  animation: drift-1 24s ease-in-out infinite alternate;
 }
+
+/* Orbe secondary (jaune) — bas-gauche */
 .bg-glow::after {
-  bottom: -10%;
-  left: 20%;
-  width: 600px;
-  height: 600px;
-  background: var(--color-secondary);
-  opacity: 0.02;
-  filter: blur(150px);
+  bottom: -15%;
+  left: 12%;
+  width: 720px;
+  height: 720px;
+  background: radial-gradient(circle at 60% 50%, var(--color-secondary), transparent 70%);
+  opacity: 0.10;
+  animation: drift-2 30s ease-in-out infinite alternate;
+}
+
+/* Orbe tertiary (rose-violet via tertiary palette) — milieu droit */
+.bg-glow > .orb {
+  top: 35%;
+  right: 22%;
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle at 50% 50%, #bb9af7, transparent 70%);
+  opacity: 0.08;
+  animation: drift-3 36s ease-in-out infinite alternate;
+}
+
+@keyframes drift-1 {
+  0%   { transform: translate(0, 0)        scale(1); }
+  100% { transform: translate(-60px, 40px) scale(1.06); }
+}
+@keyframes drift-2 {
+  0%   { transform: translate(0, 0)       scale(1); }
+  100% { transform: translate(50px, -60px) scale(1.08); }
+}
+@keyframes drift-3 {
+  0%   { transform: translate(0, 0)       scale(1); }
+  100% { transform: translate(-40px, 70px) scale(0.95); }
+}
+
+/* Désactive les animations pour les utilisateurs sensibles au mouvement */
+@media (prefers-reduced-motion: reduce) {
+  .bg-glow::before,
+  .bg-glow::after,
+  .bg-glow > .orb { animation: none; }
+}
+
+/* ============================================================
+   Polaris — Cartes en frosted glass
+
+   Utilisable via la classe `glass-card`. Cumule un fond translucide,
+   un blur subtil derrière, une bordure lumineuse, et un effet de
+   profondeur via inset shadow.
+   ============================================================ */
+.glass-card {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.04),
+    rgba(255, 255, 255, 0.015)
+  );
+  backdrop-filter: blur(16px) saturate(120%);
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 10px 40px rgba(0, 0, 0, 0.25);
+}
+
+.glass-card-strong {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.07),
+    rgba(255, 255, 255, 0.025)
+  );
+  backdrop-filter: blur(24px) saturate(140%);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.10),
+    0 20px 60px rgba(0, 0, 0, 0.30);
 }
 
 /* ============================================================

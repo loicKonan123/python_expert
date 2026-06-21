@@ -34,7 +34,7 @@ async def lifespan(app: FastAPI):
     setup_logging(settings.log_level)
 
     logger.info("=" * 60)
-    logger.info("Démarrage du backend Python Expert")
+    logger.info("Démarrage du backend Polaris")
     logger.info("=" * 60)
     logger.info("Paramètres :")
     logger.info("  llm_provider       = %s", settings.llm_provider)
@@ -74,7 +74,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Python Expert API",
+    title="Polaris API",
     description="Tuteur Python RAG local — backend FastAPI",
     version="0.2.0",
     lifespan=lifespan,
@@ -140,7 +140,7 @@ app.include_router(run.router)
 def root() -> dict:
     """Page racine — vérification rapide que le serveur tourne."""
     return {
-        "name": "Python Expert API",
+        "name": "Polaris API",
         "version": "0.2.0",
         "docs": "/docs",
         "endpoints": {

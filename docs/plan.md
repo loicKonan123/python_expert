@@ -185,8 +185,85 @@ Les 7 traits ci-dessous sont **rares ou inexistants** ailleurs (ChatGPT, Copilot
 - [x] **Vitest** indexé (218 fichiers .md depuis `vitest-dev/vitest/docs`)
 - [x] Frontend : 6 nouveaux items dans `Corpus` type + `CORPUS_META` + `CorpusFilter`
 - [x] Couleurs de marque dédiées (Pytest cyan, HTTPX bleu Nord, SQLAlchemy rouge, Zod indigo, TanStack rouge React, Vitest jaune)
-- [x] Réindexation complète : 20 053 → ~25 500 chunks
+- [x] Réindexation complète : 20 053 → 28 367 chunks
 - [x] Note globale passe de ⭐⭐⭐⭐ à **⭐⭐⭐⭐½**
+
+### Phase 8 — Branding & landing page ✅
+**Direction** : transformer le proto "Python Expert" en produit visuellement
+abouti, prêt à être montré. Moins encombré, plus de personnalité, accessible.
+
+**Nom verrouillé** : **Polaris** · **Direction design** : **B — Glass + gradient**
+
+#### 8.1 Nettoyage UI immédiat
+- [x] Cacher le widget tokens/coût dans le TopBar (data restent dispo via `/api/usage`)
+- [x] Réduire le statut "Backend connecté" à une simple pastille colorée + tooltip
+- [x] Retirer le polling `checkUsage` (économie de requêtes)
+- [x] Audit général des labels verbeux
+
+#### 8.2 Renommage du produit → Polaris
+- [x] `<title>`, metadata, root API, backend log, README rebrandés
+- [x] Wordmark "Polaris" en Geist semi-bold avec logo intégré dans TopBar + landing
+- [ ] Renommer le repo GitHub (optionnel, à faire à la main)
+
+#### 8.3 Identité visuelle (SVG de marque)
+- [x] Mark abstrait : étoile à 8 branches (4 cardinales + 4 diagonales) avec cœur radial
+- [x] Favicon `app/icon.svg` avec fond gradient navy
+- [x] Animation `polaris-twinkle` au hover (rotate + drop-shadow, respecte reduced-motion)
+- [ ] OG image (à générer plus tard)
+
+#### 8.4 Mode light
+- [x] Palette light définie via `[data-theme="light"]` sur `<html>`
+- [x] `ThemeToggle` cyclique (dark → light → system) dans le TopBar
+- [x] Persistance `localStorage["polaris-theme"]` + détection `prefers-color-scheme`
+- [x] Script anti-FOUC injecté dans `<head>` avant le premier paint
+- [x] Adaptation Monaco (`vs` / `vs-dark`) via hook `useTheme()`
+- [x] Glass cards inversées en light (fond blanc translucide au lieu de noir)
+
+#### 8.5 Landing page publique
+- [x] Nouvelle route `/` (landing) — app déplacée vers `/app`
+- [x] Hero : baseline "Le tuteur dev qui ne ment pas." + gradient sur l'accroche
+- [x] Bandeau des 13 corpus indexés avec pastilles couleurs officielles
+- [x] Section USP (3 cartes : sourcé, exécuté, hub multi-corpus)
+- [x] CTA final + footer
+- [ ] Demo interactive (chat pré-rempli) — backlog post-Phase 8
+
+#### 8.6 Design system modernisé (Glass + Gradient)
+- [x] Mesh gradient background : 3 orbes (primary/secondary/tertiary) qui dérivent
+- [x] Classes `.glass-card` + `.glass-card-strong` (frosted glass + bordure + inset shadow)
+- [x] Application aux bulles bot/user, input, TopBar, Sidebar
+- [x] Send button avec gradient `primary → #3776ab` + glow shadow
+- [x] Respect `prefers-reduced-motion` sur toutes les animations
+
+---
+
+## Naming — 5 candidats à valider
+
+Critères : court (≤ 8 lettres), prononçable EN + FR, évoque savoir / fiabilité /
+source, mémorisable, domaine probablement disponible.
+
+| Nom | Origine / sens | Tagline possible | Vibes |
+|---|---|---|---|
+| **Polaris** | Étoile polaire (l'étoile qui guide) | *"Code answers, sourced."* | Sophistiqué, classique, fiable |
+| **Sourced** | Décrit littéralement l'USP | *"Every answer, sourced."* | Direct, anglo-saxon, SEO friendly |
+| **Codex** | Livre antique de connaissance | *"Your code's living manual."* | Fort, mémorisable, risque collision OpenAI Codex |
+| **Veritas** | Latin « vérité » | *"The honest tutor."* | Sérieux, philosophique, un peu prétentieux |
+| **Doxa** | Grec « savoir / opinion » | *"Where docs become wisdom."* | Court, moderne, mystérieux, brandable |
+
+**Recommandation perso** : **Polaris** — sophistiqué et descriptif (boussole/guide),
+zéro collision connue, easy à pitcher *"Polaris, votre étoile pour naviguer dans la doc."*
+
+---
+
+## Direction design — 3 moods au choix
+
+| Mood | Inspiration | Vibe émotionnelle |
+|---|---|---|
+| **A. Editorial sobre** | Linear, Vercel, Stripe Docs | Premium, calme, dense en infos. Beaucoup de blanc, accents subtils, typographie majestueuse. Public : devs seniors, contenu first. |
+| **B. Glass + gradient** | Apple Vision Pro UI, Arc Browser | Moderne, frosted glass, gradients vivants, profondeur. Public : audience plus large, effet "wow". |
+| **C. Brutalist soft** | Notion, Linear early days, Raycast | Bordures nettes, monochromes contrastés, micro-éléments décoratifs. Public : devs créatifs, style affirmé. |
+
+**Recommandation perso** : **B** (Glass + gradient) → moderne sans être démodable
+dans 6 mois, marche bien en light ET dark, valorise le côté "produit fini".
 
 ---
 

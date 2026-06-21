@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Polaris AI | Le tuteur dev qui ne ment pas</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;family=JetBrains+Mono:wght@450;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed-dim": "#00dbe7",
+                    "on-surface-variant": "#b9cacb",
+                    "on-tertiary-container": "#5a5f71",
+                    "surface-variant": "#273647",
+                    "outline-variant": "#3a494b",
+                    "on-surface": "#d4e4fa",
+                    "on-secondary-container": "#c4abff",
+                    "surface-container-lowest": "#010f1f",
+                    "surface-container-low": "#0d1c2d",
+                    "surface-bright": "#2c3a4c",
+                    "on-secondary-fixed-variant": "#5516be",
+                    "tertiary-container": "#d6daf0",
+                    "surface": "#051424",
+                    "on-error-container": "#ffdad6",
+                    "surface-container": "#122131",
+                    "secondary": "#d0bcff",
+                    "on-primary-fixed-variant": "#004f54",
+                    "tertiary": "#f8f6ff",
+                    "inverse-on-surface": "#233143",
+                    "surface-container-highest": "#273647",
+                    "on-tertiary-fixed": "#161b2b",
+                    "surface-dim": "#051424",
+                    "tertiary-fixed-dim": "#c2c6db",
+                    "secondary-container": "#571bc1",
+                    "on-primary-container": "#006a71",
+                    "primary-fixed": "#74f5ff",
+                    "secondary-fixed": "#e9ddff",
+                    "on-tertiary": "#2b3040",
+                    "primary": "#e1fdff",
+                    "background": "#051424",
+                    "on-primary": "#00363a",
+                    "on-error": "#690005",
+                    "on-secondary-fixed": "#23005c",
+                    "on-tertiary-fixed-variant": "#414658",
+                    "surface-tint": "#00dbe7",
+                    "outline": "#849495",
+                    "inverse-primary": "#00696f",
+                    "tertiary-fixed": "#dee1f7",
+                    "error": "#ffb4ab",
+                    "surface-container-high": "#1c2b3c",
+                    "error-container": "#93000a",
+                    "on-secondary": "#3c0091",
+                    "primary-container": "#00f2ff",
+                    "secondary-fixed-dim": "#d0bcff",
+                    "inverse-surface": "#d4e4fa",
+                    "on-primary-fixed": "#002022",
+                    "on-background": "#d4e4fa"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "margin-mobile": "16px",
+                    "margin-desktop": "40px",
+                    "base": "8px",
+                    "gutter": "24px",
+                    "container-max": "1440px"
+            },
+            "fontFamily": {
+                    "code-sm": ["JetBrains Mono"],
+                    "display-lg": ["Inter"],
+                    "body-md": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "label-caps": ["JetBrains Mono"],
+                    "headline-lg-mobile": ["Inter"]
+            },
+            "fontSize": {
+                    "code-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "450"}],
+                    "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "800"}],
+                    "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.1em", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            color: #d4e4fa;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(39, 54, 71, 0.4);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .hero-gradient {
+            background: linear-gradient(135deg, #00dbe7 0%, #d0bcff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .btn-glow {
+            box-shadow: 0 0 20px rgba(0, 219, 231, 0.3);
+            transition: all 0.3s ease;
+        }
+        .btn-glow:hover {
+            box-shadow: 0 0 40px rgba(0, 219, 231, 0.6);
+            transform: translateY(-2px);
+        }
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+        .animate-pulse-glow {
+            animation: pulse-glow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        .radial-bg {
+            background: radial-gradient(circle at 50% 50%, rgba(0, 219, 231, 0.08) 0%, transparent 70%);
+        }
+        .line-clamp-code {
+            display: -webkit-box;
+            -webkit-line-clamp: 8;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="font-body-md selection:bg-primary-fixed-dim/30">
+<!-- TopNavBar -->
+<nav class="fixed top-0 right-0 w-full md:w-[calc(100%-280px)] h-16 z-50 flex items-center justify-between px-gutter bg-surface/40 backdrop-blur-xl border-b border-outline-variant/30">
+<div class="flex items-center gap-base">
+<span class="material-symbols-outlined text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">terminal</span>
+<span class="font-headline-lg text-headline-lg font-bold text-primary-fixed-dim">Polaris AI</span>
+</div>
+<div class="hidden md:flex items-center gap-gutter font-label-caps text-label-caps text-on-surface-variant">
+<a class="hover:text-primary transition-colors text-primary-fixed-dim border-b border-primary-fixed-dim pb-1" href="#">Docs</a>
+<a class="hover:text-primary transition-colors" href="#">Sandbox</a>
+<a class="hover:text-primary transition-colors" href="#">Forum</a>
+</div>
+<div class="flex items-center gap-gutter">
+<div class="hidden sm:flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors">account_tree</span>
+</div>
+<button class="bg-primary-container/20 text-primary-fixed-dim border border-primary-fixed-dim px-4 py-1.5 rounded-lg font-label-caps text-label-caps hover:bg-primary-fixed-dim hover:text-on-primary transition-all active:scale-95">
+                Deploy
+            </button>
+</div>
+</nav>
+<!-- SideNavBar (Desktop Only) -->
+<aside class="fixed left-0 top-0 h-full w-[280px] hidden md:flex flex-col py-base bg-surface/80 backdrop-blur-3xl border-r border-outline-variant/30 shadow-xl z-50">
+<div class="px-gutter py-8 mb-10">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden bg-primary-container/20 border border-primary-fixed-dim/30 flex items-center justify-center">
+<img class="w-full h-full object-cover" data-alt="A sophisticated digital avatar of a futuristic AI mentor, glowing with soft cyan light and intricate circuit patterns on a dark navy background, representing advanced artificial intelligence." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDo0GgLKcM-BKAFDiGKXBosX6K9Dd-vGbNvd11paRCxJVIGyRrQHtatY1ZEinXg96tn7smiMNSr5rqnWfqLaESA53HpCngfBy4FR0pYTt1CB2Q3eW66lN9_ssEN5Tj9wPbKE7jsCxVsZIhZFb_b89wx4g_aUhdQKa4vj9UpA3JWXjPKU9AqH-Z5EeiOvQd86uVfNRW_ic0OoZ7T8sQ3ZXAAZcSgevTMkZA_Co_1qCNv8uy2VQ9CpHrDZZczHop24yeX5vYD4xTlcNrw"/>
+</div>
+<div>
+<h2 class="font-display-lg text-display-lg font-extrabold text-primary-fixed-dim tracking-tighter text-[20px] leading-tight">Polaris AI</h2>
+<p class="text-[12px] text-on-surface-variant font-label-caps opacity-70">Expert Tutor</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-primary-fixed-dim bg-primary-container/10 border-r-2 border-primary-fixed-dim transition-all" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-body-md text-body-md">Curriculum</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all active:scale-95" href="#">
+<span class="material-symbols-outlined">terminal</span>
+<span class="font-body-md text-body-md">Workbench</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all active:scale-95" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-body-md text-body-md">Library</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all active:scale-95" href="#">
+<span class="material-symbols-outlined">bug_report</span>
+<span class="font-body-md text-body-md">Debug</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all active:scale-95" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-md text-body-md">Settings</span>
+</a>
+</nav>
+<div class="px-4 py-8 border-t border-outline-variant/20">
+<button class="w-full bg-gradient-to-r from-primary-container to-secondary-container text-on-primary py-3 rounded-xl font-bold flex items-center justify-center gap-2 mb-6 btn-glow">
+<span class="material-symbols-outlined">add</span>
+                New Session
+            </button>
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:text-on-surface transition-colors font-body-md text-body-md" href="#">
+<span class="material-symbols-outlined">help</span>
+                    Help
+                </a>
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:text-error transition-colors font-body-md text-body-md" href="#">
+<span class="material-symbols-outlined">logout</span>
+                    Logout
+                </a>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:ml-[280px] pt-16 min-h-screen relative">
+<!-- Hero Background Animation -->
+<div class="absolute inset-0 pointer-events-none z-0">
+
+<div class="absolute inset-0 radial-bg"></div>
+</div>
+<div class="relative z-10 max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-20">
+<!-- Hero Section -->
+<div class="flex flex-col items-center text-center space-y-gutter mb-32">
+<div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-surface-variant/50 border border-outline-variant/30 text-primary-fixed-dim font-label-caps text-[11px] uppercase tracking-widest mb-6">
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse"></span>
+                    Version 2.0 Engine Live
+                </div>
+<h1 class="font-display-lg text-[56px] md:text-[96px] font-extrabold leading-none tracking-tightest hero-gradient max-w-4xl">
+                    Le tuteur dev qui ne ment pas.
+                </h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl mx-auto opacity-80 leading-relaxed">
+                    Polaris AI indexe l'intégralité du corpus open-source pour vous offrir des réponses sourcées, du code exécutable en temps réel et une expertise technique sans hallucination.
+                </p>
+<div class="flex flex-col sm:flex-row items-center gap-6 pt-10">
+<button class="px-10 py-5 bg-primary-fixed-dim text-on-primary-fixed font-bold rounded-xl text-lg flex items-center gap-3 btn-glow relative group">
+<span class="absolute -inset-1 bg-primary-fixed-dim opacity-20 blur-xl animate-pulse-glow rounded-xl"></span>
+                        Commencer maintenant
+                        <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+<button class="px-10 py-5 glass-panel rounded-xl font-bold flex items-center gap-3 hover:bg-surface-variant transition-colors border border-outline-variant/50">
+                        Voir la démo
+                    </button>
+</div>
+</div>
+<!-- Bento Grid Features -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<!-- Feature 1: Sourced Answers -->
+<div class="md:col-span-7 glass-panel rounded-3xl p-gutter overflow-hidden relative group">
+<div class="absolute top-0 right-0 w-1/2 h-full opacity-10 pointer-events-none group-hover:scale-110 transition-transform duration-700">
+<img class="w-full h-full object-cover" data-alt="A macro photography shot of an old library shelf where books are replaced by glowing data crystals. The lighting is dark and moody with cyan fiber optic highlights representing the connection between classical knowledge and modern AI indexing." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgke09FXhS-CXUfD6CjlSgdhuXfwQkF7KVPyRRglXchhOK3iRRUvyngsApoft5L9WSI9nW5biR00VXEwWdh0SNEMfYSp2TM8jgDCJwoFxTTqhhlu2YeXNWPgX6E9nXdZAxW7EZbJ-fPg0GlSCOm_5YrS4UIwQzkWFUm2Kp30tp5CzDWT-Jq2DHwGOVKTANqpuveHKtrfGPFDTkgoAR32EG7qBYWCtZ1LGOIbPlCaSY8nw4Im59J1DiBMd5D71W2RCk5UbckLA46Oqx"/>
+</div>
+<div class="relative z-10">
+<div class="w-12 h-12 bg-primary-container/10 border border-primary-fixed-dim/30 rounded-xl flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<h3 class="font-headline-lg text-headline-lg text-primary mb-4">Sourced, never invented</h3>
+<p class="text-on-surface-variant leading-relaxed max-w-md">
+                            Chaque réponse est accompagnée de liens directs vers la documentation officielle, les threads GitHub et les archives de code. Finies les hallucinations.
+                        </p>
+<div class="mt-8 space-y-3">
+<div class="flex items-center gap-4 bg-surface-container-low/50 p-3 rounded-lg border border-outline-variant/20">
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">MDN Web Docs</span>
+<div class="h-1 flex-1 bg-outline-variant/20 rounded-full"><div class="h-full w-4/5 bg-primary-fixed-dim rounded-full"></div></div>
+</div>
+<div class="flex items-center gap-4 bg-surface-container-low/50 p-3 rounded-lg border border-outline-variant/20">
+<span class="font-code-sm text-code-sm text-secondary">React.dev</span>
+<div class="h-1 flex-1 bg-outline-variant/20 rounded-full"><div class="h-full w-full bg-secondary rounded-full"></div></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Feature 2: Live Execution -->
+<div class="md:col-span-5 glass-panel rounded-3xl p-gutter bg-gradient-to-br from-surface-variant/40 to-surface-container-lowest/80 relative">
+<div class="w-12 h-12 bg-secondary-container/10 border border-secondary/30 rounded-xl flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+</div>
+<h3 class="font-headline-lg text-headline-lg text-secondary mb-4">Executed live</h3>
+<p class="text-on-surface-variant leading-relaxed mb-8">
+                        Testez le code suggéré instantanément dans notre sandbox intégrée. Plus de copier-coller pour vérifier.
+                    </p>
+<div class="bg-surface-container-lowest rounded-xl p-4 font-code-sm text-code-sm border border-outline-variant/30 shadow-2xl">
+<div class="flex items-center justify-between mb-4 pb-2 border-b border-outline-variant/10">
+<span class="text-on-surface-variant">sandbox.js</span>
+<span class="text-primary-fixed-dim">Running...</span>
+</div>
+<code class="text-primary-fixed-dim block mb-2">const polaris = await connect();</code>
+<code class="text-secondary block mb-2">polaris.on('truth', (data) =&gt; {</code>
+<code class="text-on-surface block pl-4">console.log("No more lies:", data);</code>
+<code class="text-secondary block">});</code>
+</div>
+</div>
+<!-- Feature 3: Massive Corpus -->
+<div class="md:col-span-12 glass-panel rounded-3xl p-gutter flex flex-col md:flex-row items-center gap-gutter relative overflow-hidden">
+<div class="md:w-1/2">
+<div class="w-12 h-12 bg-tertiary-container/10 border border-tertiary-fixed-dim/30 rounded-xl flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-tertiary-fixed-dim" style="font-variation-settings: 'FILL' 1;">database</span>
+</div>
+<h3 class="font-headline-lg text-headline-lg text-white mb-4">Corpus Indexé de 500To</h3>
+<p class="text-on-surface-variant leading-relaxed mb-6">
+                            Nous avons indexé le plus grand corpus de connaissances en ingénierie logicielle jamais assemblé. Des archives de l'IETF aux commits d'hier soir.
+                        </p>
+<div class="flex flex-wrap gap-3">
+<span class="px-3 py-1 rounded bg-surface-variant/50 text-[10px] font-label-caps border border-outline-variant/30">C++ CORE</span>
+<span class="px-3 py-1 rounded bg-surface-variant/50 text-[10px] font-label-caps border border-outline-variant/30">RUST STDLIB</span>
+<span class="px-3 py-1 rounded bg-surface-variant/50 text-[10px] font-label-caps border border-outline-variant/30">KUBERNETES</span>
+<span class="px-3 py-1 rounded bg-surface-variant/50 text-[10px] font-label-caps border border-outline-variant/30">LINUX KERNEL</span>
+</div>
+</div>
+<div class="md:w-1/2 h-64 rounded-2xl overflow-hidden relative">
+<img class="w-full h-full object-cover" data-alt="A cinematic 3D rendering of complex data structures forming a massive floating sphere in a dark void. Glowing neural pathways in teal and violet pulse with energy, representing the vast indexed corpus of technical knowledge." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCy0OOv3a0x0rj0c-jpafPLUdBlsr0zroZIkz0fyLI6JCURKYk22OdF7DAWLcgQ60Bu7F9VIzlG0A6twS3slX8ommtzIyeEdBhJckq3VDOhofBnM2rnl-tOf_LqRLkgypk2Cp1qdzLUrCNxdJJ9MyTlOGY_ciqG9UGve9_Siyso5F5SdnR1fVJscAuGcP_2Qoe3NHhLuic0lmNA4_fdJlbxkIZrtCHdlZNUfzwzUR9k46DLIPB2Ea5-R9T1i66X8NX1ueivsHSMgVOe"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface to-transparent opacity-60"></div>
+</div>
+</div>
+</div>
+<!-- Footer Section -->
+<footer class="mt-32 pt-16 border-t border-outline-variant/20 flex flex-col md:flex-row justify-between items-center gap-gutter pb-10">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">terminal</span>
+<span class="font-headline-lg text-headline-lg font-bold text-primary-fixed-dim">Polaris</span>
+</div>
+<div class="flex gap-gutter text-on-surface-variant font-label-caps text-label-caps">
+<a class="hover:text-primary-fixed-dim transition-colors" href="#">Privacy</a>
+<a class="hover:text-primary-fixed-dim transition-colors" href="#">Terms</a>
+<a class="hover:text-primary-fixed-dim transition-colors" href="#">Security</a>
+</div>
+<div class="text-on-surface-variant/50 font-label-caps text-[10px]">
+                    © 2024 Polaris Engineering Systems
+                </div>
+</footer>
+</div>
+</main>
+<!-- FAB (Mobile Only) -->
+<div class="md:hidden fixed bottom-8 right-8 z-[100]">
+<button class="w-16 h-16 rounded-full bg-primary-fixed-dim text-on-primary-fixed flex items-center justify-center shadow-2xl btn-glow animate-bounce">
+<span class="material-symbols-outlined text-[32px]">bolt</span>
+</button>
+</div>
+<script>
+        // Micro-interactions for glass panels
+        document.querySelectorAll('.glass-panel').forEach(panel => {
+            panel.addEventListener('mousemove', (e) => {
+                const rect = panel.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                panel.style.setProperty('--mouse-x', `${x}px`);
+                panel.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+
+        // Simple smooth scroll for nav links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body></html>

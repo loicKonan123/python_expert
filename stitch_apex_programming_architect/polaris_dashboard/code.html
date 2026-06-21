@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;family=JetBrains+Mono:wght@450;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        :root {
+            --glass-bg: rgba(5, 20, 36, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+        body {
+            background-color: #051424;
+            color: #d4e4fa;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+        }
+        .glow-cyan {
+            box-shadow: 0 0 20px rgba(0, 219, 231, 0.15);
+        }
+        .code-glow {
+            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.5);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #273647;
+            border-radius: 10px;
+        }
+        .curriculum-line {
+            position: absolute;
+            left: 27px;
+            top: 40px;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, #3a494b 0%, transparent 100%);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed-dim": "#00dbe7",
+                        "on-surface-variant": "#b9cacb",
+                        "on-tertiary-container": "#5a5f71",
+                        "surface-variant": "#273647",
+                        "outline-variant": "#3a494b",
+                        "on-surface": "#d4e4fa",
+                        "on-secondary-container": "#c4abff",
+                        "surface-container-lowest": "#010f1f",
+                        "surface-container-low": "#0d1c2d",
+                        "surface-bright": "#2c3a4c",
+                        "on-secondary-fixed-variant": "#5516be",
+                        "tertiary-container": "#d6daf0",
+                        "surface": "#051424",
+                        "on-error-container": "#ffdad6",
+                        "surface-container": "#122131",
+                        "secondary": "#d0bcff",
+                        "on-primary-fixed-variant": "#004f54",
+                        "tertiary": "#f8f6ff",
+                        "inverse-on-surface": "#233143",
+                        "surface-container-highest": "#273647",
+                        "on-tertiary-fixed": "#161b2b",
+                        "surface-dim": "#051424",
+                        "tertiary-fixed-dim": "#c2c6db",
+                        "secondary-container": "#571bc1",
+                        "on-primary-container": "#006a71",
+                        "primary-fixed": "#74f5ff",
+                        "secondary-fixed": "#e9ddff",
+                        "on-tertiary": "#2b3040",
+                        "primary": "#e1fdff",
+                        "background": "#051424",
+                        "on-primary": "#00363a",
+                        "on-error": "#690005",
+                        "on-secondary-fixed": "#23005c",
+                        "on-tertiary-fixed-variant": "#414658",
+                        "surface-tint": "#00dbe7",
+                        "outline": "#849495",
+                        "inverse-primary": "#00696f",
+                        "tertiary-fixed": "#dee1f7",
+                        "error": "#ffb4ab",
+                        "surface-container-high": "#1c2b3c",
+                        "error-container": "#93000a",
+                        "on-secondary": "#3c0091",
+                        "primary-container": "#00f2ff",
+                        "secondary-fixed-dim": "#d0bcff",
+                        "inverse-surface": "#d4e4fa",
+                        "on-primary-fixed": "#002022",
+                        "on-background": "#d4e4fa"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "margin-desktop": "40px",
+                        "base": "8px",
+                        "gutter": "24px",
+                        "container-max": "1440px"
+                    },
+                    "fontFamily": {
+                        "code-sm": ["JetBrains Mono"],
+                        "display-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-caps": ["JetBrains Mono"]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="dark h-screen flex">
+<!-- Sidebar: SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-[280px] flex flex-col py-base bg-surface/80 dark:bg-surface/80 backdrop-blur-3xl border-r border-outline-variant/30 shadow-xl z-50">
+<div class="px-gutter mb-10">
+<div class="flex items-center gap-3 mb-2">
+<div class="w-10 h-10 rounded-lg bg-gradient-to-br from-primary-fixed-dim to-secondary-container flex items-center justify-center glow-cyan">
+<span class="material-symbols-outlined text-on-primary-fixed" style="font-variation-settings: 'FILL' 1;">terminal</span>
+</div>
+<div>
+<h1 class="font-display-lg text-[24px] font-extrabold text-primary-fixed-dim tracking-tighter">Polaris AI</h1>
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-label-caps">Expert Tutor</p>
+</div>
+</div>
+<div class="text-[12px] text-on-surface-variant font-body-md italic mt-1 opacity-70">
+                "Le tuteur dev qui ne ment pas."
+            </div>
+</div>
+<nav class="flex-1 px-4 overflow-y-auto relative">
+<div class="curriculum-line"></div>
+<div class="space-y-6 relative">
+<!-- Curriculum Sections -->
+<div>
+<div class="flex items-center gap-3 px-3 py-2 text-primary-fixed-dim bg-primary-container/10 border-r-2 border-primary-fixed-dim transition-all duration-200">
+<span class="material-symbols-outlined text-[20px]">menu_book</span>
+<span class="font-body-md text-body-md font-semibold">Curriculum</span>
+</div>
+<div class="ml-9 mt-4 space-y-4">
+<div class="relative flex items-start gap-3 group">
+<div class="w-2 h-2 rounded-full bg-primary-fixed-dim mt-1.5 shadow-[0_0_8px_#00dbe7]"></div>
+<div class="flex-1">
+<p class="text-sm font-medium text-on-surface">Fondamentaux FastAPI</p>
+<div class="w-full h-1 bg-surface-variant rounded-full mt-2 overflow-hidden">
+<div class="w-[85%] h-full bg-primary-fixed-dim"></div>
+</div>
+</div>
+</div>
+<div class="relative flex items-start gap-3 opacity-60 hover:opacity-100 transition-opacity">
+<div class="w-2 h-2 rounded-full bg-outline mt-1.5"></div>
+<p class="text-sm text-on-surface-variant">Auth &amp; Security Patterns</p>
+</div>
+<div class="relative flex items-start gap-3 opacity-60 hover:opacity-100 transition-opacity">
+<div class="w-2 h-2 rounded-full bg-outline mt-1.5"></div>
+<p class="text-sm text-on-surface-variant">Deployment Pipelines</p>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all duration-200 cursor-pointer active:scale-95">
+<span class="material-symbols-outlined text-[20px]">terminal</span>
+<span class="font-body-md text-body-md">Workbench</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all duration-200 cursor-pointer active:scale-95">
+<span class="material-symbols-outlined text-[20px]">inventory_2</span>
+<span class="font-body-md text-body-md">Library</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all duration-200 cursor-pointer active:scale-95">
+<span class="material-symbols-outlined text-[20px]">bug_report</span>
+<span class="font-body-md text-body-md">Debug</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all duration-200 cursor-pointer active:scale-95">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span class="font-body-md text-body-md">Settings</span>
+</div>
+</div>
+</nav>
+<div class="px-4 py-4 mt-auto border-t border-outline-variant/20">
+<button class="w-full py-3 rounded-xl bg-gradient-to-r from-secondary-container to-primary-container/40 text-primary font-bold text-sm hover:brightness-110 transition-all flex items-center justify-center gap-2 mb-4">
+<span class="material-symbols-outlined text-sm">add</span>
+                New Session
+            </button>
+<div class="space-y-1">
+<div class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer text-sm">
+<span class="material-symbols-outlined text-[18px]">help</span>
+<span>Help</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-error transition-colors cursor-pointer text-sm">
+<span class="material-symbols-outlined text-[18px]">logout</span>
+<span>Logout</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- Top Navigation: TopNavBar -->
+<header class="fixed top-0 right-0 w-[calc(100%-280px)] h-16 flex items-center justify-between px-gutter bg-surface/40 dark:bg-surface/40 backdrop-blur-xl border-b border-outline-variant/30 z-40">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-4 bg-surface-container-low px-4 py-1.5 rounded-full border border-outline-variant/30 focus-within:border-primary-fixed-dim transition-all w-96">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-full font-body-md text-on-surface" placeholder="Rechercher dans la doc ou vos sessions..." type="text"/>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors" href="#">Docs</a>
+<a class="font-label-caps text-label-caps text-primary-fixed-dim border-b border-primary-fixed-dim" href="#">Sandbox</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors" href="#">Forum</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 rounded-lg transition-all">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 rounded-lg transition-all">
+<span class="material-symbols-outlined">account_tree</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 rounded-lg transition-all">
+<span class="material-symbols-outlined">memory</span>
+</button>
+</div>
+<div class="h-8 w-[1px] bg-outline-variant/30 mx-2"></div>
+<button class="px-6 py-2 bg-primary-fixed-dim text-on-primary-fixed font-bold rounded-lg text-sm active:scale-95 transition-transform">
+                Deploy
+            </button>
+<div class="w-9 h-9 rounded-full overflow-hidden border-2 border-primary-fixed-dim/30">
+<img class="w-full h-full object-cover" data-alt="A professional high-fidelity headshot of a modern software engineer with sharp lighting and a dark background, reflecting the elite technologist persona of the Polaris AI platform. The portrait is crisp, with subtle blue rim lighting that matches the primary cyan color palette of the UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQSPz8ZaNQolvOIZJm3JpdiFpF7q79rpaS3D3F3lEe0Pry75Gqaa-BdX5dVehyTe4QGzm6VYkraPEPI3RqjxT7WufwJ5KBaH5ut6uE3YDbqjLuWI74Z1kyQJ_c3eAZ9ocqmcWcb7TfbNYavPHLtcfW3l6081U8y5vgqGirxteF2iOa_cGBG5NogpFACmip9m1PsmAKXcG3FK_eO0o8xNvXxgDkGvRyx1phRmRhiAeyma2a1EhjuBJ_uFW1_lMzmW_5hCHpcyjYCF44"/>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="ml-[280px] mt-16 flex-1 h-[calc(100vh-64px)] relative overflow-hidden flex flex-col">
+<!-- Background Decoration -->
+<div class="absolute inset-0 z-0 opacity-20 pointer-events-none">
+
+</div>
+<!-- Chat Interaction Area -->
+<section class="flex-1 relative z-10 overflow-y-auto px-12 py-10 flex flex-col gap-8 max-w-5xl mx-auto w-full">
+<!-- AI Message -->
+<div class="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary-fixed-dim/20 border border-primary-fixed-dim/40 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">Polaris • Now</span>
+</div>
+<div class="glass-panel rounded-2xl p-6 glow-cyan">
+<p class="font-body-md text-body-md leading-relaxed mb-6">
+                        Certainement. Pour implémenter une validation asynchrone avec <span class="text-secondary font-code-sm">FastAPI</span> et <span class="text-secondary font-code-sm">Pydantic</span>, vous devriez utiliser des décorateurs de validation. Voici un exemple propre pour vérifier l'unicité d'un email dans votre base de données :
+                    </p>
+<!-- Code Block -->
+<div class="rounded-xl overflow-hidden border border-outline-variant/30 bg-[#05070A] shadow-2xl">
+<div class="flex items-center justify-between px-4 py-2 bg-surface-container-highest/50 border-b border-outline-variant/20">
+<span class="font-label-caps text-xs text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">description</span> main.py
+                            </span>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-primary-fixed-dim transition-colors flex items-center gap-1 text-[10px] font-label-caps">
+<span class="material-symbols-outlined text-sm">content_copy</span> COPIER
+                                </button>
+<button class="px-3 py-1 bg-primary-fixed-dim/10 text-primary-fixed-dim border border-primary-fixed-dim/20 rounded hover:bg-primary-fixed-dim/20 transition-all flex items-center gap-1 text-[10px] font-label-caps font-bold">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">play_arrow</span> RUN
+                                </button>
+</div>
+</div>
+<div class="p-6 font-code-sm text-code-sm leading-relaxed overflow-x-auto">
+<pre class="text-[#f8f6ff]"><span class="text-[#00dbe7]">from</span> fastapi <span class="text-[#00dbe7]">import</span> HTTPException, status
+<span class="text-[#00dbe7]">from</span> pydantic <span class="text-[#00dbe7]">import</span> BaseModel, EmailStr, validator
+
+<span class="text-[#c4abff]">class</span> <span class="text-primary-fixed-dim">UserCreate</span>(BaseModel):
+    email: EmailStr
+    password: <span class="text-[#00dbe7]">str</span>
+
+    <span class="text-[#571bc1]">@validator</span>(<span class="text-[#d0bcff]">"email"</span>)
+    <span class="text-[#00dbe7]">async def</span> <span class="text-[#74f5ff]">validate_unique_email</span>(cls, v):
+        <span class="text-[#b9cacb]"># Simulation d'un appel DB asynchrone</span>
+        user_exists = <span class="text-[#00dbe7]">await</span> db.users.find_one({<span class="text-[#d0bcff]">"email"</span>: v})
+        <span class="text-[#00dbe7]">if</span> user_exists:
+            <span class="text-[#00dbe7]">raise</span> HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=<span class="text-[#d0bcff]">"Email déjà enregistré"</span>
+            )
+        <span class="text-[#00dbe7]">return</span> v</pre>
+</div>
+</div>
+<!-- Documentation Sources -->
+<div class="mt-8">
+<p class="font-label-caps text-[10px] text-on-surface-variant mb-3 tracking-widest">SOURCES RÉFÉRENCÉES</p>
+<div class="flex flex-wrap gap-2">
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary-container/20 border border-secondary-container/40 text-on-secondary-container text-xs font-medium cursor-pointer hover:bg-secondary-container/30 transition-all">
+<span class="material-symbols-outlined text-sm">link</span> FastAPI Docs: Middleware
+                            </div>
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary-container/10 border border-primary-container/30 text-primary-fixed-dim text-xs font-medium cursor-pointer hover:bg-primary-container/20 transition-all">
+<span class="material-symbols-outlined text-sm">link</span> Pydantic V2 Migration
+                            </div>
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-variant/40 border border-outline-variant/30 text-on-surface-variant text-xs font-medium cursor-pointer hover:bg-surface-variant/60 transition-all">
+<span class="material-symbols-outlined text-sm">menu_book</span> User Guide: Async Auth
+                            </div>
+</div>
+</div>
+</div>
+</div>
+<!-- User Message Placeholder (Empty state visual) -->
+<div class="h-24"></div>
+</section>
+<!-- Input Area: Floating Bar -->
+<div class="w-full max-w-5xl mx-auto px-12 pb-12 relative z-20">
+<div class="glass-panel rounded-2xl p-4 shadow-2xl glow-cyan">
+<!-- Tech Chips -->
+<div class="flex items-center gap-2 mb-4">
+<span class="text-[10px] font-label-caps text-on-surface-variant mr-2 opacity-50 uppercase tracking-tighter">Contexte actif:</span>
+<div class="px-3 py-1 rounded-full bg-primary-fixed-dim text-on-primary-fixed text-[10px] font-bold tracking-tight flex items-center gap-1">
+                        Python <span class="material-symbols-outlined text-[12px]">close</span>
+</div>
+<div class="px-3 py-1 rounded-full bg-surface-variant text-on-surface-variant text-[10px] font-bold tracking-tight flex items-center gap-1 hover:bg-surface-container-high cursor-pointer transition-colors">
+                        FastAPI <span class="material-symbols-outlined text-[12px]">close</span>
+</div>
+<div class="px-3 py-1 rounded-full bg-surface-variant text-on-surface-variant text-[10px] font-bold tracking-tight flex items-center gap-1 hover:bg-surface-container-high cursor-pointer transition-colors">
+                        Next.js <span class="material-symbols-outlined text-[12px]">add</span>
+</div>
+<button class="ml-auto flex items-center gap-1 text-[10px] font-label-caps text-primary-fixed-dim hover:underline">
+<span class="material-symbols-outlined text-sm">tune</span> PARAMÈTRES
+                    </button>
+</div>
+<div class="relative flex items-end gap-4">
+<div class="flex-1 relative">
+<textarea class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-4 pr-12 focus:ring-2 focus:ring-primary-fixed-dim focus:border-transparent transition-all text-on-surface font-body-md resize-none min-h-[56px] max-h-[200px]" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"' placeholder="Posez votre question à Polaris..." rows="1"></textarea>
+<div class="absolute right-3 bottom-3 flex items-center gap-2">
+<button class="p-2 text-on-surface-variant hover:text-primary-fixed-dim transition-colors">
+<span class="material-symbols-outlined">attach_file</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary-fixed-dim transition-colors">
+<span class="material-symbols-outlined">mic</span>
+</button>
+</div>
+</div>
+<button class="h-14 w-14 rounded-xl bg-gradient-to-br from-primary-fixed-dim to-secondary-container flex items-center justify-center text-on-primary-fixed shadow-lg hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">send</span>
+</button>
+</div>
+</div>
+<p class="text-center text-[10px] font-label-caps text-on-surface-variant mt-4 opacity-40 uppercase tracking-[0.2em]">
+                Polaris v4.2.0 • Propulsé par GPT-5-Turbo • Expertise confirmée
+            </p>
+</div>
+</main>
+<!-- Interactive Elements Scripts -->
+<script>
+        // Simple micro-interaction for sidebar tabs
+        document.querySelectorAll('nav > div > div').forEach(item => {
+            item.addEventListener('click', () => {
+                // In a real app, this would handle routing
+                console.log('Navigation clicked:', item.innerText);
+            });
+        });
+
+        // Code block run button feedback
+        const runBtn = document.querySelector('button:has(span:contains("RUN"))');
+        if(runBtn) {
+            runBtn.addEventListener('click', () => {
+                runBtn.innerHTML = '<span class="material-symbols-outlined animate-spin text-sm">sync</span> EXECUTING...';
+                setTimeout(() => {
+                    runBtn.innerHTML = '<span class="material-symbols-outlined text-sm" style="font-variation-settings: \'FILL\' 1;">check_circle</span> SUCCESS';
+                    setTimeout(() => {
+                        runBtn.innerHTML = '<span class="material-symbols-outlined text-sm" style="font-variation-settings: \'FILL\' 1;">play_arrow</span> RUN';
+                    }, 2000);
+                }, 1500);
+            });
+        }
+
+        // Custom selector for ":contains" since standard CSS doesn't support it
+        // and we are simulating the behavior for the demo's buttons
+        document.querySelectorAll('button').forEach(btn => {
+            if(btn.innerText.includes('RUN')) {
+                btn.addEventListener('click', () => {
+                    const original = btn.innerHTML;
+                    btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-sm">sync</span> RUNNING';
+                    setTimeout(() => { btn.innerHTML = original; }, 1500);
+                });
+            }
+        });
+    </script>
+</body></html>

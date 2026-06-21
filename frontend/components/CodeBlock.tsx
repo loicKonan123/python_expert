@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { MaterialIcon } from "./MaterialIcon";
 import { restartKernel, runPython, type RunResult } from "@/lib/api";
+import { useTheme } from "@/lib/useTheme";
 
 // Monaco est lourd (~3 MB) — chargement dynamique côté client uniquement.
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
@@ -46,6 +47,8 @@ export function CodeBlock({
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState<RunResult | null>(null);
   const [runError, setRunError] = useState<string | null>(null);
+  const theme = useTheme();
+  const monacoTheme = theme === "light" ? "vs" : "vs-dark";
 
   const langKey = normalizeLang(lang);
   const isRunnable = langKey === "python";
@@ -189,7 +192,7 @@ export function CodeBlock({
       <MonacoEditor
         value={code}
         language={langKey}
-        theme="vs-dark"
+        theme={monacoTheme}
         height={height}
         options={{
           readOnly: true,

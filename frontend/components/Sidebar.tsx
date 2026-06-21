@@ -7,12 +7,19 @@ import { MaterialIcon } from "./MaterialIcon";
 
 /** Couleurs et icônes par techno — sert aux séparateurs et accents. */
 const CORPUS_META: Record<Corpus, { label: string; color: string; icon: string }> = {
-  python:     { label: "Python",      color: "text-[#FFD43B]", icon: "terminal" },        // jaune Python
-  fastapi:    { label: "FastAPI",     color: "text-[#009688]", icon: "bolt" },            // teal FastAPI
-  pydantic:   { label: "Pydantic",    color: "text-[#E92063]", icon: "schema" },          // rose Pydantic
-  nextjs:     { label: "Next.js",     color: "text-on-surface", icon: "web" },            // blanc (Vercel)
-  typescript: { label: "TypeScript",  color: "text-[#3178C6]", icon: "code" },            // bleu TS
-  tailwind:   { label: "Tailwind CSS",color: "text-[#06B6D4]", icon: "format_paint" },    // cyan Tailwind
+  python:         { label: "Python",         color: "text-[#FFD43B]", icon: "terminal" },
+  fastapi:        { label: "FastAPI",        color: "text-[#009688]", icon: "bolt" },
+  pydantic:       { label: "Pydantic",       color: "text-[#E92063]", icon: "schema" },
+  nextjs:         { label: "Next.js",        color: "text-on-surface", icon: "web" },
+  typescript:     { label: "TypeScript",     color: "text-[#3178C6]", icon: "code" },
+  tailwind:       { label: "Tailwind CSS",   color: "text-[#06B6D4]", icon: "format_paint" },
+  self:           { label: "Self (mon code)",color: "text-primary-fixed-dim", icon: "folder_special" },
+  pytest:         { label: "pytest",         color: "text-[#0A9EDC]", icon: "bug_report" },
+  httpx:          { label: "httpx",          color: "text-[#6BC04B]", icon: "http" },
+  sqlalchemy:     { label: "SQLAlchemy",     color: "text-[#D71F00]", icon: "database" },
+  zod:            { label: "Zod",            color: "text-[#3B82C4]", icon: "verified" },
+  tanstack_query: { label: "TanStack Query", color: "text-[#FF4154]", icon: "sync" },
+  vitest:         { label: "Vitest",         color: "text-[#FCC72B]", icon: "science" },
 };
 
 type Props = {
@@ -39,7 +46,7 @@ export function Sidebar({ open, activeLevelNum, onPickConcept }: Props) {
 
   return (
     <aside
-      className={`fixed left-0 top-0 h-screen w-sidebar-width z-40 bg-surface-container-low border-r border-outline-variant flex flex-col py-gutter transition-transform duration-200 ease-in-out ${
+      className={`fixed left-0 top-0 h-screen w-sidebar-width z-40 bg-surface-container-low/70 backdrop-blur-xl backdrop-saturate-150 border-r border-white/10 flex flex-col py-gutter transition-transform duration-200 ease-in-out ${
         open ? "translate-x-0" : "-translate-x-full"
       }`}
       aria-hidden={!open}

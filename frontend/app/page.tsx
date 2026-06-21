@@ -1,395 +1,196 @@
-"use client";
+import Link from "next/link";
+import { PolarisLogo } from "@/components/PolarisLogo";
+import { MaterialIcon } from "@/components/MaterialIcon";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Sidebar } from "@/components/Sidebar";
-import { TopBar } from "@/components/TopBar";
-import { ChatMessage, type Message } from "@/components/ChatMessage";
-import { ChatInput, type ChatInputHandle } from "@/components/ChatInput";
-import { WelcomeHero } from "@/components/WelcomeHero";
-import { askStream, type HistoryMessage, type Source } from "@/lib/api";
-import {
-  generateTitle,
-  loadAllConversations,
-  loadCurrentId,
-  newConversation,
-  saveAllConversations,
-  saveCurrentId,
-  type Conversation,
-} from "@/lib/conversations";
-import type { Concept, Corpus, Level } from "@/lib/curriculum";
+export const metadata = {
+  title: "Polaris — Le tuteur dev qui ne ment pas",
+  description:
+    "Chaque réponse est citée dans la doc officielle de Python, FastAPI, Pydantic, Next.js, TypeScript et Tailwind. Le code généré peut être exécuté en direct.",
+};
 
-const SIDEBAR_STORAGE_KEY = "pyexpert.sidebarOpen";
-const HISTORY_TURNS = 4;
+const CORPORA = [
+  { label: "Python 3.14",     color: "#FFD43B" },
+  { label: "FastAPI",         color: "#009688" },
+  { label: "Pydantic v2",     color: "#E92063" },
+  { label: "Next.js 16",      color: "#FFFFFF" },
+  { label: "TypeScript 5",    color: "#3178C6" },
+  { label: "Tailwind v4",     color: "#06B6D4" },
+  { label: "pytest",          color: "#0A9EDC" },
+  { label: "httpx",           color: "#6BC04B" },
+  { label: "SQLAlchemy",      color: "#D71F00" },
+  { label: "Zod",             color: "#3B82C4" },
+  { label: "TanStack Query",  color: "#FF4154" },
+  { label: "Vitest",          color: "#FCC72B" },
+];
 
+const USPS = [
+  {
+    icon: "verified",
+    title: "Sourcé, jamais inventé",
+    body: "Chaque affirmation pointe vers un extrait de la doc officielle, citable d'un clic. Pas d'hallucination, pas de version périmée.",
+  },
+  {
+    icon: "play_circle",
+    title: "Exécuté en direct",
+    body: "Le code Python tourne dans un sandbox isolé avec kernel persistant. Tu lis, tu modifies, tu exécutes — sans quitter la conversation.",
+  },
+  {
+    icon: "hub",
+    title: "13 corpus, 28k chunks",
+    body: "Du langage au front : Python, FastAPI, Pydantic, Next.js, TS, Tailwind, pytest, httpx, SQLAlchemy, Zod, TanStack Query, Vitest, et ton propre code.",
+  },
+];
 
-export default function Home() {
-  const [input, setInput] = useState("");
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [currentId, setCurrentId] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [activeLevelNum, setActiveLevelNum] = useState<string | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const cancelRef = useRef<(() => void) | null>(null);
-  const bottomRef = useRef<HTMLDivElement | null>(null);
-  const inputRef = useRef<ChatInputHandle | null>(null);
-
-  // ===== Bootstrap depuis localStorage au mount =====
-  useEffect(() => {
-    const sidebar = localStorage.getItem(SIDEBAR_STORAGE_KEY);
-    if (sidebar !== null) setSidebarOpen(sidebar === "1");
-
-    const loaded = loadAllConversations();
-    const savedId = loadCurrentId();
-    if (loaded.length === 0) {
-      const fresh = newConversation();
-      setConversations([fresh]);
-      setCurrentId(fresh.id);
-    } else {
-      setConversations(loaded);
-      const valid =
-        savedId && loaded.some((c) => c.id === savedId)
-          ? savedId
-          : loaded[0].id;
-      setCurrentId(valid);
-    }
-  }, []);
-
-  // ===== Persistance =====
-  useEffect(() => {
-    localStorage.setItem(SIDEBAR_STORAGE_KEY, sidebarOpen ? "1" : "0");
-  }, [sidebarOpen]);
-
-  useEffect(() => {
-    if (conversations.length > 0) saveAllConversations(conversations);
-  }, [conversations]);
-
-  useEffect(() => {
-    saveCurrentId(currentId);
-  }, [currentId]);
-
-  // ===== Raccourcis clavier =====
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const mod = e.ctrlKey || e.metaKey;
-      if (!mod) return;
-      const key = e.key.toLowerCase();
-      if (key === "b") {
-        e.preventDefault();
-        setSidebarOpen((v) => !v);
-      } else if (key === "k") {
-        e.preventDefault();
-        inputRef.current?.focus();
-      } else if (key === "n" && e.shiftKey) {
-        e.preventDefault();
-        createNewConversation();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // ===== Dérivés =====
-  const currentConv = useMemo(
-    () => conversations.find((c) => c.id === currentId) ?? null,
-    [conversations, currentId],
-  );
-
-  const messages = currentConv?.messages ?? [];
-  const selectedCorpora = currentConv?.corpora ?? [];
-
-  // ===== Auto-scroll =====
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages.length, messages[messages.length - 1]?.content]);
-
-  // ===== History pour multi-tour =====
-  const history: HistoryMessage[] = useMemo(() => {
-    const valid = messages
-      .filter((m) => !m.streaming && m.content.trim() !== "")
-      .map((m): HistoryMessage => ({
-        role: m.role === "user" ? "user" : "assistant",
-        content: m.content,
-      }));
-    return valid.slice(-HISTORY_TURNS * 2);
-  }, [messages]);
-
-  // ===== Helpers de mutation des conversations =====
-  function updateCurrentConv(updater: (c: Conversation) => Conversation) {
-    setConversations((prev) =>
-      prev.map((c) => (c.id === currentId ? updater(c) : c)),
-    );
-  }
-
-  function setCurrentCorpora(corpora: Corpus[]) {
-    updateCurrentConv((c) => ({ ...c, corpora, updatedAt: Date.now() }));
-  }
-
-  function createNewConversation() {
-    cancelRef.current?.();
-    cancelRef.current = null;
-    setBusy(false);
-    const fresh = newConversation(currentConv?.corpora ?? []);
-    setConversations((prev) => [fresh, ...prev]);
-    setCurrentId(fresh.id);
-    setActiveLevelNum(null);
-    setInput("");
-  }
-
-  function switchConversation(id: string) {
-    cancelRef.current?.();
-    cancelRef.current = null;
-    setBusy(false);
-    setCurrentId(id);
-    setInput("");
-  }
-
-  function deleteConversation(id: string) {
-    setConversations((prev) => {
-      const remaining = prev.filter((c) => c.id !== id);
-      if (id === currentId) {
-        const nextId =
-          remaining.length > 0 ? remaining[0].id : null;
-        setCurrentId(nextId);
-        if (!nextId) {
-          // Plus aucune convo : on en recrée une fraîche.
-          const fresh = newConversation();
-          setCurrentId(fresh.id);
-          return [fresh];
-        }
-      }
-      return remaining;
-    });
-  }
-
-  // ===== Soumission =====
-  const submit = useCallback(
-    (question: string, historyOverride?: HistoryMessage[]) => {
-      const q = question.trim();
-      if (!q || busy || !currentId) return;
-
-      const userMsg: Message = {
-        id: `u-${Date.now()}`,
-        role: "user",
-        content: q,
-      };
-      const botId = `b-${Date.now() + 1}`;
-      const botMsg: Message = {
-        id: botId,
-        role: "bot",
-        content: "",
-        streaming: true,
-      };
-
-      updateCurrentConv((c) => ({
-        ...c,
-        messages: [...c.messages, userMsg, botMsg],
-        title:
-          c.messages.length === 0
-            ? generateTitle([userMsg])
-            : c.title,
-        updatedAt: Date.now(),
-      }));
-      setInput("");
-      setBusy(true);
-
-      let bufferedSources: Source[] = [];
-      const corporaForCall = currentConv?.corpora ?? [];
-
-      cancelRef.current = askStream(
-        q,
-        {
-          onModel: (model) => {
-            updateCurrentConv((c) => ({
-              ...c,
-              messages: c.messages.map((m) =>
-                m.id === botId ? { ...m, modelOverride: model } : m,
-              ),
-            }));
-          },
-          onRewrite: (rewritten) => {
-            updateCurrentConv((c) => ({
-              ...c,
-              messages: c.messages.map((m) =>
-                m.id === botId ? { ...m, rewrittenQuery: rewritten } : m,
-              ),
-            }));
-          },
-          onSources: (sources) => {
-            bufferedSources = sources;
-            updateCurrentConv((c) => ({
-              ...c,
-              messages: c.messages.map((m) =>
-                m.id === botId ? { ...m, sources } : m,
-              ),
-            }));
-          },
-          onToken: (text) => {
-            updateCurrentConv((c) => ({
-              ...c,
-              messages: c.messages.map((m) =>
-                m.id === botId ? { ...m, content: m.content + text } : m,
-              ),
-              updatedAt: Date.now(),
-            }));
-          },
-          onDone: () => {
-            updateCurrentConv((c) => ({
-              ...c,
-              messages: c.messages.map((m) =>
-                m.id === botId
-                  ? { ...m, streaming: false, sources: bufferedSources }
-                  : m,
-              ),
-              updatedAt: Date.now(),
-            }));
-            setBusy(false);
-            cancelRef.current = null;
-          },
-          onError: (err) => {
-            updateCurrentConv((c) => ({
-              ...c,
-              messages: c.messages.map((m) =>
-                m.id === botId
-                  ? {
-                      ...m,
-                      streaming: false,
-                      content:
-                        m.content +
-                        `\n\n**Erreur** : ${err.message}\n\nLe backend Python tourne-t-il bien sur \`localhost:8000\` ?`,
-                    }
-                  : m,
-              ),
-            }));
-            setBusy(false);
-            cancelRef.current = null;
-          },
-        },
-        {
-          history: historyOverride ?? history,
-          corpora: corporaForCall,
-          rewriteQuery: true,
-        },
-      );
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [busy, currentId, history, currentConv?.corpora],
-  );
-
-  function cancel() {
-    cancelRef.current?.();
-    cancelRef.current = null;
-    setBusy(false);
-    updateCurrentConv((c) => ({
-      ...c,
-      messages: c.messages.map((m) =>
-        m.streaming
-          ? { ...m, streaming: false, content: m.content + "\n\n_[Annulé]_" }
-          : m,
-      ),
-    }));
-  }
-
-  function pickConcept(concept: Concept, level: Level) {
-    setActiveLevelNum(level.num);
-    submit(concept.en);
-  }
-
-  function regenerate(botMessageId: string) {
-    if (busy || !currentConv) return;
-    const idx = currentConv.messages.findIndex((m) => m.id === botMessageId);
-    if (idx <= 0) return;
-    const prev = currentConv.messages[idx - 1];
-    if (prev.role !== "user") return;
-
-    const truncated = currentConv.messages.slice(0, idx - 1);
-    const histBefore: HistoryMessage[] = truncated
-      .filter((m) => !m.streaming && m.content.trim() !== "")
-      .map((m): HistoryMessage => ({
-        role: m.role === "user" ? "user" : "assistant",
-        content: m.content,
-      }))
-      .slice(-HISTORY_TURNS * 2);
-
-    updateCurrentConv((c) => ({ ...c, messages: truncated }));
-    setTimeout(() => submit(prev.content, histBefore), 0);
-  }
-
-  function clearCurrentConversation() {
-    cancelRef.current?.();
-    cancelRef.current = null;
-    setBusy(false);
-    updateCurrentConv((c) => ({
-      ...c,
-      messages: [],
-      title: "Nouvelle conversation",
-      updatedAt: Date.now(),
-    }));
-    setActiveLevelNum(null);
-  }
-
+export default function Landing() {
   return (
-    <>
-      <Sidebar
-        open={sidebarOpen}
-        activeLevelNum={activeLevelNum}
-        onPickConcept={pickConcept}
-      />
+    <main className="min-h-screen flex flex-col">
+      {/* Nav simplifiée */}
+      <header className="px-gutter h-16 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <PolarisLogo
+            size={28}
+            primary="var(--color-primary-fixed-dim)"
+            twinkle
+          />
+          <span className="text-[20px] font-semibold text-primary-fixed-dim tracking-tight">
+            Polaris
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          <a
+            href="https://github.com/loicKonan123/python_expert"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden sm:inline-flex items-center gap-1.5 text-[13px] text-on-surface-variant hover:text-on-surface transition-colors"
+          >
+            <MaterialIcon name="code" className="text-[16px]" />
+            GitHub
+          </a>
+          <Link
+            href="/app"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-br from-primary to-[#3776ab] text-on-primary text-[14px] font-medium shadow-[0_8px_24px_rgba(152,203,255,0.25)] hover:brightness-110 transition-all"
+          >
+            Ouvrir Polaris
+            <MaterialIcon name="arrow_forward" className="text-[18px]" />
+          </Link>
+        </div>
+      </header>
 
-      <main
-        className={`min-h-screen flex flex-col transition-[margin-left] duration-200 ${
-          sidebarOpen ? "ml-sidebar-width" : "ml-0"
-        }`}
-      >
-        <TopBar
-          sidebarOpen={sidebarOpen}
-          onToggleSidebar={() => setSidebarOpen((v) => !v)}
-          conversations={conversations}
-          currentId={currentId}
-          onNewConversation={createNewConversation}
-          onPickConversation={switchConversation}
-          onDeleteConversation={deleteConversation}
-          onClearConversation={
-            messages.length > 0 ? clearCurrentConversation : undefined
-          }
-        />
-
-        <div className="pt-16 pb-44 flex-1 flex flex-col items-center">
-          <div className="w-full max-w-chat-max-width px-8 py-stack-lg space-y-10">
-            {messages.length === 0 ? (
-              <WelcomeHero />
-            ) : (
-              <div className="space-y-8">
-                {messages.map((m) => (
-                  <ChatMessage
-                    key={m.id}
-                    message={m}
-                    onRegenerate={
-                      m.role === "bot" && !m.streaming
-                        ? () => regenerate(m.id)
-                        : undefined
-                    }
-                    sessionId={currentId ?? undefined}
-                  />
-                ))}
-              </div>
-            )}
-            <div ref={bottomRef} />
-          </div>
+      {/* Hero */}
+      <section className="px-gutter pt-16 pb-24 max-w-5xl mx-auto text-center">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-card text-[12px] font-mono uppercase tracking-widest text-on-surface-variant mb-8">
+          <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+          RAG local · 13 corpus · sources citées
         </div>
 
-        <ChatInput
-          ref={inputRef}
-          value={input}
-          onChange={setInput}
-          onSubmit={() => submit(input)}
-          onCancel={cancel}
-          busy={busy}
-          sidebarOpen={sidebarOpen}
-          selectedCorpora={selectedCorpora}
-          onCorporaChange={setCurrentCorpora}
-        />
-      </main>
-    </>
+        <h1 className="text-[clamp(40px,7vw,84px)] font-semibold tracking-tight leading-[1.05] mb-6">
+          Le tuteur dev qui{" "}
+          <span className="bg-gradient-to-br from-primary via-[#bb9af7] to-secondary bg-clip-text text-transparent">
+            ne ment pas.
+          </span>
+        </h1>
+
+        <p className="text-[18px] sm:text-[20px] text-on-surface-variant max-w-2xl mx-auto leading-[1.6] mb-10">
+          Polaris répond à tes questions de dev full-stack en{" "}
+          <span className="text-on-surface">citant la doc officielle</span>{" "}
+          ligne par ligne — et exécute son code Python pour te montrer qu'il
+          marche vraiment.
+        </p>
+
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <Link
+            href="/app"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-br from-primary to-[#3776ab] text-on-primary text-[15px] font-medium shadow-[0_12px_32px_rgba(152,203,255,0.35)] hover:brightness-110 transition-all"
+          >
+            <MaterialIcon name="rocket_launch" className="text-[20px]" />
+            Commencer maintenant
+          </Link>
+          <a
+            href="#how"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl glass-card text-[15px] text-on-surface hover:bg-white/10 transition-colors"
+          >
+            <MaterialIcon name="play_circle" className="text-[20px]" />
+            Comment ça marche
+          </a>
+        </div>
+      </section>
+
+      {/* Bandeau corpus */}
+      <section className="px-gutter pb-24 max-w-6xl mx-auto w-full">
+        <p className="text-[11px] font-mono uppercase tracking-widest text-on-surface-variant/70 text-center mb-5">
+          Sources officielles indexées
+        </p>
+        <div className="flex flex-wrap justify-center gap-2">
+          {CORPORA.map((c) => (
+            <span
+              key={c.label}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full glass-card text-[12px] font-mono"
+            >
+              <span
+                className="w-1.5 h-1.5 rounded-full"
+                style={{ background: c.color }}
+              />
+              {c.label}
+            </span>
+          ))}
+        </div>
+      </section>
+
+      {/* USPs */}
+      <section id="how" className="px-gutter pb-24 max-w-6xl mx-auto w-full">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {USPS.map((u) => (
+            <article
+              key={u.title}
+              className="glass-card-strong p-6 rounded-2xl space-y-3"
+            >
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/30 to-[#bb9af7]/30 flex items-center justify-center">
+                <MaterialIcon
+                  name={u.icon}
+                  filled
+                  className="text-primary-fixed-dim text-[22px]"
+                />
+              </div>
+              <h2 className="text-[18px] font-semibold text-on-surface">
+                {u.title}
+              </h2>
+              <p className="text-[14px] text-on-surface-variant leading-[1.6]">
+                {u.body}
+              </p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA final */}
+      <section className="px-gutter pb-24 max-w-3xl mx-auto w-full text-center">
+        <div className="glass-card-strong p-10 rounded-3xl space-y-5">
+          <PolarisLogo
+            size={56}
+            primary="var(--color-primary-fixed-dim)"
+            twinkle
+            className="mx-auto"
+          />
+          <h2 className="text-[28px] font-semibold tracking-tight">
+            Prêt à coder avec une vraie boussole ?
+          </h2>
+          <p className="text-on-surface-variant">
+            Aucune inscription. Aucune télémétrie. Tout tourne en local sauf
+            l'API de complétion (clé optionnelle).
+          </p>
+          <Link
+            href="/app"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-br from-primary to-[#3776ab] text-on-primary text-[15px] font-medium shadow-[0_12px_32px_rgba(152,203,255,0.35)] hover:brightness-110 transition-all"
+          >
+            <MaterialIcon name="arrow_forward" />
+            Ouvrir Polaris
+          </Link>
+        </div>
+      </section>
+
+      <footer className="px-gutter py-6 border-t border-white/5 text-center text-[12px] font-mono uppercase tracking-widest text-on-surface-variant/60">
+        Polaris · RAG local · doc officielle
+      </footer>
+    </main>
   );
 }

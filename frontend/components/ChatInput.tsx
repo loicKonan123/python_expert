@@ -63,13 +63,13 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
         sidebarOpen ? "left-sidebar-width" : "left-0"
       }`}
     >
-      <div className="w-full max-w-chat-max-width glass-input p-4 rounded-2xl border border-outline-variant shadow-2xl pointer-events-auto space-y-3">
+      <div className="w-full max-w-chat-max-width glass-card-strong p-4 rounded-2xl pointer-events-auto space-y-3">
         {/* Filtre par corpus */}
         <CorpusFilter selected={selectedCorpora} onChange={onCorporaChange} />
 
         {/* Zone de saisie */}
         <div className="relative flex items-end gap-3">
-          <div className="flex-1 bg-surface-container-highest rounded-xl px-4 py-3 min-h-14 flex flex-col justify-center border border-transparent focus-within:border-primary transition-colors">
+          <div className="flex-1 bg-surface-container-lowest/60 rounded-xl px-4 py-3 min-h-14 flex flex-col justify-center border border-outline-variant/40 focus-within:border-primary/60 focus-within:bg-surface-container-lowest/80 transition-colors">
             <textarea
               ref={taRef}
               value={value}
@@ -95,7 +95,7 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
               <button
                 onClick={onSubmit}
                 disabled={!value.trim() || busy}
-                className="p-3 bg-primary text-on-primary rounded-xl hover:opacity-90 transition-all shadow-lg disabled:opacity-40 disabled:cursor-not-allowed"
+                className="p-3 bg-gradient-to-br from-primary to-[#3776ab] text-on-primary rounded-xl hover:brightness-110 transition-all shadow-[0_8px_24px_rgba(152,203,255,0.35)] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
                 title="Envoyer (Entrée)"
               >
                 <MaterialIcon name="send" />

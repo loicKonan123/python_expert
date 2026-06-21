@@ -37,7 +37,7 @@ export function ChatMessage({ message, onRegenerate, sessionId }: Props) {
   if (message.role === "user") {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[85%] px-5 py-3 rounded-2xl border border-outline-variant bg-surface-container-low">
+        <div className="glass-card max-w-[85%] px-5 py-3 rounded-2xl">
           <p className="text-[16px] leading-[1.6]">{message.content}</p>
         </div>
       </div>
@@ -83,7 +83,7 @@ function BotMessage({
     <div className="flex justify-start gap-4">
       <div className="w-1 self-stretch bg-primary rounded-full shrink-0" />
       <div className="flex-1 min-w-0 space-y-4">
-        <div className="bg-surface-container p-6 rounded-2xl border border-outline-variant space-y-4">
+        <div className="glass-card-strong p-6 rounded-2xl space-y-4">
           {/* Bandeau meta : modèle choisi par auto-routing + rewrite éventuel */}
           {(message.modelOverride || message.rewrittenQuery) && (
             <div className="flex flex-wrap items-center gap-3 text-[11px] font-mono text-on-surface-variant/80">
