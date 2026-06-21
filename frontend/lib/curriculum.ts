@@ -22,7 +22,14 @@ export type Corpus =
   | "nextjs"
   | "typescript"
   | "tailwind"
-  | "self";
+  | "self"
+  // Phase 7 — écosystème
+  | "pytest"
+  | "httpx"
+  | "sqlalchemy"
+  | "zod"
+  | "tanstack_query"
+  | "vitest";
 
 export type Level = {
   /** Identifiant du niveau (ex: "1", "FA1") — sert aussi de clé visuelle */

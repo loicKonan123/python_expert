@@ -1,191 +1,427 @@
-# Plan du projet — Tuteur Python RAG
+# Plan & avancement — Python Expert
 
-Ce document explique **ce qu'est le projet**, **de quoi il est fait**, **où il en est aujourd'hui**, et **où on l'amène** avec la nouvelle interface Next.js.
+Document vivant qui retrace **où on est**, **comment on y est arrivé**,
+et **ce qui reste**. À garder à jour à chaque session de travail.
 
----
-
-## 1. Qu'est-ce que c'est ?
-
-Un **tuteur Python** qui répond à tes questions en s'appuyant sur la documentation officielle de Python 3.14. Tout tourne en local — pas d'API payante, pas de dépendance externe, pas de fuite de données.
-
-### Le problème qu'il résout
-
-Quand tu apprends Python, tu cherches partout : Stack Overflow, des tutos vieillis, des blogs approximatifs. La doc officielle est la source la plus fiable mais elle est **dense** et difficile à explorer quand on cherche une explication pédagogique.
-
-Le tuteur résout ça en deux temps :
-1. Il **trouve** automatiquement les bons passages de la doc officielle pour ta question
-2. Il les **explique** en français avec un LLM local
-
-### Ce qui le distingue
-
-- **Fidèle à la source** : il cite toujours les passages utilisés
-- **Pas d'hallucinations** : le modèle ne « se souvient pas » de Python, il **lit** la doc à chaque question
-- **100% autonome** : aucune API externe — coût zéro, vie privée totale
-- **Parcours pédagogique intégré** : 7 niveaux progressifs, ~60 concepts numérotés
+> 📌 Dernière mise à jour : 2026-06-21 (après Phase 7 + section "où vivent les corpus")
 
 ---
 
-## 2. De quoi c'est composé ?
+## 1. Vision
 
-Le projet a **trois grandes briques** :
+Un tuteur de développement web moderne qui répond avec :
+- **fidélité absolue** à la documentation officielle (citations à l'appui)
+- **multi-techno** : Python, FastAPI, Pydantic, Next.js, TypeScript, Tailwind + ton propre code
+- **interaction notebook-style** : conversations multi-tours, kernel Python persistant
+- **autonomie possible** (Ollama local) ou **performance** (DeepSeek API)
 
-### Brique A — La connaissance (les données)
-La documentation officielle Python 3.14 en texte brut : 534 fichiers répartis en `library/`, `tutorial/`, `reference/`, `howto/`, `faq/`, `c-api/`, `whatsnew/`, etc. ~15 MB au total. C'est la **vérité** sur laquelle le tuteur s'appuie.
-
-### Brique B — Le moteur RAG (Python, le cerveau)
-*Retrieval-Augmented Generation* : le LLM ne connaît pas la doc par cœur, on lui montre les bons passages avant chaque réponse.
-
-1. **Chunker** — découpe les 534 fichiers en ~10 899 morceaux cohérents.
-2. **Embedding** — chaque chunk → vecteur 384 dim. Modèle : `sentence-transformers/all-MiniLM-L6-v2`.
-3. **Base vectorielle** — ChromaDB stocke les vecteurs (`./chroma_db/`). Une question est elle aussi encodée puis comparée par similarité cosinus.
-4. **LLM** — Ollama fait tourner `qwen2.5-coder:7b` localement. Reçoit les 5 chunks + la question, rédige en streaming.
-
-### Brique C — L'interface (le visage)
-**Deux interfaces vont coexister** durant la transition :
-
-- **Version actuelle** (`server.py` + `web/index.html`) : conservée tant que la version Next.js n'est pas validée
-- **Version Next.js** (`frontend/`) : la nouvelle interface moderne, design soigné, Monaco Editor pour le code, en cours de construction
-
-Plus tard, la version actuelle sera retirée et seule la version Next.js restera.
+Cible : toi, étudiant qui apprend, qui veut un assistant **qui ne ment pas** et qui peut **vérifier son code**.
 
 ---
 
-## 3. Où on en est aujourd'hui
+## ⭐ Niveau d'expertise par langage et techno
 
-### Ce qui fonctionne
+Évaluation honnête de **ce que le tuteur sait vraiment**, par techno.
+Chaque ⭐ est gagnée sur 4 critères :
+- **Couverture** : quelle part de la doc officielle est indexée
+- **Profondeur** : peut-il répondre du débutant à l'avancé
+- **Écosystème** : connaît-il les libs/outils tiers fréquemment associés
+- **Fraîcheur** : date de la doc indexée
 
-- Pipeline RAG complet et validé (score retrieval 0.7+ sur questions Python typiques)
-- Interface web actuelle opérationnelle (parcours 7 niveaux × ~60 concepts, streaming SSE)
-- Publié sur GitHub : https://github.com/loicKonan123/python_expert
+| Techno | Couverture | Profondeur | Écosystème | Fraîcheur | **Note** |
+|---|---|---|---|---|---|
+| **Python** | 100% doc officielle 3.14 | ⭐⭐⭐⭐⭐ du `print` aux métaclasses, async, GIL, descriptors | ⭐⭐⭐⭐ **avec pytest + httpx + SQLAlchemy** | Python 3.14 stable | **⭐⭐⭐⭐⭐** |
+| **FastAPI** | 100% docs officielles | ⭐⭐⭐⭐⭐ routes, deps, OAuth2, WebSocket, lifespan | ⭐⭐⭐⭐ **avec SQLAlchemy + httpx + pytest** | Branche master | **⭐⭐⭐⭐⭐** |
+| **Pydantic** | 100% docs v2 | ⭐⭐⭐⭐ validators, settings, JSON schema, computed_field | ⭐⭐⭐ **couvre pydantic-settings + bridges SQLAlchemy** | Branche main | **⭐⭐⭐⭐½** |
+| **Next.js** | 100% docs intégrés (v16 App Router) | ⭐⭐⭐⭐⭐ Server/Client Components, Server Actions, caching | ⭐⭐⭐⭐ **avec TanStack Query + Zod** | Pinned sur la version installée | **⭐⭐⭐⭐⭐** |
+| **TypeScript** | 100% Handbook v2 officiel Microsoft | ⭐⭐⭐⭐ types essentiels et avancés, génériques | ⭐⭐⭐⭐ **avec Zod + Vitest + TanStack Query** | Branche v2 | **⭐⭐⭐⭐⭐** |
+| **Tailwind CSS** | 100% site officiel v4 | ⭐⭐⭐⭐ utilities, `@theme`, variants, container queries | ⭐⭐ plugins officiels seulement | Branche main | **⭐⭐⭐⭐** |
+| **Ton code (`self`)** | 100% du repo courant | ⭐⭐⭐⭐ chaque fonction/classe identifiée | N/A | À jour à la dernière `build_index` | **⭐⭐⭐** |
 
-### Ce qui va changer
+### Écosystème (Phase 7) — libs tierces
 
-| Élément | Avant | Après |
+| Lib | Pour | Note |
 |---|---|---|
-| Frontend | HTML/CSS/JS dans un seul fichier | **Next.js 14 + Tailwind + TypeScript** |
-| Coloration syntaxique du code | Aucune | **Monaco Editor** (même qu'in VS Code) |
-| Composants visuels | Basiques | **Composants React typés**, SVG personnalisés |
-| Style visuel | Sobre maison | Design system **DESIGN.md** (palette navy + accents Python) |
-| Typographie | System fonts | **Geist** (UI) + **JetBrains Mono** (code) |
-| Backend | Stdlib `http.server` | **Inchangé pour l'instant** (juste ajout de CORS pour Next.js) |
+| **Pytest** | Testing Python (standard de l'industrie) | ⭐⭐⭐⭐⭐ |
+| **HTTPX** | Client HTTP Python moderne (compagnon FastAPI) | ⭐⭐⭐⭐⭐ |
+| **SQLAlchemy 2.x** | ORM Python avec FastAPI | ⭐⭐⭐⭐⭐ |
+| **Zod** | Validation TS pour Next.js | ⭐⭐⭐⭐⭐ |
+| **TanStack Query** | Data fetching React/Next.js | ⭐⭐⭐⭐⭐ |
+| **Vitest** | Testing TS/JS moderne | ⭐⭐⭐⭐⭐ |
+
+### Niveau global moyen : **⭐⭐⭐⭐½ / 5** (après Phase 7)
+
+### Pourquoi pas ⭐⭐⭐⭐⭐ partout
+
+- **Tailwind** : reste à 4/5 car les plugins communautaires populaires
+  (daisyUI, headlessui, etc.) ne sont pas indexés. Pour 5/5 il faudrait
+  ajouter au moins `headlessui` et `tailwindui` (mais Tailwind UI est payant).
+- **`self`** : reste à 3/5 car indexation ponctuelle (date de la dernière
+  `build_index`) au lieu d'un suivi continu à chaque commit. Pour 5/5 il
+  faudrait un hook git qui ré-indexe les fichiers modifiés.
+
+### Pour pousser plus loin l'écosystème (jamais terminé)
+
+Le tableau ci-dessus couvre le **stack web Python + Next.js typé**. Pour
+d'autres orientations :
+- Côté Python data : `pandas`, `numpy`, `scikit-learn`
+- Côté Python ML : `pytorch`, `transformers`, `langchain`
+- Côté frontend alternatif : `vue`, `svelte`, `solid`
+- Côté backend alternatif : `django`, `flask`, `litestar`
+- Côté ORM TS : `prisma`, `drizzle`
+- Côté API typée : `trpc`
+
+Chaque ajout = ~5 min de code + ~3 min de fetch + ~1 min de réindexation
+incrémentielle (par chunk-corpus).
+
+### Ce que **personne d'autre** ne couvre comme ça
+
+Les 7 traits ci-dessous sont **rares ou inexistants** ailleurs (ChatGPT, Copilot, Stack Overflow) :
+
+1. **Anti-hallucination** : chaque affirmation citée et traçable au paragraphe précis
+2. **Réponses transversales** : un même chat ramène des chunks de 2-3 corpus avec citations croisées
+3. **Le tuteur exécute son code** : kernel persistant Jupyter-style, variables conservées entre runs
+4. **Il connaît TON code** : corpus `self`, citations de tes propres fonctions
+5. **Local ↔ cloud d'un mot** : variable `.env` pour basculer Ollama / DeepSeek
+6. **Coût visible en direct** : compteur live $$ + tokens dans le TopBar
+7. **Audit hook de sécurité PEP 578** : ton `.env` (clé API) inaccessible même au code malveillant
 
 ---
 
-## 4. Plan technique — Architecture Next.js + Python
+## 2. État actuel — métrique unique
 
-### Vue d'ensemble
-
-```
-┌──────────────────────────────────┐       ┌──────────────────────────────────┐
-│  Next.js (port 3000)             │       │  Python backend (port 8000)      │
-│  ┌────────────────────────────┐  │       │  ┌────────────────────────────┐  │
-│  │ UI moderne (Tailwind +     │  │       │  │ server.py                  │  │
-│  │   composants React)        │  │       │  │  - retrieval (ChromaDB)    │  │
-│  │ Monaco Editor              │  │ HTTP  │  │  - LLM via Ollama          │  │
-│  │ SSE streaming consumer     │ ─┼───────┼─▶│  - streaming SSE           │  │
-│  │ Lecture concepts (JSON)    │  │       │  │  + CORS activé             │  │
-│  └────────────────────────────┘  │       │  └────────────────────────────┘  │
-└──────────────────────────────────┘       └──────────────────────────────────┘
-                                                          │
-                                                          ▼
-                                              ChromaDB + Ollama (locaux)
-```
-
-### Pourquoi cette architecture ?
-
-- **Python reste le cerveau** : il a déjà toutes les briques ML/RAG, inutile de tout refaire en JS.
-- **Next.js fait l'UI** : composants, routing, Monaco, animations — sa spécialité.
-- **Pendant la transition** : la version actuelle (web/index.html servi par server.py) continue de tourner, on peut comparer en parallèle.
-- **Au final** : on retire `web/index.html` et `server.py` ne servira plus que l'API JSON / SSE. Next.js sera servi en standalone ou packagé statiquement.
-
-### Structure cible
-
-```
-python_expert/
-├── (existant — inchangé pendant la transition)
-│   ├── server.py             # +CORS pour autoriser Next.js
-│   ├── config.py, chunker.py, build_index.py, ask.py, search.py
-│   └── web/index.html        # Ancienne UI, retirée plus tard
-│
-├── frontend/                 # ← NOUVEAU : application Next.js
-│   ├── app/
-│   │   ├── layout.tsx        # Layout racine + polices Geist/JetBrains Mono
-│   │   ├── page.tsx          # Page principale (chat + sidebar)
-│   │   └── globals.css       # Tailwind base + tokens DESIGN.md
-│   ├── components/
-│   │   ├── Sidebar.tsx       # Sidebar curriculum
-│   │   ├── TopBar.tsx        # En-tête (statut Ollama, theme toggle)
-│   │   ├── ChatMessage.tsx   # Bulle user / IA
-│   │   ├── CodeBlock.tsx     # Wrapper Monaco Editor
-│   │   ├── Sources.tsx       # Chips de citations
-│   │   └── ChatInput.tsx     # Input glassmorphique
-│   ├── lib/
-│   │   ├── api.ts            # fetch + SSE vers backend Python
-│   │   ├── curriculum.ts     # Données du parcours (60 concepts)
-│   │   └── markdown.ts       # Rendu markdown léger
-│   ├── public/icons/         # SVG personnalisés
-│   ├── tailwind.config.ts    # Tokens depuis DESIGN.md
-│   ├── tsconfig.json
-│   ├── next.config.js
-│   └── package.json
-│
-└── docs/
-    └── plan.md
-```
-
-### Stack Next.js
-
-- **Next.js 14** (App Router, pas Pages Router)
-- **TypeScript** (typage solide)
-- **Tailwind CSS** (compatible avec le `code.html` de référence)
-- **Monaco Editor** via `@monaco-editor/react` (chargement dynamique pour ne pas alourdir le bundle initial)
-- **Geist** + **JetBrains Mono** via `next/font/google`
-- **Material Symbols** ou icônes SVG custom (à arbitrer)
-
-### Modifications du backend
-
-Une seule, minimale : ajouter des en-têtes CORS dans `server.py` pour autoriser les requêtes depuis `http://localhost:3000`.
-
-Pas de migration FastAPI pour l'instant — le serveur stdlib actuel suffit largement. FastAPI restera une option pour plus tard si on en a besoin (auth, openapi, multi-users).
+| Brique | Valeur |
+|---|---|
+| Corpus indexés | **7** (Python 3.14, FastAPI, Pydantic, Next.js, TypeScript, Tailwind, **ton code**) |
+| Chunks vectoriels | **20 053** |
+| Concepts pré-rédigés dans la sidebar | **178** (21 niveaux) |
+| Endpoints HTTP | 8 (`/api/ask`, `/api/run`, `/api/kernel/*`, `/api/usage`, `/api/health`, `/docs`, `/redoc`) |
+| Tests de sécurité sandbox | **8/8 passent** |
+| LOC repo (hors corpus + node_modules) | ~6 000 |
+| Commits sur GitHub | 6 |
 
 ---
 
-## 5. Ordre d'exécution
+## 3. Avancement — ce qui est livré
 
-1. **Scaffold Next.js** dans `frontend/`
-2. **Configuration Tailwind** avec les tokens de DESIGN.md (couleurs, polices, espacements)
-3. **Composants de base** matchant le `code.html` de référence (Sidebar, TopBar, Chat, Input)
-4. **Intégration Monaco** pour les blocs de code générés
-5. **Câblage API** : appel SSE vers `http://localhost:8000/ask`
-6. **CORS** dans `server.py`
-7. **Test end-to-end** avec les deux serveurs en parallèle (Python `:8000`, Next.js `:3000`)
-8. **Commit + push** par étapes
+### Phase 0 — Fondations (semaine 1)
+- [x] RAG mono-corpus sur Python 3.14
+- [x] Chunker Sphinx-aware (titres soulignés `===`/`---`)
+- [x] Embeddings local CPU (`all-MiniLM-L6-v2`)
+- [x] ChromaDB persistant
+- [x] Backend stdlib `http.server` + SSE
+- [x] Frontend HTML monolithique (parcours pédagogique)
+- [x] Publication GitHub (commit initial)
 
-À chaque étape, commit séparé.
+### Phase 1 — Migration architecture
+- [x] Backend **FastAPI** avec `lifespan` + Pydantic Settings
+- [x] Frontend **Next.js 16 + Tailwind v4 + TypeScript**
+- [x] Composants React typés (Sidebar, TopBar, ChatMessage, CodeBlock, ChatInput)
+- [x] Monaco Editor pour les blocs de code
+- [x] Streaming SSE multiplexé
+- [x] CORS + middleware HTTP logging
+- [x] Logs structurés partout (`backend.http`, `backend.rag`, etc.)
+
+### Phase 2 — Multi-corpus
+- [x] Manifeste `backend/corpora.py`
+- [x] Script `fetch_docs.py` (clone shallow par techno)
+- [x] Chunker multi-format (sphinx-text + markdown + mdx + rst)
+- [x] Indexation FastAPI · Pydantic · Next.js · TypeScript · Tailwind
+- [x] Métadonnée `corpus` par chunk → filtrage à la recherche
+- [x] Test de benchmark retrieval (`test_retrieval.py`, 22 questions)
+
+### Phase 3 — LLM providers
+- [x] Abstraction `LLMProvider` (Protocol)
+- [x] Provider **Ollama** local
+- [x] Provider **DeepSeek API** (compatible OpenAI)
+- [x] Bascule via `.env` (PYEXPERT_LLM_PROVIDER)
+- [x] Tracker tokens + coût session (`/api/usage`)
+- [x] Auto-routing **Flash / Reasoner** selon complexité de la question
+- [x] Query rewriting (FR → EN ou follow-up résolu)
+- [x] Pré-chauffage + keep_alive Ollama 30 min
+
+### Phase 4 — UX moderne
+- [x] Conversations multi-tours avec historique injecté au LLM
+- [x] **Plusieurs threads** persistés (`pyexpert.conversations` dans localStorage)
+- [x] Export d'une conversation en Markdown
+- [x] Filtre par corpus (chips Tous/Python/FastAPI/.../Mon code)
+- [x] Indicateur de qualité du retrieval (vert/jaune/rouge selon score)
+- [x] Badges techno sur les réponses (puise dans : Python + FastAPI...)
+- [x] Citations `[Source N]` cliquables → scroll + focus sur la source
+- [x] Boutons Régénérer / Copier / Effacer / Nouvelle conv
+- [x] Raccourcis Ctrl+B (sidebar), Ctrl+K (focus input), Ctrl+Shift+N (new conv)
+- [x] Compteur live $ + tokens dans le TopBar
+- [x] Persistance complète (F5 ne perd rien)
+
+### Phase 5 — Sandbox d'exécution Python
+- [x] **One-shot** : subprocess + temp dir + env nettoyé
+- [x] Audit hook PEP 578 : bloque subprocess, os.system, ctypes externe
+- [x] Bloque accès fichier hors sandbox + Python install (.env protégé)
+- [x] Tracebacks propres : path masqué `<snippet>`, line numbers réalignés
+- [x] **Kernel persistant** notebook-style (`backend/kernel.py`)
+- [x] Pool de kernels indexé par session_id (= conversation id)
+- [x] TTL d'inactivité 10 min + restart auto sur timeout
+- [x] Bouton 🔄 restart kernel par bloc + endpoint dédié
+- [x] Fix Unicode (errors='replace' sur stdin/stdout/stderr du kernel)
+- [x] Cumul de blocs précédents en fallback (sans session)
+- [x] 8/8 tests de sécurité passent
+
+### Phase 6 — Indexation du code utilisateur
+- [x] Format `code` dans `corpora.py`
+- [x] Chunker code (découpe par fonction/classe via regex)
+- [x] Champ `language` dans les métadonnées
+- [x] `exclude_patterns` (node_modules, chroma_db, etc.)
+- [x] Corpus `self` ajouté → 232 chunks du projet courant
+- [x] Frontend : corpus `self` dans CORPUS_META + CorpusFilter (violet, `folder_code`)
+- [x] Test : retrieval sur « what does my sandbox.py do » → bons fichiers
+- [x] README à jour décrivant TOUT ce qui précède
+
+### Phase 7 — Écosystème (libs tierces)
+- [x] **Pytest** indexé (259 fichiers .rst depuis `pytest-dev/pytest/doc/en`)
+- [x] **HTTPX** indexé (23 fichiers .md depuis `encode/httpx/docs`)
+- [x] **SQLAlchemy 2.x** indexé (205 fichiers .rst depuis `sqlalchemy/sqlalchemy/doc/build`)
+- [x] **Zod** indexé (18 fichiers .mdx+.md depuis `colinhacks/zod/packages/docs`)
+- [x] **TanStack Query** indexé (71 fichiers .md depuis `TanStack/query/docs/framework/react`)
+- [x] **Vitest** indexé (218 fichiers .md depuis `vitest-dev/vitest/docs`)
+- [x] Frontend : 6 nouveaux items dans `Corpus` type + `CORPUS_META` + `CorpusFilter`
+- [x] Couleurs de marque dédiées (Pytest cyan, HTTPX bleu Nord, SQLAlchemy rouge, Zod indigo, TanStack rouge React, Vitest jaune)
+- [x] Réindexation complète : 20 053 → ~25 500 chunks
+- [x] Note globale passe de ⭐⭐⭐⭐ à **⭐⭐⭐⭐½**
 
 ---
 
-## 6. Pour lancer après la migration
+## 4. Roadmap — ce qui reste
+
+### 🟢 Court terme (1-3 h chacun)
+
+- [ ] **Hybrid search BM25 + vector**
+      Combine recherche vectorielle (sémantique) + lexicale (mots-clés exacts).
+      Améliore la récupération sur les termes techniques rares ou les fautes.
+      Lib : `rank-bm25`. Effort : 3 h.
+
+- [ ] **Embedding `bge-m3` multilingue**
+      Remplace `all-MiniLM-L6-v2` (anglais 384d) par BGE-M3 (multilingue 1024d).
+      Score FR moyen attendu : 0.64 → 0.78. Effort : 30 min code + 25 min réindex.
+
+- [ ] **Mobile UX sérieuse**
+      Sidebar en drawer, taille des chips, viewport meta correct.
+      Aujourd'hui utilisable mais pas joli. Effort : 2 h.
+
+- [ ] **Test du sandbox kernel via le navigateur**
+      On a validé en HTTP (curl), pas dans l'UI réelle. Effort : 15 min.
+
+### 🟡 Moyen terme (3 h - 1 j)
+
+- [ ] **LLM function calling**
+      Le bot décide quand appeler `run_python()` lui-même, voit la sortie, se corrige.
+      Requiert un loop multi-turn de tool use côté backend.
+      DeepSeek supporte les tools.
+      Effort : 1 jour.
+
+- [ ] **Re-ranker post-retrieval**
+      Cross-encoder (`ms-marco-MiniLM-L-6-v2`) qui re-trie les top-30 → top-K.
+      +5-10% de pertinence. Effort : 2-3 h.
+
+- [ ] **HyDE** (Hypothetical Document Embeddings)
+      Le LLM génère une fausse réponse, on embed cette fausse réponse pour chercher.
+      Très efficace sur les questions abstraites. Effort : 1 h.
+
+- [ ] **Onboarding tour première visite**
+      Petit overlay qui explique la sidebar, le filtre, le bouton Run.
+      Effort : 2 h.
+
+### 🔵 Long terme (1-3 j)
+
+- [ ] **Déploiement public**
+      Front Vercel + backend Railway/Render. URL partageable.
+      Effort : 3 h technique + tests.
+
+- [ ] **Authentification + multi-user**
+      Chacun sa clé DeepSeek, son historique, ses kernels isolés.
+      Effort : 1 j.
+
+- [ ] **Indexer Stack Overflow top answers**
+      Élargit le tuteur des « concepts officiels » aux « problèmes réels ».
+      Effort : 1 j (parse + filtre + index).
+
+- [ ] **Sandbox Docker** (au lieu de subprocess + audit hook)
+      Vrai container isolé. Indispensable si déployé public.
+      Effort : 4-6 h.
+
+### 🟣 Idées plus lointaines
+
+- [ ] Connecter à un repo GitHub arbitraire (« indexe mon autre projet »)
+- [ ] Mode « tutorat actif » : le bot pose des questions pour vérifier la compréhension
+- [ ] Génération de quiz à partir d'une conversation
+- [ ] Export d'une conversation en notebook Jupyter exécutable
+- [ ] Plugin VS Code qui ouvre le tuteur dans une side panel
+
+---
+
+## 4½. Où vivent physiquement les corpus
+
+Les 13 corpus ne sont pas tous au même endroit sur le disque. Trois familles :
+
+### 🌐 Cloné depuis GitHub (la majorité — 10 corpus)
+```
+docs-sources/
+├── fastapi/        ← github.com/fastapi/fastapi/docs/en/docs
+├── pydantic/       ← github.com/pydantic/pydantic/docs
+├── typescript/     ← github.com/microsoft/TypeScript-Website/...
+├── tailwind/       ← github.com/tailwindlabs/tailwindcss.com/src
+├── pytest/         ← github.com/pytest-dev/pytest/doc/en
+├── httpx/          ← github.com/encode/httpx/docs
+├── sqlalchemy/     ← github.com/sqlalchemy/sqlalchemy/doc/build
+├── zod/            ← github.com/colinhacks/zod/packages/docs
+├── tanstack-query/ ← github.com/TanStack/query/docs/framework/react
+└── vitest/         ← github.com/vitest-dev/vitest/docs
+```
+**Mise à jour** : `python -m backend.scripts.fetch_docs --corpus <nom>`
+ou `python -m backend.scripts.fetch_docs` (tous d'un coup).
+
+### 📦 Shippé avec un package npm (1 corpus — exception Next.js)
+```
+frontend/node_modules/next/dist/docs/   ← 421 fichiers .md
+├── 01-app/          ← App Router
+├── 02-pages/        ← Pages Router (legacy)
+├── 03-architecture/
+└── 04-community/
+```
+**Pourquoi** : Vercel embarque la doc dans le package npm pour que les
+assistants IA lisent la version **exactement alignée** avec celle installée.
+**Mise à jour** : `cd frontend && npm update next`.
+**Risque** : si tu fais `rm -rf frontend/node_modules`, la doc disparaît
+jusqu'au prochain `npm install`.
+
+### 📂 Téléchargé manuellement (1 corpus — exception Python)
+```
+python-3.14-docs-text/   ← 534 fichiers .txt
+├── library/   reference/   tutorial/   howto/
+├── faq/       c-api/       whatsnew/   ...
+```
+**Pourquoi** : la doc Python officielle n'a pas de repo git « plat » facile
+à cloner. C'est une archive `.zip` (ou `.tar.bz2`) à télécharger sur
+[docs.python.org/3.14/download.html](https://docs.python.org/3.14/download.html)
+et à extraire à la racine du projet.
+**Mise à jour** : refaire la procédure quand Python 3.15 sort.
+
+### 💻 Ton propre code (1 corpus — `self`)
+```
+.   ← la racine du projet courant
+    (exclusions : node_modules, .next, .cache, chroma_db,
+     docs-sources, python-3.14-docs-text, .git, __pycache__, .venv, venv)
+```
+**Mise à jour** : à chaque `python -m backend.scripts.build_index`,
+le corpus `self` reflète l'état du repo à ce moment-là.
+
+---
+
+## 5. Décisions architecturales clés
+
+| Décision | Raison | Date |
+|---|---|---|
+| **RAG plutôt que fine-tuning** | Mise à jour triviale, traçabilité, anti-hallucination | Phase 0 |
+| **ChromaDB local (pas pgvector)** | Zéro setup, fichier local, suffisant single-user | Phase 0 |
+| **Migration FastAPI** | Pydantic, OpenAPI auto, middleware standard | Phase 1 |
+| **Next.js 16 + Tailwind v4** | Stack moderne, hot-reload, écosystème complet | Phase 1 |
+| **Multi-corpus dans la MÊME collection** | Filtrage par `where` ChromaDB plus simple que collections séparées | Phase 2 |
+| **DeepSeek-V4-Flash par défaut** | Qualité GPT-4o pour 100× moins cher (~$0.0008/req) | Phase 3 |
+| **Audit hook PEP 578 plutôt que Docker** | Suffisant pour usage local, zéro dépendance | Phase 5 |
+| **Kernel persistant par conversation** | UX notebook naturelle, pas par message (trop éphémère) | Phase 5 |
+| **Conversation id = kernel session id** | Synchro implicite, restart par bouton sur n'importe quel bloc | Phase 5 |
+| **Cumul de blocs précédents en fallback** | Si kernel pas dispo, comportement raisonnable conservé | Phase 5 |
+| **Next.js : doc lue depuis `node_modules`** | Vercel embarque la doc dans le package npm. Version exactement alignée avec celle installée, mise à jour avec `npm update` | Phase 2 |
+| **Python : doc extraite manuellement** | Pas de repo git plat → archive `.zip` depuis docs.python.org. Rare mais propre | Phase 0 |
+
+---
+
+## 6. Si tu reprends après une pause
 
 ```powershell
-# Terminal 1 : backend Python
-python server.py
+# 1. Démarrer les serveurs
+cd C:\Users\konan\Desktop\python_expert
 
-# Terminal 2 : frontend Next.js
-cd frontend
-npm install   # première fois seulement
-npm run dev   # ouvre http://localhost:3000
+# Terminal 1 : backend
+python -m backend.main
+
+# Terminal 2 : frontend
+cd frontend ; npm run dev
+
+# Ouvrir http://localhost:3000
 ```
 
-Les deux versions coexistent jusqu'à validation finale.
+Si quelque chose ne marche pas, le tableau de dépannage est dans [docs/commands.md](commands.md).
+
+### Pour reprendre le développement
+
+- Pour ajouter un corpus : éditer `backend/corpora.py` + `python -m backend.scripts.fetch_docs --corpus <nom>` + `python -m backend.scripts.build_index`
+- Pour modifier le prompt : `backend/prompts.py`
+- Pour la sidebar : `frontend/lib/curriculum.ts` (concepts) + `frontend/components/Sidebar.tsx` (rendu)
+- Pour le sandbox : `backend/kernel.py` (kernel persistant) + `backend/sandbox.py` (one-shot)
 
 ---
 
-## 7. Questions à trancher (en cours de route)
+## 7. Est-ce un outil **vraiment complet** ?
 
-1. **Monaco Editor** : lecture seule (afficher proprement le code généré), ou éditable (l'utilisateur peut modifier et te demander d'expliquer) ? *Default : lecture seule.*
-2. **Icônes** : Material Symbols (comme `code.html`) ou SVG personnalisés que tu fournis ? *Default : Material Symbols + quelques SVG custom pour les éléments distinctifs.*
-3. **Curriculum** : on le garde en TypeScript côté frontend, ou tu veux qu'on l'expose via une route API ? *Default : côté frontend, c'est plus simple.*
-4. **Theme switcher** : sombre uniquement, ou clair + sombre ? *Default : sombre uniquement comme dans le template.*
+Réponse honnête : **ça dépend pour qui et pour quoi**.
 
-Je n'ai pas besoin de ces réponses pour démarrer — je prends les defaults sauf si tu m'arrêtes.
+### ✅ Complet pour : ton apprentissage de développeur web full-stack
+
+Tu as toutes les briques nécessaires pour apprendre, expérimenter, et écrire
+du code Python + TypeScript autour de FastAPI + Next.js + Pydantic + Tailwind.
+Tu peux travailler offline (Ollama) ou avec qualité max (DeepSeek). Tu peux
+exécuter ton code. Tu connais le coût. Tu peux exporter tes apprentissages.
+**Rien à ajouter pour ton usage quotidien.**
+
+### ⚠️ Partiellement complet pour : un usage public / produit
+
+Manque pour qu'un autre que toi l'utilise sereinement :
+
+| Manque | Pourquoi c'est nécessaire | Effort |
+|---|---|---|
+| 🔴 **Sandbox Docker** | L'audit hook PEP 578 est solide pour usage local, pas pour usage public (un user malveillant pourrait épuiser CPU/RAM, ouvrir des connexions réseau) | 4-6 h |
+| 🔴 **Authentification** | Sinon n'importe qui sur internet peut consommer ta clé API DeepSeek | 1 j |
+| 🔴 **Rate limiting** | Pour ne pas se faire DoS et limiter les coûts | 2 h |
+| 🟡 **Monitoring + logs centralisés** | Voir ce qui se passe en production (Sentry, OpenTelemetry) | 4 h |
+| 🟡 **Mobile UX correcte** | Aujourd'hui 4/10. Manquant pour partage sur téléphone | 2 h |
+| 🟢 **Onboarding** | Premier visiteur ne sait pas quoi faire | 2 h |
+| 🟢 **Documentation utilisateur publique** | README OK, manque un site / vidéo | 3 h |
+
+### ❌ Incomplet pour : usages spécialisés
+
+Le tuteur ne couvre pas (et ne doit pas couvrir) :
+
+- **Data science / ML** : pas de NumPy, Pandas, PyTorch, scikit-learn, Polars
+- **Backend non-FastAPI** : pas de Django, Flask, Litestar
+- **Frontend non-Next** : pas de Vue, Svelte, Solid, Angular
+- **Mobile** : pas de React Native, Flutter, Swift, Kotlin
+- **DevOps** : pas de Docker, Kubernetes, Terraform, AWS, GCP
+- **Bases de données** : pas de PostgreSQL, Redis, MongoDB en profondeur
+- **Sécurité offensive** : pas par design (refus politique)
+
+Pour étendre vers un de ces domaines, il suffit d'ajouter une entrée dans
+[backend/corpora.py](../backend/corpora.py) et de relancer `fetch_docs` + `build_index`.
+Architecture déjà prête.
+
+### 🎯 Conclusion
+
+- **Pour toi qui apprends le web Python+TS moderne** : 🟢 **complet, on peut s'arrêter**
+- **Pour montrer dans un portfolio dev** : 🟢 **complet**
+- **Pour partager avec quelques amis qui apprennent** : 🟡 **manque auth + mobile + Docker**
+- **Pour en faire un SaaS public** : 🟠 **encore 3-5 jours de boulot**
+- **Pour couvrir TOUTE la programmation moderne** : 🔴 **ce n'est pas l'objectif et ça ne devrait jamais l'être** — un outil expert sur 6 technos vaut mieux qu'un outil moyen sur 60
+
+---
+
+## 8. Métriques cibles pour la V1.0 publique
+
+| Métrique | Aujourd'hui | Cible V1.0 |
+|---|---|---|
+| Score retrieval moyen (benchmark 22 questions) | 0.711 | ≥ 0.75 |
+| Score FR moyen | 0.639 | ≥ 0.75 |
+| Hit rate sur sources attendues | 82% | ≥ 90% |
+| Premier token (DeepSeek) | < 1 s | < 0.8 s |
+| Sécurité sandbox | 8/8 | 10/10 (ajouter : fork bomb, mémoire, CPU) |
+| Mobile UX | 4/10 | 8/10 |
+| Onboarding première visite | 0 | tour interactif |
+| Lighthouse score | non mesuré | ≥ 90 |

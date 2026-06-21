@@ -58,6 +58,43 @@ export const CORPUS_META: Record<Corpus | "unknown", CorpusMeta> = {
     bgColor: "bg-[#A78BFA]/15 border-[#A78BFA]/40",
     icon: "folder_code",
   },
+  // ============ Phase 7 — Écosystème ============
+  pytest: {
+    label: "Pytest",
+    color: "text-[#0A9EDC]",
+    bgColor: "bg-[#0A9EDC]/15 border-[#0A9EDC]/40",
+    icon: "bug_report",
+  },
+  httpx: {
+    label: "HTTPX",
+    color: "text-[#5E81AC]",
+    bgColor: "bg-[#5E81AC]/15 border-[#5E81AC]/40",
+    icon: "send_and_archive",
+  },
+  sqlalchemy: {
+    label: "SQLAlchemy",
+    color: "text-[#D71F00]",
+    bgColor: "bg-[#D71F00]/15 border-[#D71F00]/40",
+    icon: "database",
+  },
+  zod: {
+    label: "Zod",
+    color: "text-[#274D7F]",
+    bgColor: "bg-[#274D7F]/15 border-[#274D7F]/40",
+    icon: "shield",
+  },
+  tanstack_query: {
+    label: "TanStack Query",
+    color: "text-[#FF4154]",
+    bgColor: "bg-[#FF4154]/15 border-[#FF4154]/40",
+    icon: "sync",
+  },
+  vitest: {
+    label: "Vitest",
+    color: "text-[#FCC72B]",
+    bgColor: "bg-[#FCC72B]/15 border-[#FCC72B]/40",
+    icon: "speed",
+  },
   unknown: {
     label: "Inconnu",
     color: "text-on-surface-variant",

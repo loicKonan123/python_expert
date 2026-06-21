@@ -13,6 +13,13 @@ const ALL_CORPORA: Corpus[] = [
   "typescript",
   "tailwind",
   "self",
+  // Phase 7 — écosystème
+  "pytest",
+  "httpx",
+  "sqlalchemy",
+  "zod",
+  "tanstack_query",
+  "vitest",
 ];
 
 type Props = {

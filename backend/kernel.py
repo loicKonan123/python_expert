@@ -351,6 +351,10 @@ class PythonKernel:
             )
 
             elapsed_ms = int((time.perf_counter() - start) * 1000)
+            # Normalise les fins de ligne Windows et retire les \r isolés que
+            # le buffering subprocess peut laisser traîner.
+            stdout = stdout.replace("\r\n", "\n").replace("\r", "").rstrip()
+            stderr = stderr.replace("\r\n", "\n").replace("\r", "").rstrip()
             stdout, t1 = _truncate(stdout, max_output_bytes)
             stderr, t2 = _truncate(stderr, max_output_bytes)
 

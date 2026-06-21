@@ -122,6 +122,82 @@ CORPORA: dict[str, Corpus] = {
         source_subpath="src",
     ),
 
+    # ============================================================
+    # Phase 7 — Écosystème (libs tierces fréquemment associées au stack)
+    # ============================================================
+
+    # ---------------------------------------------------------------- pytest
+    "pytest": Corpus(
+        name="pytest",
+        description="Pytest (testing Python)",
+        local_path=DOCS_ROOT / "pytest",
+        format="rst",
+        file_extensions=(".rst",),
+        source_repo="https://github.com/pytest-dev/pytest.git",
+        source_branch="main",
+        source_subpath="doc/en",
+    ),
+
+    # ---------------------------------------------------------------- httpx
+    "httpx": Corpus(
+        name="httpx",
+        description="HTTPX (client HTTP Python moderne)",
+        local_path=DOCS_ROOT / "httpx",
+        format="markdown",
+        file_extensions=(".md",),
+        source_repo="https://github.com/encode/httpx.git",
+        source_branch="master",
+        source_subpath="docs",
+    ),
+
+    # ------------------------------------------------------------ sqlalchemy
+    "sqlalchemy": Corpus(
+        name="sqlalchemy",
+        description="SQLAlchemy 2.x (ORM Python)",
+        local_path=DOCS_ROOT / "sqlalchemy",
+        format="rst",
+        file_extensions=(".rst",),
+        source_repo="https://github.com/sqlalchemy/sqlalchemy.git",
+        source_branch="main",
+        source_subpath="doc/build",
+    ),
+
+    # ---------------------------------------------------------------- Zod
+    "zod": Corpus(
+        name="zod",
+        description="Zod (validation TS)",
+        local_path=DOCS_ROOT / "zod",
+        format="mdx",  # docs Zod en MDX dans packages/docs
+        file_extensions=(".mdx", ".md"),
+        source_repo="https://github.com/colinhacks/zod.git",
+        source_branch="main",
+        source_subpath="packages/docs",
+    ),
+
+    # ---------------------------------------------------------------- TanStack Query
+    "tanstack_query": Corpus(
+        name="tanstack_query",
+        description="TanStack Query (data fetching React)",
+        local_path=DOCS_ROOT / "tanstack-query",
+        format="markdown",
+        file_extensions=(".md",),
+        source_repo="https://github.com/TanStack/query.git",
+        source_branch="main",
+        source_subpath="docs/framework/react",
+    ),
+
+    # ---------------------------------------------------------------- Vitest
+    "vitest": Corpus(
+        name="vitest",
+        description="Vitest (testing TS/JS)",
+        local_path=DOCS_ROOT / "vitest",
+        format="markdown",
+        file_extensions=(".md",),
+        source_repo="https://github.com/vitest-dev/vitest.git",
+        source_branch="main",
+        source_subpath="docs",
+    ),
+
     # ---------------------------------------------------- Code du projet courant
     # Permet au tuteur de répondre à des questions sur le code que TU as écrit
     # (« regarde mon backend/rag.py », « est-ce que mon ChatMessage.tsx est
