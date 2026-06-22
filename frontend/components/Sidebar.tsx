@@ -128,7 +128,7 @@ export function Sidebar({ open, activeLevelNum, onPickConcept }: Props) {
               </button>
 
               {isExpanded && (
-                <ul className="ml-3 pl-3 border-l border-outline-variant/40 space-y-0.5">
+                <ul className="ml-3 pl-3 relative space-y-0.5 [&::before]:content-[''] [&::before]:absolute [&::before]:left-0 [&::before]:top-0 [&::before]:bottom-2 [&::before]:w-px [&::before]:bg-gradient-to-b [&::before]:from-accent/40 [&::before]:via-action/30 [&::before]:to-transparent">
                   {level.concepts.map((c, idx) => {
                     const realIdx =
                       CURRICULUM.find((l) => l.num === level.num)?.concepts.indexOf(c) ?? idx;
@@ -167,8 +167,8 @@ export function Sidebar({ open, activeLevelNum, onPickConcept }: Props) {
         )}
       </nav>
 
-      {/* Pied : version / lien GitHub */}
-      <div className="px-4 mt-auto pt-2">
+      {/* Footer minimaliste — juste la signature RAG local */}
+      <div className="px-4 mt-auto pt-3 border-t border-outline-variant/20">
         <div className="text-[10px] font-mono text-on-surface-variant/60 text-center uppercase tracking-widest">
           RAG local · doc officielle
         </div>

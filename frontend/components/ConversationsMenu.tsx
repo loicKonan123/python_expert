@@ -67,12 +67,12 @@ export function ConversationsMenu({
 
       {open && (
         <div
-          className="absolute right-0 mt-2 w-[360px] max-h-[70vh] overflow-hidden flex flex-col rounded-xl border border-outline-variant bg-surface-container shadow-2xl"
+          className="absolute right-0 mt-2 w-[360px] max-h-[70vh] overflow-hidden flex flex-col rounded-2xl glass-card-strong shadow-2xl"
           role="menu"
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-outline-variant">
-            <div className="text-[13px] font-mono uppercase tracking-widest text-on-surface-variant">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-on-surface/10">
+            <div className="text-[11px] font-mono uppercase tracking-widest text-accent">
               Conversations · {conversations.length}
             </div>
             <button
@@ -80,7 +80,7 @@ export function ConversationsMenu({
                 onNew();
                 setOpen(false);
               }}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-primary text-on-primary text-[12px] hover:opacity-90 transition-opacity"
+              className="flex items-center gap-1 px-3 py-1 rounded-full bg-action text-white text-[12px] font-medium hover:brightness-110 transition-all shadow-[0_4px_12px_-4px_rgba(99,102,241,0.5)]"
             >
               <MaterialIcon name="add" className="text-[14px]" />
               Nouvelle
@@ -100,10 +100,10 @@ export function ConversationsMenu({
               return (
                 <div
                   key={c.id}
-                  className={`group flex items-stretch border-b border-outline-variant/40 last:border-b-0 ${
+                  className={`group flex items-stretch border-b border-on-surface/10 last:border-b-0 transition-colors ${
                     isCurrent
-                      ? "bg-primary-container/15 border-l-2 border-l-primary"
-                      : "hover:bg-surface-container-high"
+                      ? "bg-gradient-to-r from-[#6366f1]/15 to-transparent border-l-2 border-l-accent"
+                      : "hover:bg-on-surface/5"
                   }`}
                 >
                   <button

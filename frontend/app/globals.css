@@ -59,6 +59,15 @@
   --color-on-error: #690005;
   --color-on-error-container: #ffdad6;
 
+  /* ---------- Couleurs brand "action" et "accent" ----------
+   * Adaptent au thème via [data-theme="light"] plus bas.
+   *   action = CTA solide (boutons primaires, avatars, lignes pulse)
+   *   accent = highlights ambre/teal (titres flagship, labels kickers)
+   */
+  --color-action: #4f46e5;
+  --color-action-hover: #6366f1;
+  --color-accent: #fbbf24;
+
   /* ---------- Espacements custom ---------- */
   --spacing-sidebar-width: 280px;
   --spacing-chat-max-width: 1024px;
@@ -79,15 +88,15 @@
    pour garder la cohérence de marque).
    ============================================================ */
 html[data-theme="light"] {
-  --color-background: #f5f7fb;
-  --color-surface: #f5f7fb;
-  --color-surface-dim: #e9eef7;
+  --color-background: #e6ebf2;        /* gris-bleu sourd — laisse les cartes blanches popper */
+  --color-surface: #e6ebf2;
+  --color-surface-dim: #d9e0ea;
   --color-surface-bright: #ffffff;
   --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #eef2f9;
-  --color-surface-container: #e6ecf6;
-  --color-surface-container-high: #dde5f1;
-  --color-surface-container-highest: #d4deec;
+  --color-surface-container-low: #f1f4f9;
+  --color-surface-container: #eaeef5;
+  --color-surface-container-high: #dfe5ef;
+  --color-surface-container-highest: #d4dce9;
   --color-surface-variant: #d4deec;
   --color-on-background: #1a2238;
   --color-on-surface: #1a2238;
@@ -107,37 +116,105 @@ html[data-theme="light"] {
   --color-secondary-container: #ffe082;
   --color-on-secondary: #ffffff;
   --color-on-secondary-container: #2a2100;
+
+  /* Action et accent — palette Stitch light (teal + cyan, plus de gold) */
+  --color-action: #00677f;        /* teal-deep — CTA solide */
+  --color-action-hover: #00808f;  /* teal légèrement plus clair */
+  --color-accent: #00677f;        /* identique à action : on garde une seule famille */
 }
 
-/* En light, les "frosted" doivent être basés sur du noir transparent
-   plutôt que du blanc transparent, sinon les cartes deviennent invisibles. */
-html[data-theme="light"] .glass-card {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.75),
-    rgba(255, 255, 255, 0.55)
-  );
-  border: 1px solid rgba(26, 34, 56, 0.08);
+/* En light, on troque le verre dépoli pour de vraies cartes blanches solides
+   avec ombres douces — c'est ce qui rend la version Stitch light si propre.
+   Le backdrop-filter est neutralisé, sinon il assombrit la carte sur fond clair. */
+/* Hover lift — toutes les cartes se soulèvent légèrement au survol */
+.glass-card:hover,
+.glass-card-strong:hover {
+  transform: translateY(-2px);
+}
+.glass-card:hover {
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.8),
-    0 10px 40px rgba(26, 34, 56, 0.08);
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 2px 4px rgba(0, 0, 0, 0.22),
+    0 12px 32px -4px rgba(0, 0, 0, 0.40),
+    0 32px 80px -16px rgba(0, 0, 0, 0.45);
+}
+.glass-card-strong:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 4px 8px rgba(0, 0, 0, 0.30),
+    0 16px 40px -6px rgba(0, 0, 0, 0.45),
+    0 40px 100px -20px rgba(0, 0, 0, 0.50);
+}
+@media (prefers-reduced-motion: reduce) {
+  .glass-card, .glass-card-strong { transition: none; }
+  .glass-card:hover, .glass-card-strong:hover { transform: none; }
+}
+
+/* Light — cartes blanches qui détachent sur fond gris-bleu, effet 3D pop */
+html[data-theme="light"] .glass-card {
+  background: #ffffff;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),                 /* highlight haut */
+    0 1px 2px rgba(15, 23, 42, 0.06),                     /* contour proche */
+    0 6px 16px -4px rgba(15, 23, 42, 0.08),               /* ombre principale */
+    0 16px 32px -8px rgba(15, 23, 42, 0.06);              /* halo diffus */
 }
 html[data-theme="light"] .glass-card-strong {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.85),
-    rgba(255, 255, 255, 0.65)
-  );
-  border: 1px solid rgba(26, 34, 56, 0.10);
+  background: #ffffff;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid rgba(15, 23, 42, 0.08);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 20px 60px rgba(26, 34, 56, 0.10);
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    0 2px 4px rgba(15, 23, 42, 0.07),
+    0 10px 24px -6px rgba(15, 23, 42, 0.10),
+    0 24px 48px -12px rgba(15, 23, 42, 0.08);
 }
 
-/* Orbes plus discrets et chauds en light */
-html[data-theme="light"] .bg-glow::before { opacity: 0.10; }
-html[data-theme="light"] .bg-glow::after  { opacity: 0.06; }
-html[data-theme="light"] .bg-glow > .orb  { opacity: 0.05; }
+/* Hover light — ombres plus profondes pour amplifier le pop-out */
+html[data-theme="light"] .glass-card:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    0 2px 4px rgba(15, 23, 42, 0.08),
+    0 12px 28px -4px rgba(15, 23, 42, 0.14),
+    0 24px 48px -8px rgba(15, 23, 42, 0.10);
+}
+html[data-theme="light"] .glass-card-strong:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    0 4px 8px rgba(15, 23, 42, 0.10),
+    0 16px 36px -6px rgba(15, 23, 42, 0.16),
+    0 32px 64px -12px rgba(15, 23, 42, 0.12);
+}
+
+/* En light, on coupe le mesh background : la grille seule suffit, les orbes
+   colorés sur fond clair font cheap. */
+html[data-theme="light"] .bg-glow::before,
+html[data-theme="light"] .bg-glow::after,
+html[data-theme="light"] .bg-glow > .orb { opacity: 0; }
+
+/* Constellations + particules deviennent trop bruyantes en light → on les éteint
+   ou on les rend ultra-subtiles. Les pulses gardent un peu de présence. */
+html[data-theme="light"] .polaris-particle { opacity: 0; animation: none; }
+html[data-theme="light"] .constellation-star { opacity: 0; }
+
+/* En light, la scène orbitale garde son opacité mais ses éléments deviennent
+   plus contrastés via les couleurs de fond — pas besoin de globaliser une
+   opacité réduite. */
+
+/* Fenêtres de code (hero preview + CodeBlock résultats) — fond navy profond
+   en dark, fond très clair grisé en light pour rester cohérent avec les
+   cartes blanches mais bien identifier la "fenêtre code". */
+.hero-code-preview {
+  background: #010f1f;
+}
+html[data-theme="light"] .hero-code-preview {
+  background: var(--color-surface-container-low);
+  border-color: rgba(15, 23, 42, 0.10);
+}
 
 /* ============================================================
    Base
@@ -149,16 +226,45 @@ html, body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+}
+@media (prefers-reduced-motion: reduce) {
+  html, body { scroll-behavior: auto; }
 }
 
-/* Scrollbar custom (webkit) */
-.custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--color-surface-container-highest);
-  border-radius: 10px;
+/* Scrollbar — globale + custom */
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: #4f46e5;
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--color-outline); }
+*::-webkit-scrollbar-thumb:hover {
+  background: #6366f1;
+  background-clip: padding-box;
+  border: 2px solid transparent;
+}
+.custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+
+/* Sélection de texte aux couleurs marque */
+::selection {
+  background: rgba(251, 191, 36, 0.30);
+  color: #ffffff;
+}
+html[data-theme="light"] ::selection {
+  background: rgba(99, 102, 241, 0.20);
+  color: #0b1326;
+}
+
+/* Focus rings uniformes — toute interaction clavier prend un halo indigo subtil */
+*:focus-visible {
+  outline: 2px solid rgba(129, 140, 248, 0.6);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
 
 /* Glassmorphism pour l'input flottant */
 .glass-input {
@@ -168,6 +274,15 @@ html, body {
 }
 
 /* Polaris — scintillement subtil au hover */
+/* Étoiles de la constellation — blanc en dark, indigo foncé en light */
+.constellation-star {
+  color: #ffffff;
+}
+html[data-theme="light"] .constellation-star {
+  color: #1d6296;
+  opacity: 0.6;
+}
+
 .polaris-twinkle {
   transition: transform 0.4s ease, filter 0.4s ease;
 }
@@ -179,14 +294,36 @@ html, body {
   .polaris-twinkle:hover { transform: none; filter: none; }
 }
 
-/* Animation curseur streaming */
+/* Animation curseur streaming — petit dot ambre pulsant (style "génération en cours") */
 .typing-caret::after {
-  content: '▍';
-  color: var(--color-primary);
-  animation: blink 1s steps(2, end) infinite;
-  margin-left: 2px;
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-left: 4px;
+  border-radius: 9999px;
+  background: var(--color-accent);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--color-accent) 50%, transparent);
+  animation: caret-pulse 1.2s ease-in-out infinite;
+  vertical-align: middle;
 }
-@keyframes blink { 50% { opacity: 0; } }
+@keyframes caret-pulse {
+  0%, 100% { transform: scale(0.7); opacity: 0.6; }
+  50%      { transform: scale(1.1); opacity: 1; }
+}
+
+/* Trois dots qui bouncent en cascade pour l'état "loading" initial */
+.polaris-bounce {
+  animation: polaris-bounce 1.2s ease-in-out infinite;
+}
+@keyframes polaris-bounce {
+  0%, 100% { transform: translateY(0);    opacity: 0.5; }
+  50%      { transform: translateY(-6px); opacity: 1;   }
+}
+@media (prefers-reduced-motion: reduce) {
+  .typing-caret::after,
+  .polaris-bounce { animation: none; }
+}
 
 /* ============================================================
    Polaris — Mesh gradient background (Phase 8, direction Glass+Gradient)
@@ -241,7 +378,7 @@ html, body {
   right: 22%;
   width: 480px;
   height: 480px;
-  background: radial-gradient(circle at 50% 50%, #bb9af7, transparent 70%);
+  background: radial-gradient(circle at 50% 50%, #4f46e5, transparent 70%);
   opacity: 0.08;
   animation: drift-3 36s ease-in-out infinite alternate;
 }
@@ -273,32 +410,96 @@ html, body {
    un blur subtil derrière, une bordure lumineuse, et un effet de
    profondeur via inset shadow.
    ============================================================ */
+/* Système d'ombres 3D multi-couches — effet "pop-out" en dark */
 .glass-card {
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.04),
-    rgba(255, 255, 255, 0.015)
+    rgba(255, 255, 255, 0.05),
+    rgba(255, 255, 255, 0.02)
   );
   backdrop-filter: blur(16px) saturate(120%);
   -webkit-backdrop-filter: blur(16px) saturate(120%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.10);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 10px 40px rgba(0, 0, 0, 0.25);
+    /* highlight haut (suggère une surface bombée) */
+    inset 0 1px 0 rgba(255, 255, 255, 0.10),
+    /* contour proche pour la définition */
+    0 1px 2px rgba(0, 0, 0, 0.20),
+    /* ombre principale qui ancre l'objet */
+    0 8px 24px -4px rgba(0, 0, 0, 0.35),
+    /* halo diffus qui crée la sensation de flottement */
+    0 24px 60px -12px rgba(0, 0, 0, 0.40);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .glass-card-strong {
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.07),
-    rgba(255, 255, 255, 0.025)
+    rgba(255, 255, 255, 0.08),
+    rgba(255, 255, 255, 0.03)
   );
   backdrop-filter: blur(24px) saturate(140%);
   -webkit-backdrop-filter: blur(24px) saturate(140%);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.10),
-    0 20px 60px rgba(0, 0, 0, 0.30);
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 2px 4px rgba(0, 0, 0, 0.25),
+    0 12px 32px -6px rgba(0, 0, 0, 0.40),
+    0 32px 80px -16px rgba(0, 0, 0, 0.45);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* ============================================================
+   Polaris — particules flottantes décoratives
+
+   Petits points qui montent doucement, fadent en chemin. Pure CSS,
+   pas de JS. Utilisable dans n'importe quel conteneur en position:relative
+   via <span class="polaris-particle"></span>. Le delay et la position
+   sont passés en CSS custom properties pour répartir le pattern.
+   ============================================================ */
+.polaris-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 9999px;
+  background: var(--p-color, var(--color-accent));
+  opacity: 0;
+  left: var(--p-left, 50%);
+  bottom: 0;
+  filter: blur(0.5px);
+  animation: polaris-float var(--p-dur, 8s) ease-in-out var(--p-delay, 0s) infinite;
+  pointer-events: none;
+}
+@keyframes polaris-float {
+  0%   { transform: translateY(0)      scale(0.6); opacity: 0; }
+  20%  { opacity: 0.9; }
+  100% { transform: translateY(-160px) scale(1);   opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .polaris-particle { animation: none; opacity: 0; }
+}
+
+/* ============================================================
+   Polaris — tech-grid (motif de points radiaux, inspiré du mockup Stitch)
+
+   Utilisée sur la landing en arrière-plan pour donner une texture
+   technique sans alourdir. Variante claire et sombre.
+   ============================================================ */
+.tech-grid {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    rgba(99, 102, 241, 0.18) 1px,
+    transparent 0
+  );
+  background-size: 40px 40px;
+}
+html[data-theme="light"] .tech-grid {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    rgba(0, 103, 127, 0.06) 1px,
+    transparent 0
+  );
+  background-size: 32px 32px;
 }
 
 /* ============================================================

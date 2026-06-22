@@ -234,6 +234,56 @@ abouti, prêt à être montré. Moins encombré, plus de personnalité, accessib
 - [x] Send button avec gradient `primary → #3776ab` + glow shadow
 - [x] Respect `prefers-reduced-motion` sur toutes les animations
 
+### Phase 9 — Intents câblés (à venir)
+
+**Constat actuel** : la barre d'intents dans le `ChatInput` (Refactor, Debug,
+Generate, Explain) **ne change rien côté backend**. Cliquer un intent injecte
+juste un préfixe texte (`"Refactor: "`) dans l'input. Le LLM se débrouille.
+Pour que ces boutons aient une valeur produit, il faut les câbler vraiment.
+
+**Décision** : on passe à **6 intents** (sweet spot UX : couvre tout le
+workflow dev sans devenir un menu) et on les câble réellement.
+
+#### 9.1 Les 6 intents officiels
+
+| # | Intent | Cas d'usage | Système prompt (essence) | Boost retrieval |
+|---|---|---|---|---|
+| 1 | **Generate** | Partir de zéro | "Code runnable + docstring + un exemple d'usage" | stdlib + libs nommées dans la question |
+| 2 | **Explain** | Comprendre un code/concept | "Junior dev, analogies, pas de jargon non défini" | 1 seul corpus, plus de contexte par chunk |
+| 3 | **Refactor** | Améliorer la **structure** | "Avant/après + pourquoi de chaque changement" | `self` (le code de l'utilisateur) |
+| 4 | **Debug** | Trouver et fixer un bug | "Cause racine + fix minimal + test de non-régression" | corpus détectés dans le stack-trace |
+| 5 | **Test** *(nouveau)* | Écrire des tests | "Golden path + edge cases + erreurs, suit la convention du projet" | pytest, httpx, vitest |
+| 6 | **Optimize** *(nouveau)* | Améliorer la **performance** | "Mesure avant/après, identifie le bottleneck, justifie le gain" | stdlib (functools, asyncio), `self` |
+
+Pourquoi pas d'autres ?
+- "Review" se confond trop avec Refactor
+- "Document" est un sous-cas d'Explain (sortie = docstring vs prose)
+- "Migrate" est trop niche pour mériter une pill permanente
+
+#### 9.2 Travail backend
+
+- [ ] Endpoint `/api/ask` accepte un champ `intent: Literal["generate", "explain", "refactor", "debug", "test", "optimize"] | None`
+- [ ] Dictionnaire `INTENT_PROMPTS` dans `backend/llm/prompts.py` qui mappe chaque intent vers son system prompt
+- [ ] Si `intent` est fourni → injection du system prompt correspondant en plus du system prompt de base
+- [ ] Dictionnaire `INTENT_CORPUS_BOOST` qui boost certains corpus dans le retrieval (multiplie le score `k` ou réordonne)
+- [ ] Logger l'intent dans les usage stats pour mesurer l'adoption
+
+#### 9.3 Travail frontend
+
+- [ ] `ChatInput` passe à 6 pills (ajout Test + Optimize)
+- [ ] Cliquer une pill n'injecte plus de préfixe texte — change un state `selectedIntent`
+- [ ] Visuel : la pill active a un glow ambre + le `Intent` label montre la pill choisie en clair
+- [ ] L'intent sélectionné est passé à `askStream()` puis au backend
+- [ ] Persistance : l'intent par défaut peut être configuré (localStorage, ex: "Generate")
+- [ ] Bot message badge : affiche l'intent utilisé (déjà fait pour modelOverride, même pattern)
+
+#### 9.4 Auto-routing modèle (optionnel, phase 9 bis)
+
+- [ ] `Debug` → reasoning model (deepseek-r1 quand dispo, fallback deepseek-chat)
+- [ ] `Generate` + `Refactor` → coder model (deepseek-coder ou qwen2.5-coder)
+- [ ] `Explain` + `Test` + `Optimize` → modèle généraliste rapide
+- [ ] Garder l'auto-routing existant pour les questions sans intent explicite
+
 ---
 
 ## Naming — 5 candidats à valider

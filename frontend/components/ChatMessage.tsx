@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { MaterialIcon } from "./MaterialIcon";
 import { CodeBlock } from "./CodeBlock";
 import { Sources, type SourcesHandle } from "./Sources";
+import { PolarisLogo } from "./PolarisLogo";
 import { parseMarkdown } from "@/lib/markdown";
 import { metaForCorpus } from "@/lib/corpus-meta";
 import type { Source } from "@/lib/api";
@@ -36,9 +37,12 @@ type Props = {
 export function ChatMessage({ message, onRegenerate, sessionId }: Props) {
   if (message.role === "user") {
     return (
-      <div className="flex justify-end">
-        <div className="glass-card max-w-[85%] px-5 py-3 rounded-2xl">
+      <div className="flex justify-end gap-3">
+        <div className="glass-card max-w-[85%] px-5 py-3 rounded-2xl border-l-[3px] border-l-[#6366f1]/60">
           <p className="text-[16px] leading-[1.6]">{message.content}</p>
+        </div>
+        <div className="w-8 h-8 rounded-full bg-action flex items-center justify-center shrink-0 mt-1 shadow-[0_4px_12px_-4px_rgba(99,102,241,0.6)]">
+          <MaterialIcon name="person" className="text-white text-[18px]" />
         </div>
       </div>
     );
@@ -81,7 +85,12 @@ function BotMessage({
 
   return (
     <div className="flex justify-start gap-4">
-      <div className="w-1 self-stretch bg-primary rounded-full shrink-0" />
+      <div className="flex flex-col items-center shrink-0">
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent to-action flex items-center justify-center shadow-[0_4px_12px_-4px_rgba(139,92,246,0.6)]">
+          <PolarisLogo size={18} variant="mono" color="#ffffff" uid={`msg-${message.id}`} />
+        </div>
+        <div className="w-px flex-1 mt-2 bg-gradient-to-b from-action/40 via-action/20 to-transparent" />
+      </div>
       <div className="flex-1 min-w-0 space-y-4">
         <div className="glass-card-strong p-6 rounded-2xl space-y-4">
           {/* Bandeau meta : modèle choisi par auto-routing + rewrite éventuel */}
@@ -133,12 +142,13 @@ function BotMessage({
           )}
 
           {message.content === "" && message.streaming ? (
-            <div className="flex items-center gap-2 text-on-surface-variant text-[14px]">
-              <MaterialIcon
-                name="bolt"
-                className="text-secondary text-[18px] animate-pulse"
-              />
-              Recherche dans la documentation et génération...
+            <div className="flex items-center gap-3 text-on-surface-variant text-[14px]">
+              <span className="inline-flex items-end gap-1 h-4" aria-hidden="true">
+                <span className="w-1.5 h-1.5 rounded-full bg-accent polaris-bounce" style={{ animationDelay: "0ms" }} />
+                <span className="w-1.5 h-1.5 rounded-full bg-action polaris-bounce" style={{ animationDelay: "150ms" }} />
+                <span className="w-1.5 h-1.5 rounded-full bg-action polaris-bounce" style={{ animationDelay: "300ms" }} />
+              </span>
+              <span>Recherche dans la documentation et génération…</span>
             </div>
           ) : (
             <div className="space-y-3">

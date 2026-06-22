@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { MaterialIcon } from "./MaterialIcon";
 import { ConversationsMenu } from "./ConversationsMenu";
 import { PolarisLogo } from "./PolarisLogo";
@@ -83,22 +84,33 @@ export function TopBar({
             className="text-[22px]"
           />
         </button>
-        <div className="flex items-center gap-2">
+        <Link
+          href="/"
+          aria-label="Retour à l'accueil Polaris"
+          className="flex items-center gap-2 group"
+        >
           <PolarisLogo
-            size={24}
-            primary="var(--color-primary-fixed-dim)"
+            size={28}
+            variant="animated"
             twinkle
-            className="text-primary-fixed-dim"
+            uid="topbar"
           />
-          <h1 className="text-[20px] font-semibold text-primary-fixed-dim tracking-tight">
+          <h1 className="text-[20px] font-semibold tracking-tight bg-gradient-to-br from-[#818cf8] to-accent bg-clip-text text-transparent group-hover:brightness-110 transition-all">
             Polaris
           </h1>
-        </div>
+        </Link>
         <span
           className={`w-2 h-2 rounded-full ${statusColor}`}
           title={statusLabel}
           aria-label={statusLabel}
         />
+
+        {/* Liens secondaires (style Stitch dashboard) */}
+        <nav className="hidden lg:flex items-center gap-4 ml-4 pl-4 border-l border-outline-variant/30">
+          <TopBarLink href="#" label="Docs" active />
+          <TopBarLink href="#" label="Sandbox" />
+          <TopBarLink href="#" label="Forum" />
+        </nav>
       </div>
       <div className="flex items-center gap-2">
         {/* Compteur tokens/coût retiré de l'UI (Phase 8 — design moins encombré).
@@ -146,6 +158,29 @@ export function TopBar({
         </a>
       </div>
     </header>
+  );
+}
+
+function TopBarLink({
+  href,
+  label,
+  active,
+}: {
+  href: string;
+  label: string;
+  active?: boolean;
+}) {
+  return (
+    <a
+      href={href}
+      className={`text-[11px] font-mono uppercase tracking-widest transition-colors ${
+        active
+          ? "text-accent border-b border-accent/60 pb-0.5"
+          : "text-on-surface-variant hover:text-accent"
+      }`}
+    >
+      {label}
+    </a>
   );
 }
 

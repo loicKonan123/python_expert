@@ -337,7 +337,7 @@ export default function Home() {
       />
 
       <main
-        className={`min-h-screen flex flex-col transition-[margin-left] duration-200 ${
+        className={`min-h-screen flex flex-col transition-[margin-left] duration-200 tech-grid ${
           sidebarOpen ? "ml-sidebar-width" : "ml-0"
         }`}
       >
@@ -354,10 +354,15 @@ export default function Home() {
           }
         />
 
-        <div className="pt-16 pb-44 flex-1 flex flex-col items-center">
+        <div className="pt-16 pb-28 flex-1 flex flex-col items-center">
           <div className="w-full max-w-chat-max-width px-8 py-stack-lg space-y-10">
             {messages.length === 0 ? (
-              <WelcomeHero />
+              <WelcomeHero
+                onPickSuggestion={(text) => {
+                  setInput(text);
+                  requestAnimationFrame(() => inputRef.current?.focus());
+                }}
+              />
             ) : (
               <div className="space-y-8">
                 {messages.map((m) => (

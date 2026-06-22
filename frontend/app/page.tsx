@@ -1,6 +1,15 @@
 import Link from "next/link";
 import { PolarisLogo } from "@/components/PolarisLogo";
+import { Constellation } from "@/components/Constellation";
 import { MaterialIcon } from "@/components/MaterialIcon";
+import { Tilt3D } from "@/components/Tilt3D";
+import { Reveal } from "@/components/Reveal";
+import { ScrollProgress } from "@/components/ScrollProgress";
+import { CountUp } from "@/components/CountUp";
+import { ScrollToTop } from "@/components/ScrollToTop";
+import { Typewriter } from "@/components/Typewriter";
+import { LandingNav } from "@/components/LandingNav";
+import { HeroOrbits } from "@/components/HeroOrbits";
 
 export const metadata = {
   title: "Polaris — Le tuteur dev qui ne ment pas",
@@ -43,49 +52,35 @@ const USPS = [
 
 export default function Landing() {
   return (
-    <main className="min-h-screen flex flex-col">
-      {/* Nav simplifiée */}
-      <header className="px-gutter h-16 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <PolarisLogo
-            size={28}
-            primary="var(--color-primary-fixed-dim)"
-            twinkle
-          />
-          <span className="text-[20px] font-semibold text-primary-fixed-dim tracking-tight">
-            Polaris
-          </span>
-        </div>
-        <div className="flex items-center gap-3">
-          <a
-            href="https://github.com/loicKonan123/python_expert"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden sm:inline-flex items-center gap-1.5 text-[13px] text-on-surface-variant hover:text-on-surface transition-colors"
-          >
-            <MaterialIcon name="code" className="text-[16px]" />
-            GitHub
-          </a>
-          <Link
-            href="/app"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-br from-primary to-[#3776ab] text-on-primary text-[14px] font-medium shadow-[0_8px_24px_rgba(152,203,255,0.25)] hover:brightness-110 transition-all"
-          >
-            Ouvrir Polaris
-            <MaterialIcon name="arrow_forward" className="text-[18px]" />
-          </Link>
-        </div>
-      </header>
+    <main className="relative min-h-screen flex flex-col tech-grid overflow-x-hidden">
+      <ScrollProgress />
+      <ScrollToTop />
+      <LandingNav />
 
       {/* Hero */}
-      <section className="px-gutter pt-16 pb-24 max-w-5xl mx-auto text-center">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-card text-[12px] font-mono uppercase tracking-widest text-on-surface-variant mb-8">
-          <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+      <section className="relative px-gutter pt-12 pb-24 max-w-5xl mx-auto text-center">
+        {/* Constellation en fond du hero */}
+        <Constellation
+          className="absolute inset-0 -z-10 pointer-events-none"
+          density={3}
+          uid="hero"
+        />
+
+        {/* Particules flottantes */}
+        <ParticlesLayer />
+
+
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-accent/30 bg-accent/5 text-accent text-[12px] font-mono uppercase tracking-widest mb-8">
+          <span className="relative w-2 h-2">
+            <span className="absolute inset-0 rounded-full bg-accent" />
+            <span className="absolute inset-0 rounded-full bg-accent animate-ping opacity-75" />
+          </span>
           RAG local · 13 corpus · sources citées
         </div>
 
-        <h1 className="text-[clamp(40px,7vw,84px)] font-semibold tracking-tight leading-[1.05] mb-6">
-          Le tuteur dev qui{" "}
-          <span className="bg-gradient-to-br from-primary via-[#bb9af7] to-secondary bg-clip-text text-transparent">
+        <h1 className="text-[clamp(40px,7vw,84px)] font-extrabold tracking-tight leading-[1.05] mb-6">
+          Le tuteur dev qui<br />
+          <span className="text-accent">
             ne ment pas.
           </span>
         </h1>
@@ -100,77 +95,183 @@ export default function Landing() {
         <div className="flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/app"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-br from-primary to-[#3776ab] text-on-primary text-[15px] font-medium shadow-[0_12px_32px_rgba(152,203,255,0.35)] hover:brightness-110 transition-all"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-action text-white text-[15px] font-semibold shadow-[0_10px_40px_-10px_rgba(99,102,241,0.6)] hover:brightness-110 hover:-translate-y-0.5 transition-all"
           >
             <MaterialIcon name="rocket_launch" className="text-[20px]" />
             Commencer maintenant
           </Link>
           <a
             href="#how"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl glass-card text-[15px] text-on-surface hover:bg-white/10 transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-surface-container-low border border-outline-variant/60 text-[15px] text-on-surface hover:border-action/40 hover:bg-surface-container transition-colors"
           >
             <MaterialIcon name="play_circle" className="text-[20px]" />
             Comment ça marche
           </a>
         </div>
-      </section>
 
-      {/* Bandeau corpus */}
-      <section className="px-gutter pb-24 max-w-6xl mx-auto w-full">
-        <p className="text-[11px] font-mono uppercase tracking-widest text-on-surface-variant/70 text-center mb-5">
-          Sources officielles indexées
-        </p>
-        <div className="flex flex-wrap justify-center gap-2">
-          {CORPORA.map((c) => (
-            <span
-              key={c.label}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full glass-card text-[12px] font-mono"
-            >
-              <span
-                className="w-1.5 h-1.5 rounded-full"
-                style={{ background: c.color }}
-              />
-              {c.label}
-            </span>
-          ))}
+        {/* Showcase logo animé entouré d'une scène orbitale */}
+        <div className="hero-scene mt-20 relative h-[400px] max-w-4xl mx-auto">
+          <HeroOrbits />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <PolarisLogo size={240} variant="animated" uid="hero-mark" />
+          </div>
+        </div>
+
+        {/* Preview code "live" sous la scène */}
+        <div className="mt-12 max-w-xl mx-auto">
+          <Tilt3D maxTilt={4}>
+            <HeroCodePreview />
+          </Tilt3D>
         </div>
       </section>
 
-      {/* USPs */}
+      {/* Bandeau stats */}
+      <Reveal>
+        <section className="px-gutter pb-20 max-w-6xl mx-auto w-full">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Stat label="Truth accuracy" color="var(--color-accent)">
+              <CountUp to={99.8} decimals={1} suffix="%" />
+            </Stat>
+            <Stat label="Inference delay" color="var(--color-on-surface)">
+              <CountUp to={0} suffix="ms" />
+            </Stat>
+            <Stat label="Corpus indexés" color="var(--color-action)">
+              <CountUp to={13} />
+            </Stat>
+            <Stat label="Chunks indexés" color="var(--color-on-surface)">
+              <CountUp to={28367} duration={1800} />
+            </Stat>
+          </div>
+        </section>
+      </Reveal>
+
+      {/* Bento grid USPs — style Stitch (7+5+12) */}
       <section id="how" className="px-gutter pb-24 max-w-6xl mx-auto w-full">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {USPS.map((u) => (
-            <article
-              key={u.title}
-              className="glass-card-strong p-6 rounded-2xl space-y-3"
-            >
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/30 to-[#bb9af7]/30 flex items-center justify-center">
-                <MaterialIcon
-                  name={u.icon}
-                  filled
-                  className="text-primary-fixed-dim text-[22px]"
-                />
-              </div>
-              <h2 className="text-[18px] font-semibold text-on-surface">
-                {u.title}
-              </h2>
-              <p className="text-[14px] text-on-surface-variant leading-[1.6]">
-                {u.body}
-              </p>
-            </article>
-          ))}
+        <Reveal>
+          <SectionHeader
+            kicker="Comment ça marche"
+            title="Trois piliers, aucun compromis"
+            subtitle="Polaris ne se contente pas de générer du texte. Il cite, il exécute, il croise les sources."
+          />
+        </Reveal>
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+          {/* Card 1 — Sourced (col-span-7) avec mini badges */}
+          <Reveal delay={0} className="md:col-span-7">
+            <Tilt3D className="h-full" maxTilt={6}>
+              <article className="glass-card-strong h-full p-7 rounded-3xl space-y-4 hover:border-accent/30 transition-colors">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#6366f1]/30 to-accent/20 flex items-center justify-center">
+                  <MaterialIcon name="verified" filled className="text-action text-[24px]" />
+                </div>
+                <h2 className="text-[22px] font-semibold text-on-surface">
+                  Sourcé, jamais inventé
+                </h2>
+                <p className="text-[14px] text-on-surface-variant leading-[1.6]">
+                  Chaque affirmation pointe vers un extrait de la doc officielle,
+                  citable d'un clic. Pas d'hallucination, pas de version périmée.
+                </p>
+                {/* Mini widget : barres de couverture des 3 plus gros corpus */}
+                <div className="space-y-2 pt-2">
+                  <CoverageBar label="Python 3.14" pct={92} color="#FFD43B" />
+                  <CoverageBar label="FastAPI" pct={88} color="#009688" />
+                  <CoverageBar label="Next.js 16" pct={84} color="#FFFFFF" />
+                </div>
+              </article>
+            </Tilt3D>
+          </Reveal>
+
+          {/* Card 2 — Executed live (col-span-5) avec code window */}
+          <Reveal delay={120} className="md:col-span-5">
+            <Tilt3D className="h-full" maxTilt={6}>
+              <article className="glass-card-strong h-full p-7 rounded-3xl space-y-4 hover:border-accent/30 transition-colors">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent/30 to-[#818cf8]/20 flex items-center justify-center">
+                  <MaterialIcon name="play_circle" filled className="text-accent text-[24px]" />
+                </div>
+                <h2 className="text-[22px] font-semibold text-on-surface">
+                  Exécuté en direct
+                </h2>
+                <p className="text-[14px] text-on-surface-variant leading-[1.6]">
+                  Le code Python tourne dans un sandbox isolé avec kernel
+                  persistant. Tu lis, modifies, exécutes — sans quitter le chat.
+                </p>
+                <MiniCodeWindow />
+              </article>
+            </Tilt3D>
+          </Reveal>
+
+          {/* Card 3 — Multi-corpus (col-span-12) avec belt animé */}
+          <Reveal delay={240} className="md:col-span-12">
+            <Tilt3D className="h-full" maxTilt={3}>
+              <article className="glass-card-strong p-7 rounded-3xl space-y-5 hover:border-accent/30 transition-colors">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#818cf8]/30 to-[#6366f1]/20 flex items-center justify-center shrink-0">
+                    <MaterialIcon name="hub" filled className="text-action text-[24px]" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-[22px] font-semibold text-on-surface">
+                      13 corpus, 28 367 chunks
+                    </h2>
+                    <p className="text-[14px] text-on-surface-variant leading-[1.6] mt-1">
+                      Du langage au front, de l'ORM aux tests : Polaris pioche
+                      simultanément dans toutes les docs officielles + ton propre
+                      code via le corpus <span className="text-accent font-mono">self</span>.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {CORPORA.map((c, i) => (
+                    <Reveal key={c.label} delay={i * 30} translateY={8}>
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full glass-card text-[12px] font-mono">
+                        <span
+                          className="w-1.5 h-1.5 rounded-full"
+                          style={{ background: c.color }}
+                        />
+                        {c.label}
+                      </span>
+                    </Reveal>
+                  ))}
+                </div>
+              </article>
+            </Tilt3D>
+          </Reveal>
         </div>
       </section>
+
+      {/* Showcase identité — 3 variantes du logo */}
+      <Reveal>
+        <section id="brand" className="px-gutter pb-24 max-w-5xl mx-auto w-full">
+          <SectionHeader
+            kicker="Identité"
+            title="Une étoile, trois visages"
+            subtitle="Le logo Polaris représente l'étoile polaire — ton point de repère dans l'univers du code. Animée pour les surfaces vivantes, statique pour la sobriété, monochrome pour le contexte."
+          />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <LogoVariantCard variant="animated" label="Animée" sub="Hero · CTA · landing" />
+            <LogoVariantCard variant="static" label="Statique" sub="Listings · OG · favicon" />
+            <LogoVariantCard variant="mono" label="Monochrome" sub="Sidebar · footer · inline" />
+          </div>
+        </section>
+      </Reveal>
+
+      {/* Comparaison */}
+      <Reveal>
+        <section id="comparison" className="px-gutter pb-24 max-w-5xl mx-auto w-full">
+          <SectionHeader
+            kicker="Comparaison"
+            title="Polaris vs LLM générique"
+            subtitle="La même question. Deux postures radicalement différentes."
+          />
+          <ComparisonTable />
+        </section>
+      </Reveal>
 
       {/* CTA final */}
+      <Reveal>
       <section className="px-gutter pb-24 max-w-3xl mx-auto w-full text-center">
+        <Tilt3D maxTilt={6}>
         <div className="glass-card-strong p-10 rounded-3xl space-y-5">
-          <PolarisLogo
-            size={56}
-            primary="var(--color-primary-fixed-dim)"
-            twinkle
-            className="mx-auto"
-          />
+          <div className="flex justify-center">
+            <PolarisLogo size={80} variant="animated" uid="cta" />
+          </div>
           <h2 className="text-[28px] font-semibold tracking-tight">
             Prêt à coder avec une vraie boussole ?
           </h2>
@@ -180,17 +281,405 @@ export default function Landing() {
           </p>
           <Link
             href="/app"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-br from-primary to-[#3776ab] text-on-primary text-[15px] font-medium shadow-[0_12px_32px_rgba(152,203,255,0.35)] hover:brightness-110 transition-all"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-action text-white text-[15px] font-semibold shadow-[0_10px_40px_-10px_rgba(99,102,241,0.6)] hover:brightness-110 hover:-translate-y-0.5 transition-all"
           >
             <MaterialIcon name="arrow_forward" />
             Ouvrir Polaris
           </Link>
         </div>
+        </Tilt3D>
       </section>
+      </Reveal>
 
-      <footer className="px-gutter py-6 border-t border-white/5 text-center text-[12px] font-mono uppercase tracking-widest text-on-surface-variant/60">
-        Polaris · RAG local · doc officielle
-      </footer>
+      <FooterLanding />
+
     </main>
+  );
+}
+
+/** En-tête de section — kicker (label ambre), titre gradient, sous-titre. */
+function SectionHeader({
+  kicker,
+  title,
+  subtitle,
+}: {
+  kicker: string;
+  title: string;
+  subtitle?: string;
+}) {
+  return (
+    <div className="mb-10 text-center">
+      <p className="text-[11px] font-mono uppercase tracking-widest text-accent mb-3">
+        {kicker}
+      </p>
+      <h2 className="text-[clamp(28px,4vw,42px)] font-extrabold tracking-tight leading-tight text-on-surface">
+        {title}
+      </h2>
+      {subtitle && (
+        <p className="mt-3 text-[15px] text-on-surface-variant max-w-2xl mx-auto leading-[1.6]">
+          {subtitle}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/** Carte d'une variante de logo — gros logo centré + label + tagline. */
+function LogoVariantCard({
+  variant,
+  label,
+  sub,
+}: {
+  variant: "animated" | "static" | "mono";
+  label: string;
+  sub: string;
+}) {
+  return (
+    <Tilt3D maxTilt={6}>
+      <article className="glass-card-strong h-full p-6 rounded-3xl flex flex-col items-center text-center space-y-4 hover:border-accent/30 transition-colors">
+        <div className="w-32 h-32 flex items-center justify-center">
+          <PolarisLogo
+            size={120}
+            variant={variant}
+            color={variant === "mono" ? "var(--color-primary-fixed-dim)" : undefined}
+            uid={`variant-${variant}`}
+          />
+        </div>
+        <div>
+          <h3 className="text-[15px] font-semibold text-on-surface">{label}</h3>
+          <p className="text-[11px] font-mono uppercase tracking-widest text-on-surface-variant/70 mt-1">
+            {sub}
+          </p>
+        </div>
+      </article>
+    </Tilt3D>
+  );
+}
+
+/** Table comparant Polaris à un LLM générique, ligne par ligne. */
+function ComparisonTable() {
+  const rows: Array<{ feature: string; polaris: string; generic: string }> = [
+    {
+      feature: "Sources citées",
+      polaris: "Chaque ligne pointe vers la doc officielle",
+      generic: "Affirmations sans source vérifiable",
+    },
+    {
+      feature: "Code Python",
+      polaris: "Exécuté en sandbox + kernel persistant",
+      generic: "Texte non vérifié, à copier-coller",
+    },
+    {
+      feature: "Versions",
+      polaris: "Python 3.14, Next.js 16, Tailwind v4",
+      generic: "Souvent périmées (knowledge cutoff)",
+    },
+    {
+      feature: "Corpus",
+      polaris: "13 sources spécialisées (28 367 chunks)",
+      generic: "Données génériques mélangées",
+    },
+    {
+      feature: "Vie privée",
+      polaris: "Indexation locale, pas de télémétrie",
+      generic: "Données envoyées au fournisseur",
+    },
+  ];
+
+  return (
+    <Tilt3D maxTilt={3}>
+      <div className="glass-card-strong rounded-3xl overflow-hidden">
+        <div className="grid grid-cols-12 px-6 py-4 border-b border-on-surface/10 text-[11px] font-mono uppercase tracking-widest text-on-surface-variant">
+          <div className="col-span-4">Critère</div>
+          <div className="col-span-4 text-accent flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+            Polaris
+          </div>
+          <div className="col-span-4">LLM générique</div>
+        </div>
+        {rows.map((r, i) => (
+          <div
+            key={r.feature}
+            className={`grid grid-cols-12 px-6 py-4 text-[14px] ${
+              i < rows.length - 1 ? "border-b border-on-surface/10" : ""
+            }`}
+          >
+            <div className="col-span-4 text-on-surface font-medium">{r.feature}</div>
+            <div className="col-span-4 flex items-start gap-2 text-on-surface">
+              <span className="text-green-400 mt-0.5 shrink-0">✓</span>
+              {r.polaris}
+            </div>
+            <div className="col-span-4 flex items-start gap-2 text-on-surface-variant">
+              <span className="text-error mt-0.5 shrink-0">✗</span>
+              {r.generic}
+            </div>
+          </div>
+        ))}
+      </div>
+    </Tilt3D>
+  );
+}
+
+/** Footer expansif 4 colonnes inspiré de la light landing Stitch. */
+function FooterLanding() {
+  return (
+    <footer className="mt-20 border-t border-on-surface/10 px-gutter py-12 max-w-6xl mx-auto w-full">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+        <div className="col-span-2 md:col-span-1 space-y-3">
+          <Link
+            href="/"
+            aria-label="Retour à l'accueil Polaris"
+            className="flex items-center gap-2 group w-fit"
+          >
+            <PolarisLogo size={28} variant="animated" uid="footer" />
+            <span className="text-[18px] font-semibold tracking-tight bg-gradient-to-br from-[#818cf8] to-accent bg-clip-text text-transparent group-hover:brightness-110 transition-all">
+              Polaris
+            </span>
+          </Link>
+          <p className="text-[12px] text-on-surface-variant/70 leading-[1.5] max-w-xs">
+            Le tuteur dev qui ne ment pas. Chaque réponse est sourcée, chaque
+            code est exécuté.
+          </p>
+        </div>
+
+        <FooterCol
+          title="Produit"
+          links={[
+            { label: "Application", href: "/app" },
+            { label: "Curriculum", href: "/app" },
+            { label: "Sandbox", href: "/app" },
+          ]}
+        />
+        <FooterCol
+          title="Projet"
+          links={[
+            { label: "GitHub", href: "https://github.com/loicKonan123/python_expert" },
+            { label: "Roadmap", href: "https://github.com/loicKonan123/python_expert/blob/main/docs/plan.md" },
+            { label: "Changelog", href: "https://github.com/loicKonan123/python_expert/commits/main" },
+          ]}
+        />
+        <FooterCol
+          title="Légal"
+          links={[
+            { label: "Confidentialité", href: "#" },
+            { label: "Conditions", href: "#" },
+            { label: "Licence", href: "#" },
+          ]}
+        />
+      </div>
+
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-6 border-t border-on-surface/10 text-[11px] font-mono uppercase tracking-widest text-on-surface-variant/60">
+        <span>v1.0.0 · © 2026 Polaris Engineering</span>
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+          <span className="text-green-400/80">Systems operational</span>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+function FooterCol({
+  title,
+  links,
+}: {
+  title: string;
+  links: { label: string; href: string }[];
+}) {
+  return (
+    <div className="space-y-2">
+      <h3 className="text-[10px] font-mono uppercase tracking-widest text-accent">
+        {title}
+      </h3>
+      <ul className="space-y-1.5">
+        {links.map((l) => (
+          <li key={l.label}>
+            <a
+              href={l.href}
+              target={l.href.startsWith("http") ? "_blank" : undefined}
+              rel={l.href.startsWith("http") ? "noopener noreferrer" : undefined}
+              className="text-[12px] text-on-surface-variant hover:text-on-surface transition-colors"
+            >
+              {l.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** Preview de code pour le hero — fenêtre macOS avec une "vraie" question + extrait de réponse. */
+function HeroCodePreview() {
+  return (
+    <div className="hero-code-preview rounded-2xl overflow-hidden border border-on-surface/10 shadow-[0_20px_60px_-20px_rgba(99,102,241,0.4)] font-mono text-[12.5px]">
+      {/* Chrome */}
+      <div className="px-4 py-2.5 flex items-center justify-between border-b border-on-surface/10 bg-on-surface/[0.03]">
+        <div className="flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]" />
+          <span className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
+          <span className="w-2.5 h-2.5 rounded-full bg-[#27c93f]" />
+        </div>
+        <span className="text-[10px] text-on-surface-variant/60">
+          polaris://chat
+        </span>
+        <span className="text-[10px] text-accent flex items-center gap-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+          live
+        </span>
+      </div>
+
+      {/* Body */}
+      <div className="p-4 space-y-3 text-left">
+        <div className="flex items-start gap-2">
+          <span className="text-action">?</span>
+          <span className="text-on-surface-variant">
+            <Typewriter text="Comment streamer un SSE en FastAPI ?" speed={40} />
+          </span>
+        </div>
+        <div className="flex items-start gap-2 pt-1">
+          <span className="text-accent">›</span>
+          <div className="flex-1 space-y-1">
+            <div className="text-on-surface">
+              <Typewriter
+                text="Avec StreamingResponse :"
+                speed={45}
+                startDelay={1800}
+              />
+            </div>
+            <pre className="text-action pl-2 border-l border-[#818cf8]/30">
+              <Typewriter
+                text={`@app.get("/stream")\nasync def stream():\n    return StreamingResponse(\n        gen(), media_type="text/event-stream"\n    )`}
+                speed={55}
+                startDelay={3000}
+              />
+            </pre>
+            <div className="text-on-surface-variant text-[11px] flex items-center gap-2 pt-1">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#009688]/20 text-[#7ed4cc]">
+                <span className="w-1 h-1 rounded-full bg-[#009688]" />
+                FastAPI · responses.py
+              </span>
+              <span className="opacity-70">score 0.91</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Statistique clé du bandeau hero — chiffre coloré + label monospace. */
+function Stat({
+  label,
+  color,
+  children,
+}: {
+  label: string;
+  color: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="glass-card rounded-2xl p-5 text-center">
+      <div
+        className="text-[28px] sm:text-[34px] font-extrabold leading-none tabular-nums"
+        style={{ color }}
+      >
+        {children}
+      </div>
+      <div className="mt-2 text-[10px] font-mono uppercase tracking-widest text-on-surface-variant/70">
+        {label}
+      </div>
+    </div>
+  );
+}
+
+/** Barre de couverture pour mini-widget — label + barre proportionnelle. */
+function CoverageBar({
+  label,
+  pct,
+  color,
+}: {
+  label: string;
+  pct: number;
+  color: string;
+}) {
+  return (
+    <div className="flex items-center gap-3 bg-surface-container-low/50 p-2.5 rounded-lg border border-outline-variant/20">
+      <span className="font-mono text-[11px] text-on-surface w-24 shrink-0">
+        {label}
+      </span>
+      <div className="flex-1 h-1 bg-on-surface/10 rounded-full overflow-hidden">
+        <div
+          className="h-full rounded-full"
+          style={{ width: `${pct}%`, background: color }}
+        />
+      </div>
+      <span className="font-mono text-[10px] text-on-surface-variant/70 shrink-0">
+        {pct}%
+      </span>
+    </div>
+  );
+}
+
+/** Mini fenêtre de code décorative — chrome macOS + 4 lignes Python colorées. */
+function MiniCodeWindow() {
+  return (
+    <div className="hero-code-preview rounded-xl p-3 font-mono text-[12px] border border-outline-variant/30 shadow-2xl">
+      <div className="flex items-center justify-between mb-2 pb-2 border-b border-outline-variant/20">
+        <div className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-[#ff5f56]" />
+          <span className="w-2 h-2 rounded-full bg-[#ffbd2e]" />
+          <span className="w-2 h-2 rounded-full bg-[#27c93f]" />
+        </div>
+        <span className="text-[10px] text-on-surface-variant/60">
+          sandbox.py
+        </span>
+        <span className="text-[10px] text-accent flex items-center gap-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+          run
+        </span>
+      </div>
+      <code className="block text-action">from polaris import truth</code>
+      <code className="block text-accent">result = truth.cite(query)</code>
+      <code className="block text-on-surface pl-3">→ ["python.org/3/...", ...]</code>
+      <code className="block text-action">assert no_hallucination</code>
+    </div>
+  );
+}
+
+/** Couche de 12 particules réparties horizontalement avec délais variés. */
+function ParticlesLayer() {
+  const particles = [
+    { left: "8%",  color: "var(--color-accent)", dur: "9s",  delay: "0s" },
+    { left: "16%", color: "#818cf8", dur: "11s", delay: "1.5s" },
+    { left: "24%", color: "#818cf8", dur: "8s",  delay: "3s" },
+    { left: "32%", color: "var(--color-accent)", dur: "10s", delay: "0.8s" },
+    { left: "42%", color: "#818cf8", dur: "12s", delay: "2.2s" },
+    { left: "50%", color: "var(--color-accent)", dur: "9s",  delay: "4s" },
+    { left: "58%", color: "#818cf8", dur: "11s", delay: "1.2s" },
+    { left: "66%", color: "#818cf8", dur: "8s",  delay: "3.5s" },
+    { left: "76%", color: "var(--color-accent)", dur: "10s", delay: "2s" },
+    { left: "84%", color: "#818cf8", dur: "12s", delay: "0.5s" },
+    { left: "92%", color: "#818cf8", dur: "9s",  delay: "4.5s" },
+    { left: "96%", color: "var(--color-accent)", dur: "11s", delay: "3.2s" },
+  ];
+  return (
+    <div className="absolute inset-0 -z-10 pointer-events-none overflow-hidden" aria-hidden="true">
+      {particles.map((p, i) => (
+        <span
+          key={i}
+          className="polaris-particle"
+          style={
+            {
+              "--p-left": p.left,
+              "--p-color": p.color,
+              "--p-dur": p.dur,
+              "--p-delay": p.delay,
+              bottom: "20%",
+            } as React.CSSProperties
+          }
+        />
+      ))}
+    </div>
   );
 }

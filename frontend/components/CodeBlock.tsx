@@ -120,12 +120,19 @@ export function CodeBlock({
   }, [copied]);
 
   return (
-    <div className="rounded-xl overflow-hidden border border-outline-variant bg-[#010409] my-3">
-      {/* Header */}
+    <div className="hero-code-preview rounded-xl overflow-hidden border border-outline-variant my-3">
+      {/* Header — style fenêtre macOS */}
       <div className="px-4 py-2 bg-surface-container-highest flex justify-between items-center border-b border-outline-variant">
-        <span className="font-mono text-[11px] text-on-surface-variant uppercase tracking-wider">
-          {filename ?? prettyLangLabel(lang)}
-        </span>
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="flex items-center gap-1.5 shrink-0" aria-hidden="true">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#27c93f]" />
+          </div>
+          <span className="font-mono text-[11px] text-on-surface-variant uppercase tracking-wider truncate">
+            {filename ?? prettyLangLabel(lang)}
+          </span>
+        </div>
         <div className="flex items-center gap-3">
           {isRunnable && (
             <>
@@ -281,10 +288,13 @@ function SandboxOutput({
       : `Exit code ${result.exit_code} (${result.elapsed_ms}ms)`;
 
   return (
-    <div className="border-t border-outline-variant bg-surface-container-low">
-      {/* Bandeau résultat */}
-      <div className="px-4 py-2 flex items-center justify-between border-b border-outline-variant/40">
+    <div className="border-t border-on-surface/10 hero-code-preview">
+      {/* Bandeau résultat avec dot status pulsant */}
+      <div className="px-4 py-2.5 flex items-center justify-between border-b border-white/5">
         <div className={`flex items-center gap-2 text-[11px] font-mono ${statusColor}`}>
+          <span
+            className={`w-1.5 h-1.5 rounded-full ${ok ? "bg-green-400 animate-pulse" : result.timeout ? "bg-yellow-400" : "bg-error"}`}
+          />
           <MaterialIcon name={statusIcon} className="text-[14px]" />
           <span>{statusLabel}</span>
           {result.truncated && (
@@ -299,8 +309,11 @@ function SandboxOutput({
       {/* stdout */}
       {result.stdout && (
         <div className="px-4 py-3">
-          <div className="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant mb-1.5">
-            stdout
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="w-1 h-1 rounded-full bg-accent" />
+            <div className="text-[10px] font-mono uppercase tracking-widest text-accent/80">
+              stdout
+            </div>
           </div>
           <pre className="text-[12px] text-on-surface font-mono whitespace-pre-wrap break-words max-h-72 overflow-y-auto custom-scrollbar">
             {result.stdout}
@@ -311,10 +324,13 @@ function SandboxOutput({
       {/* stderr */}
       {result.stderr && (
         <div
-          className={`px-4 py-3 ${result.stdout ? "border-t border-outline-variant/40" : ""}`}
+          className={`px-4 py-3 ${result.stdout ? "border-t border-white/5" : ""}`}
         >
-          <div className="text-[10px] font-mono uppercase tracking-widest text-error/80 mb-1.5">
-            stderr
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="w-1 h-1 rounded-full bg-error" />
+            <div className="text-[10px] font-mono uppercase tracking-widest text-error/80">
+              stderr
+            </div>
           </div>
           <pre className="text-[12px] text-error/90 font-mono whitespace-pre-wrap break-words max-h-72 overflow-y-auto custom-scrollbar">
             {result.stderr}

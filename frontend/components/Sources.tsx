@@ -41,12 +41,15 @@ export const Sources = forwardRef<SourcesHandle, Props>(function Sources(
   const quality = qualityForScore(topScore);
 
   return (
-    <div ref={containerRef} className="pt-4 mt-4 border-t border-outline-variant">
-      <div className="flex items-center justify-between mb-2">
+    <div ref={containerRef} className="pt-4 mt-4 border-t border-white/10">
+      <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <MaterialIcon name="menu_book" className="text-[16px] text-secondary" />
+          <MaterialIcon name="menu_book" className="text-[16px] text-accent" />
           <span className="font-mono text-[11px] text-on-surface-variant uppercase tracking-widest">
             Sources documentaires
+          </span>
+          <span className="font-mono text-[11px] text-on-surface-variant/40">
+            · {sources.length}
           </span>
         </div>
         <div
@@ -69,10 +72,10 @@ export const Sources = forwardRef<SourcesHandle, Props>(function Sources(
                 chipRefs.current[i] = el;
               }}
               onClick={() => setOpenIdx(isActive ? null : i)}
-              className={`px-3 py-1 rounded-full border text-[12px] flex items-center gap-1.5 transition-all ${
+              className={`px-3 py-1.5 rounded-full border text-[12px] flex items-center gap-1.5 transition-all ${
                 isActive
-                  ? "bg-primary-container text-on-primary-container border-primary"
-                  : `${meta.bgColor} ${meta.color} hover:brightness-125`
+                  ? "bg-action text-white border-transparent shadow-[0_4px_16px_-4px_rgba(99,102,241,0.6)]"
+                  : `${meta.bgColor} ${meta.color} hover:brightness-125 hover:-translate-y-0.5`
               }`}
               title={`[${i + 1}] ${s.corpus}/${s.source} — score ${s.score.toFixed(3)}`}
             >
@@ -88,7 +91,7 @@ export const Sources = forwardRef<SourcesHandle, Props>(function Sources(
       </div>
 
       {openIdx !== null && sources[openIdx] && (
-        <div className="mt-3 p-4 bg-surface-container-low rounded-lg border border-outline-variant">
+        <div className="mt-3 p-4 glass-card rounded-xl">
           <div className="flex items-center gap-2 mb-2 text-[11px] font-mono text-on-surface-variant uppercase tracking-wider">
             <MaterialIcon name="article" className="text-[14px]" />
             <span className={metaForCorpus(sources[openIdx].corpus).color}>

@@ -44,12 +44,15 @@ export function CorpusFilter({ selected, onChange }: Props) {
 
   return (
     <div className="flex flex-wrap items-center gap-1.5">
+      <span className="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant/60 mr-1">
+        Sources
+      </span>
       <button
         onClick={() => onChange([])}
-        className={`px-2.5 py-1 rounded-md border text-[11px] font-mono transition-all ${
+        className={`px-3 py-1 rounded-full text-[11px] font-mono transition-all ${
           isAll
-            ? "bg-primary-container text-on-primary-container border-primary"
-            : "bg-transparent text-on-surface-variant border-outline-variant hover:text-on-surface"
+            ? "bg-gradient-to-br from-accent to-accent/70 text-[#0b1326] font-semibold shadow-[0_4px_16px_-4px_rgba(251,191,36,0.5)]"
+            : "bg-surface-container-low/40 text-on-surface-variant border border-outline-variant/40 hover:text-accent hover:border-accent/40"
         }`}
       >
         Tous
@@ -61,10 +64,10 @@ export function CorpusFilter({ selected, onChange }: Props) {
           <button
             key={corpus}
             onClick={() => toggle(corpus)}
-            className={`px-2.5 py-1 rounded-md border text-[11px] inline-flex items-center gap-1 transition-all ${
+            className={`px-3 py-1 rounded-full text-[11px] inline-flex items-center gap-1 transition-all ${
               active
-                ? `${meta.bgColor} ${meta.color}`
-                : "bg-transparent text-on-surface-variant border-outline-variant hover:text-on-surface"
+                ? `${meta.bgColor} ${meta.color} border border-current/30 shadow-[0_4px_16px_-6px_currentColor]`
+                : "bg-surface-container-low/40 text-on-surface-variant border border-outline-variant/40 hover:text-on-surface hover:border-outline-variant"
             }`}
             title={`${active ? "Retirer" : "Limiter à"} ${meta.label}`}
           >
