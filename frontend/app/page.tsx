@@ -7,9 +7,8 @@ import { Reveal } from "@/components/Reveal";
 import { ScrollProgress } from "@/components/ScrollProgress";
 import { CountUp } from "@/components/CountUp";
 import { ScrollToTop } from "@/components/ScrollToTop";
-import { Typewriter } from "@/components/Typewriter";
 import { LandingNav } from "@/components/LandingNav";
-import { HeroOrbits } from "@/components/HeroOrbits";
+import { InteractiveHero } from "@/components/InteractiveHero";
 
 export const metadata = {
   title: "Polaris — Le tuteur dev qui ne ment pas",
@@ -32,24 +31,6 @@ const CORPORA = [
   { label: "Vitest",          color: "#FCC72B" },
 ];
 
-const USPS = [
-  {
-    icon: "verified",
-    title: "Sourcé, jamais inventé",
-    body: "Chaque affirmation pointe vers un extrait de la doc officielle, citable d'un clic. Pas d'hallucination, pas de version périmée.",
-  },
-  {
-    icon: "play_circle",
-    title: "Exécuté en direct",
-    body: "Le code Python tourne dans un sandbox isolé avec kernel persistant. Tu lis, tu modifies, tu exécutes — sans quitter la conversation.",
-  },
-  {
-    icon: "hub",
-    title: "13 corpus, 28k chunks",
-    body: "Du langage au front : Python, FastAPI, Pydantic, Next.js, TS, Tailwind, pytest, httpx, SQLAlchemy, Zod, TanStack Query, Vitest, et ton propre code.",
-  },
-];
-
 export default function Landing() {
   return (
     <main className="relative min-h-screen flex flex-col tech-grid overflow-x-hidden">
@@ -57,72 +38,53 @@ export default function Landing() {
       <ScrollToTop />
       <LandingNav />
 
-      {/* Hero */}
-      <section className="relative px-gutter pt-12 pb-24 max-w-5xl mx-auto text-center">
-        {/* Constellation en fond du hero */}
+      {/* Hero — copie centrée en haut, panneau interactif plein largeur dessous */}
+      <section className="relative px-gutter pt-10 pb-20 max-w-6xl mx-auto">
         <Constellation
           className="absolute inset-0 -z-10 pointer-events-none"
           density={3}
           uid="hero"
         />
-
-        {/* Particules flottantes */}
         <ParticlesLayer />
 
+        {/* Copie centrée */}
+        <div className="text-center max-w-3xl mx-auto mb-12">
+          <h1 className="text-[clamp(40px,6.5vw,80px)] font-extrabold tracking-[-0.02em] leading-[1.02] mb-5">
+            Le tuteur dev qui<br />
+            <span className="text-accent">ne ment pas.</span>
+          </h1>
 
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-accent/30 bg-accent/5 text-accent text-[12px] font-mono uppercase tracking-widest mb-8">
-          <span className="relative w-2 h-2">
-            <span className="absolute inset-0 rounded-full bg-accent" />
-            <span className="absolute inset-0 rounded-full bg-accent animate-ping opacity-75" />
-          </span>
-          RAG local · 13 corpus · sources citées
-        </div>
+          <p className="text-[17px] sm:text-[19px] text-on-surface-variant leading-[1.55] mb-8 max-w-2xl mx-auto">
+            Chaque réponse est{" "}
+            <span className="text-on-surface font-medium">
+              citée dans la doc officielle
+            </span>
+            . Chaque ligne de Python est{" "}
+            <span className="text-on-surface font-medium">
+              exécutée en sandbox
+            </span>
+            . Zéro hallucination.
+          </p>
 
-        <h1 className="text-[clamp(40px,7vw,84px)] font-extrabold tracking-tight leading-[1.05] mb-6">
-          Le tuteur dev qui<br />
-          <span className="text-accent">
-            ne ment pas.
-          </span>
-        </h1>
-
-        <p className="text-[18px] sm:text-[20px] text-on-surface-variant max-w-2xl mx-auto leading-[1.6] mb-10">
-          Polaris répond à tes questions de dev full-stack en{" "}
-          <span className="text-on-surface">citant la doc officielle</span>{" "}
-          ligne par ligne — et exécute son code Python pour te montrer qu'il
-          marche vraiment.
-        </p>
-
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          <Link
-            href="/app"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-action text-white text-[15px] font-semibold shadow-[0_10px_40px_-10px_rgba(99,102,241,0.6)] hover:brightness-110 hover:-translate-y-0.5 transition-all"
-          >
-            <MaterialIcon name="rocket_launch" className="text-[20px]" />
-            Commencer maintenant
-          </Link>
-          <a
-            href="#how"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-surface-container-low border border-outline-variant/60 text-[15px] text-on-surface hover:border-action/40 hover:bg-surface-container transition-colors"
-          >
-            <MaterialIcon name="play_circle" className="text-[20px]" />
-            Comment ça marche
-          </a>
-        </div>
-
-        {/* Showcase logo animé entouré d'une scène orbitale */}
-        <div className="hero-scene mt-20 relative h-[400px] max-w-4xl mx-auto">
-          <HeroOrbits />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <PolarisLogo size={240} variant="animated" uid="hero-mark" />
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <Link
+              href="/app"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-action text-white text-[15px] font-semibold shadow-[0_10px_30px_-8px_rgba(99,102,241,0.5)] hover:brightness-110 hover:-translate-y-0.5 transition-all"
+            >
+              <MaterialIcon name="rocket_launch" className="text-[18px]" />
+              Commencer
+            </Link>
+            <a
+              href="#how"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-surface-container-low border border-outline-variant/60 text-[15px] text-on-surface hover:border-action/40 hover:bg-surface-container transition-colors"
+            >
+              Voir la démo
+            </a>
           </div>
         </div>
 
-        {/* Preview code "live" sous la scène */}
-        <div className="mt-12 max-w-xl mx-auto">
-          <Tilt3D maxTilt={4}>
-            <HeroCodePreview />
-          </Tilt3D>
-        </div>
+        {/* Panneau interactif plein largeur — constellation + démo côte à côte */}
+        <InteractiveHero />
       </section>
 
       {/* Bandeau stats */}
@@ -505,65 +467,6 @@ function FooterCol({
           </li>
         ))}
       </ul>
-    </div>
-  );
-}
-
-/** Preview de code pour le hero — fenêtre macOS avec une "vraie" question + extrait de réponse. */
-function HeroCodePreview() {
-  return (
-    <div className="hero-code-preview rounded-2xl overflow-hidden border border-on-surface/10 shadow-[0_20px_60px_-20px_rgba(99,102,241,0.4)] font-mono text-[12.5px]">
-      {/* Chrome */}
-      <div className="px-4 py-2.5 flex items-center justify-between border-b border-on-surface/10 bg-on-surface/[0.03]">
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]" />
-          <span className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
-          <span className="w-2.5 h-2.5 rounded-full bg-[#27c93f]" />
-        </div>
-        <span className="text-[10px] text-on-surface-variant/60">
-          polaris://chat
-        </span>
-        <span className="text-[10px] text-accent flex items-center gap-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-          live
-        </span>
-      </div>
-
-      {/* Body */}
-      <div className="p-4 space-y-3 text-left">
-        <div className="flex items-start gap-2">
-          <span className="text-action">?</span>
-          <span className="text-on-surface-variant">
-            <Typewriter text="Comment streamer un SSE en FastAPI ?" speed={40} />
-          </span>
-        </div>
-        <div className="flex items-start gap-2 pt-1">
-          <span className="text-accent">›</span>
-          <div className="flex-1 space-y-1">
-            <div className="text-on-surface">
-              <Typewriter
-                text="Avec StreamingResponse :"
-                speed={45}
-                startDelay={1800}
-              />
-            </div>
-            <pre className="text-action pl-2 border-l border-[#818cf8]/30">
-              <Typewriter
-                text={`@app.get("/stream")\nasync def stream():\n    return StreamingResponse(\n        gen(), media_type="text/event-stream"\n    )`}
-                speed={55}
-                startDelay={3000}
-              />
-            </pre>
-            <div className="text-on-surface-variant text-[11px] flex items-center gap-2 pt-1">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#009688]/20 text-[#7ed4cc]">
-                <span className="w-1 h-1 rounded-full bg-[#009688]" />
-                FastAPI · responses.py
-              </span>
-              <span className="opacity-70">score 0.91</span>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

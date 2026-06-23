@@ -67,7 +67,7 @@ export function ConversationsMenu({
 
       {open && (
         <div
-          className="absolute right-0 mt-2 w-[360px] max-h-[70vh] overflow-hidden flex flex-col rounded-2xl glass-card-strong shadow-2xl"
+          className="absolute right-0 mt-2 w-[min(360px,calc(100vw-2rem))] max-h-[70vh] overflow-hidden flex flex-col rounded-2xl glass-card-strong shadow-2xl"
           role="menu"
         >
           {/* Header */}

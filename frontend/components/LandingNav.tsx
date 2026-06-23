@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { PolarisLogo } from "./PolarisLogo";
 import { MaterialIcon } from "./MaterialIcon";
+import { ThemeToggle } from "./ThemeToggle";
 
 /**
  * Nav de la landing avec :
@@ -92,6 +93,7 @@ export function LandingNav() {
         </nav>
 
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           <a
             href="https://github.com/loicKonan123/python_expert"
             target="_blank"

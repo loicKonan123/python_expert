@@ -234,6 +234,88 @@ abouti, prêt à être montré. Moins encombré, plus de personnalité, accessib
 - [x] Send button avec gradient `primary → #3776ab` + glow shadow
 - [x] Respect `prefers-reduced-motion` sur toutes les animations
 
+#### 8.7 Itérations post-commit (sobre, light propre, 3D, interactif)
+
+Après le premier push Phase 8 (`5a1a290`), une grosse passe d'itération a
+suivi pour resserrer le design. Commit de référence : `bcdd857`.
+
+**Suppression du violet → palette à 3 couleurs**
+- [x] Tous les `#8b5cf6` / `#c084fc` / `#bb9af7` retirés (CTAs, gradients texte, ScrollProgress, avatars, mesh orbs)
+- [x] Palette resserrée à 3 couleurs : navy bg + indigo CTA (`#4f46e5`) + gold accent (`#fbbf24`)
+- [x] Aucun gradient texte rainbow — soit solide soit 2 couleurs max
+
+**Light mode adaptatif (refonte profonde)**
+- [x] CSS variables `--color-action` et `--color-accent` qui swappent par `[data-theme]` (indigo/gold en dark, teal/teal en light)
+- [x] Migration globale `bg-[#4f46e5]` → `bg-action`, `text-[#fbbf24]` → `text-accent` dans tous les composants
+- [x] SVG fills hardcodés (PolarisLogo, HeroOrbits, Constellation, particules) migrés vers `var(--color-accent)` pour s'adapter au thème
+- [x] Fond light passé de `#f5f7fb` à `#e6ebf2` (gris-bleu sourd) pour que les cartes blanches détachent
+- [x] Glass cards repassent en blanc solide + ombres multicouches en light (vs verre dépoli en dark)
+- [x] Mesh orbs, particules et constellation éteints en light (faisaient cheap)
+- [x] Fenêtres de code (HeroCodePreview, MiniCodeWindow, CodeBlock) avec classe `.hero-code-preview` adaptative (navy en dark, gris-bleu clair en light)
+- [x] Snippets Python flottants du HeroOrbits migrés en `var(--color-on-surface-variant)`
+
+**Effet 3D pop-out**
+- [x] Système d'ombres multicouches sur glass-card / glass-card-strong (inset highlight + contour + ombre principale + halo diffus)
+- [x] Hover lift avec `transform: translateY(-2px)` + ombres amplifiées
+- [x] Respect `prefers-reduced-motion`
+
+**Hero refait — InteractiveHero (constellation interactive)**
+- [x] Copie centrée en haut (h1 + paragraphe + 2 CTAs), max-w-3xl
+- [x] **Panneau interactif plein largeur** dessous : constellation (60%) + démo card (40%) côte à côte, dans une seule glass-card-strong
+- [x] **6 satellites cliquables** autour du logo Polaris central (Python, FastAPI, Pydantic, Next.js, TypeScript, Tailwind)
+- [x] **Démo card live** qui change à chaque clic — question + réponse + code + citation source (URL doc officielle)
+- [x] Typewriter qui re-anime à chaque changement de satellite (via `key={satellite.key}`)
+- [x] Satellites placés à 15-85% (au lieu de 8-92%) pour éviter overflow sur écran étroit
+- [x] Sélection par défaut : **FastAPI** (démo la plus parlante)
+
+**ChatInput compact (résout aussi un conflit de scroll)**
+- [x] Sources et Intent passent en **popovers** au lieu de bandeaux inline qui prenaient ~200px de hauteur
+- [x] Layout 1 ligne : `[Sources pill] [Intent pill] [textarea] [Send]`
+- [x] Click extérieur / Escape ferme les popovers
+- [x] L'intent détecté affiche sa valeur dans le pill (`Intent · Refactor`)
+- [x] Pills cachés en mobile (`hidden sm:inline-flex`)
+- [x] Popovers en `w-[min(340px,calc(100vw-2rem))]` → ne dépassent plus du viewport
+- [x] Padding bottom du chat passé de `pb-44` à `pb-28` (input plus compact)
+
+**ThemeToggle simplifié + sur landing**
+- [x] Bouton **2 états seulement** : toggle dark ↔ light (plus de "system")
+- [x] L'icône indique l'action future (soleil quand on est en dark, lune en light)
+- [x] `data-theme` initial lu du DOM (posé par THEME_INIT_SCRIPT) — fix race condition d'init React qui écrasait la préférence
+- [x] Ajouté à la `LandingNav` (en plus de la TopBar de l'app)
+- [x] Persistance localStorage[`polaris-theme`]
+
+**Audit responsive**
+- [x] Sidebar mobile : backdrop noir blur + auto-close après pick de concept (`window.innerWidth < 768`)
+- [x] ConversationsMenu popover : width clampée pour ne pas overflow
+- [x] LandingNav : burger mobile + drawer (déjà fait Phase 8)
+- [x] TopBar app : delete_sweep + GitHub cachés en `< sm`
+- [x] Tous les `bg-white/X` migrés vers `bg-on-surface/X` (adaptatif au thème)
+- [x] Sélection de texte, focus rings, scrollbar passés en CSS vars brand
+
+**Sections landing supplémentaires**
+- [x] `LandingNav` sticky avec sections actives détectées au scroll (Concept · Identité · Comparaison)
+- [x] Bandeau stats animé `CountUp` (99.8% / 0ms / 13 / 28367)
+- [x] Bento bento 7+5+12 cols avec mini-widgets (CoverageBar, MiniCodeWindow, belt corpus)
+- [x] Section **Identité** : 3 variantes du logo (animated / static / mono)
+- [x] Table **comparaison** Polaris vs LLM générique (5 lignes ✓/✗)
+- [x] Footer 4 colonnes + "Systems operational" status
+- [x] `ScrollProgress` (barre fine en haut, gradient indigo→gold)
+- [x] `ScrollToTop` flottant (apparaît après 600px de scroll)
+- [x] Page 404 custom avec constellation + branding
+- [x] Tous les wordmark/logo "Polaris" cliquables vers `/`
+- [x] Sidebar curriculum : nettoyée (retrait New Session CTA / Aide / Notes de version)
+- [x] Hero badge "v1.0 · RAG local · 13 corpus" et stack bar **retirés** (trop encombrés)
+
+**Animations + interactivité**
+- [x] `Tilt3D` — perspective 3D au survol des cartes USP, identité, comparaison, CTA
+- [x] `Reveal` — fade-in + translateY au scroll via IntersectionObserver (effet staggered)
+- [x] `CountUp` — chiffres animés 0→cible quand entrée dans le viewport (cubic ease-out)
+- [x] `Typewriter` — texte tapé caractère par caractère (DemoCard du hero)
+- [x] `polaris-bounce` — 3 dots de chargement qui bouncent en cascade pendant streaming
+- [x] `caret-pulse` — typing-caret ambre pulsant avec glow (remplace le `▍` block)
+- [x] Pulse, drift, twinkle sur tout (mesh orbs, particules, satellites, étoiles)
+- [x] Tous les `<animate>` SVG + keyframes CSS respectent `prefers-reduced-motion`
+
 ### Phase 9 — Intents câblés (à venir)
 
 **Constat actuel** : la barre d'intents dans le `ChatInput` (Refactor, Debug,

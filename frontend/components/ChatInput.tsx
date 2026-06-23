@@ -265,7 +265,7 @@ function CompactPill({
 /** Wrapper popover qui s'ouvre au-dessus du pill. */
 function Popover({ children }: { children: React.ReactNode }) {
   return (
-    <div className="absolute bottom-full mb-2 left-0 z-30 w-[340px] max-h-[60vh] overflow-auto custom-scrollbar p-3 rounded-xl glass-card-strong">
+    <div className="absolute bottom-full mb-2 left-0 z-30 w-[min(340px,calc(100vw-2rem))] max-h-[60vh] overflow-auto custom-scrollbar p-3 rounded-xl glass-card-strong">
       {children}
     </div>
   );

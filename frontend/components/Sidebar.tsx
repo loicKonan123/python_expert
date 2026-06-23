@@ -26,9 +26,11 @@ type Props = {
   open: boolean;
   activeLevelNum: string | null;
   onPickConcept: (concept: Concept, level: Level) => void;
+  /** Permet à la sidebar de se fermer (utilisé en mobile après pick / clic backdrop). */
+  onClose?: () => void;
 };
 
-export function Sidebar({ open, activeLevelNum, onPickConcept }: Props) {
+export function Sidebar({ open, activeLevelNum, onPickConcept, onClose }: Props) {
   const [filter, setFilter] = useState("");
   const [expanded, setExpanded] = useState<Set<string>>(
     () => new Set([CURRICULUM[0].num]),
@@ -44,13 +46,30 @@ export function Sidebar({ open, activeLevelNum, onPickConcept }: Props) {
     });
   }
 
+  // Sur mobile, sélectionner un concept ferme la sidebar pour libérer l'écran.
+  function pickAndMaybeClose(concept: Concept, level: Level) {
+    onPickConcept(concept, level);
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      onClose?.();
+    }
+  }
+
   return (
-    <aside
-      className={`fixed left-0 top-0 h-screen w-sidebar-width z-40 bg-surface-container-low/70 backdrop-blur-xl backdrop-saturate-150 border-r border-white/10 flex flex-col py-gutter transition-transform duration-200 ease-in-out ${
-        open ? "translate-x-0" : "-translate-x-full"
-      }`}
-      aria-hidden={!open}
-    >
+    <>
+      {/* Backdrop mobile — ferme la sidebar au clic */}
+      {open && onClose && (
+        <button
+          aria-label="Fermer le menu"
+          onClick={onClose}
+          className="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm md:hidden"
+        />
+      )}
+      <aside
+        className={`fixed left-0 top-0 h-screen w-sidebar-width z-40 bg-surface-container-low/70 backdrop-blur-xl backdrop-saturate-150 border-r border-on-surface/10 flex flex-col py-gutter transition-transform duration-200 ease-in-out ${
+          open ? "translate-x-0" : "-translate-x-full"
+        }`}
+        aria-hidden={!open}
+      >
       {/* En-tête de la sidebar */}
       <div className="px-6 mb-4">
         <div className="flex items-center gap-3 mb-2">
@@ -135,7 +154,7 @@ export function Sidebar({ open, activeLevelNum, onPickConcept }: Props) {
                     return (
                       <li key={`${level.num}.${realIdx}`}>
                         <button
-                          onClick={() => onPickConcept(c, level)}
+                          onClick={() => pickAndMaybeClose(c, level)}
                           className="w-full text-left px-3 py-1.5 rounded-md text-[13px] text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors group"
                           title={c.en}
                         >
@@ -174,6 +193,7 @@ export function Sidebar({ open, activeLevelNum, onPickConcept }: Props) {
         </div>
       </div>
     </aside>
+    </>
   );
 }
 

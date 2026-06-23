@@ -334,6 +334,7 @@ export default function Home() {
         open={sidebarOpen}
         activeLevelNum={activeLevelNum}
         onPickConcept={pickConcept}
+        onClose={() => setSidebarOpen(false)}
       />
 
       <main

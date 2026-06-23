@@ -141,7 +141,7 @@ export function TopBar({
                 onClearConversation();
               }
             }}
-            className="p-2 rounded-full hover:bg-error/20 text-on-surface-variant hover:text-error transition-colors"
+            className="hidden sm:inline-flex p-2 rounded-full hover:bg-error/20 text-on-surface-variant hover:text-error transition-colors"
             title="Vider la conversation actuelle"
           >
             <MaterialIcon name="delete_sweep" />
@@ -151,7 +151,7 @@ export function TopBar({
           href="https://github.com/loicKonan123/python_expert"
           target="_blank"
           rel="noopener noreferrer"
-          className="p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant transition-colors"
+          className="hidden sm:inline-flex p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant transition-colors"
           title="Voir sur GitHub"
         >
           <MaterialIcon name="code" />
