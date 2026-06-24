@@ -20,6 +20,10 @@ const ALL_CORPORA: Corpus[] = [
   "zod",
   "tanstack_query",
   "vitest",
+  // Phase 12 — front-end MDN
+  "html",
+  "css",
+  "javascript",
 ];
 
 type Props = {

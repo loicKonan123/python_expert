@@ -36,6 +36,9 @@ Chaque ⭐ est gagnée sur 4 critères :
 | **Next.js** | 100% docs intégrés (v16 App Router) | ⭐⭐⭐⭐⭐ Server/Client Components, Server Actions, caching | ⭐⭐⭐⭐ **avec TanStack Query + Zod** | Pinned sur la version installée | **⭐⭐⭐⭐⭐** |
 | **TypeScript** | 100% Handbook v2 officiel Microsoft | ⭐⭐⭐⭐ types essentiels et avancés, génériques | ⭐⭐⭐⭐ **avec Zod + Vitest + TanStack Query** | Branche v2 | **⭐⭐⭐⭐⭐** |
 | **Tailwind CSS** | 100% site officiel v4 | ⭐⭐⭐⭐ utilities, `@theme`, variants, container queries | ⭐⭐ plugins officiels seulement | Branche main | **⭐⭐⭐⭐** |
+| **HTML** *(Phase 12)* | 100% référence MDN | ⭐⭐⭐⭐⭐ sémantique, formulaires, ARIA, médias, SEO | ⭐⭐⭐ ARIA + accessibilité couverts | Branche main MDN | **⭐⭐⭐⭐⭐** |
+| **CSS** *(Phase 12)* | 100% référence MDN | ⭐⭐⭐⭐⭐ sélecteurs, box model, flex, grid, animations, custom props | ⭐⭐⭐⭐ avec Tailwind comme couche utilitaire | Branche main MDN | **⭐⭐⭐⭐⭐** |
+| **JavaScript** *(Phase 12)* | 100% référence MDN | ⭐⭐⭐⭐⭐ syntaxe moderne, async, modules, classes, DOM | ⭐⭐⭐⭐ avec TypeScript + Zod + Vitest | Branche main MDN | **⭐⭐⭐⭐⭐** |
 | **Ton code (`self`)** | 100% du repo courant | ⭐⭐⭐⭐ chaque fonction/classe identifiée | N/A | À jour à la dernière `build_index` | **⭐⭐⭐** |
 
 ### Écosystème (Phase 7) — libs tierces
@@ -49,7 +52,7 @@ Chaque ⭐ est gagnée sur 4 critères :
 | **TanStack Query** | Data fetching React/Next.js | ⭐⭐⭐⭐⭐ |
 | **Vitest** | Testing TS/JS moderne | ⭐⭐⭐⭐⭐ |
 
-### Niveau global moyen : **⭐⭐⭐⭐½ / 5** (après Phase 7)
+### Niveau global moyen : **⭐⭐⭐⭐¾ / 5** (après Phase 12)
 
 ### Pourquoi pas ⭐⭐⭐⭐⭐ partout
 
@@ -92,13 +95,13 @@ Les 7 traits ci-dessous sont **rares ou inexistants** ailleurs (ChatGPT, Copilot
 
 | Brique | Valeur |
 |---|---|
-| Corpus indexés | **7** (Python 3.14, FastAPI, Pydantic, Next.js, TypeScript, Tailwind, **ton code**) |
-| Chunks vectoriels | **20 053** |
-| Concepts pré-rédigés dans la sidebar | **178** (21 niveaux) |
+| Corpus indexés | **16** (Python 3.14, FastAPI, Pydantic, Next.js, TypeScript, Tailwind, pytest, httpx, SQLAlchemy, Zod, TanStack Query, Vitest, **HTML**, **CSS**, **JavaScript** *(MDN, Phase 12)*, **ton code**) |
+| Chunks vectoriels | **47 094** *(post-Phase 12)* |
+| Concepts pré-rédigés dans la sidebar | **214** (24 niveaux) — +36 concepts HTML/CSS/JS Phase 12 |
 | Endpoints HTTP | 8 (`/api/ask`, `/api/run`, `/api/kernel/*`, `/api/usage`, `/api/health`, `/docs`, `/redoc`) |
 | Tests de sécurité sandbox | **8/8 passent** |
-| LOC repo (hors corpus + node_modules) | ~6 000 |
-| Commits sur GitHub | 6 |
+| LOC repo (hors corpus + node_modules) | ~10 000 |
+| Aperçu front live | ✅ via `<HtmlPreview>` (iframe sandboxée + Tailwind CDN) |
 
 ---
 
@@ -365,6 +368,182 @@ Pourquoi pas d'autres ?
 - [ ] `Generate` + `Refactor` → coder model (deepseek-coder ou qwen2.5-coder)
 - [ ] `Explain` + `Test` + `Optimize` → modèle généraliste rapide
 - [ ] Garder l'auto-routing existant pour les questions sans intent explicite
+
+### Phase 10 — Mode de réponse (concis / détaillé)
+
+**Constat** : le system prompt actuel pousse Polaris à tout expliquer comme à
+un junior. Idéal pour apprendre mais lourd quand un dev senior veut juste
+*"comment je fais X en FastAPI"* et avoir 3 lignes de réponse + un snippet.
+
+**Mécanisme** : un toggle 2 états dans la TopBar (à côté du ThemeToggle) qui
+passe un paramètre `verbosity: "concise" | "detailed"` au backend, lequel
+charge un system prompt différent. Pas de retrieval changé, pas de routing
+modèle. Le toggle est persisté dans `localStorage["polaris-verbosity"]` au
+niveau global (pas par conversation).
+
+#### 10.1 Backend
+- [ ] `/api/ask` accepte `verbosity: Literal["concise", "detailed"] = "detailed"`
+- [ ] `backend/llm/prompts.py` : 2 system prompts distincts
+  - **Concise** : "Tu réponds à un dev expérimenté. Code d'abord. Une phrase de contexte max. Citations obligatoires. Pas de blabla pédagogique."
+  - **Detailed** (actuel) : "Tu enseignes à un dev en apprentissage. Analogies, exemples, contexte. Citations obligatoires."
+- [ ] Composition : intent (Phase 9) > verbosity > base prompt
+
+#### 10.2 Frontend
+- [ ] Composant `VerbosityToggle` dans la TopBar (icône `notes` vs `subject`)
+- [ ] State global → `lib/verbosity.ts` (pattern identique à `theme.ts`)
+- [ ] Le mode est passé à `askStream()` comme l'intent
+- [ ] Bot message badge : mini pill `concise`/`detailed` si non-défaut
+
+### Phase 11 — Environnement Python complet (Docker) ❌ ABANDONNÉE
+
+**Statut** : implémentée puis **entièrement revertée** (commit suivant la
+décision de produit du 2026-06-24). Tout le code est supprimé.
+
+**Pourquoi on a essayé** : permettre l'exécution de FastAPI, httpx, pytest
+dans un container Docker isolé, avec ports forwardés et iframe live pour
+voir un serveur uvicorn tourner.
+
+**Pourquoi on a arrêté** :
+1. **Friction OS énorme** : Windows + Docker Desktop + encoding cp1252 vs
+   UTF-8 = succession de bugs (image build qui plante, subprocess qui ne
+   décode pas Docker logs, ports pas mappés, container fantômes).
+2. **Race conditions multiples** : uvicorn boot async dans un thread vs
+   httpx.get instantané → ConnectionRefused systématique. On a essayé des
+   helpers magiques (`serve()`, `wait_for()`) puis un patch transparent de
+   `uvicorn.run`, mais le LLM générait quand même du code qui ratait.
+3. **Pas le bon design** : aucun produit du marché ne lance des serveurs
+   live dans un chat tuteur. Ni ChatGPT Code Interpreter, ni Claude
+   artifacts. Replit/Codespaces sont des IDE complets — ce n'est pas le
+   positionnement de Polaris.
+4. **Le bon pattern existait** : pour démontrer FastAPI, **TestClient**
+   suffit. C'est synchrone, instantané, ne nécessite ni uvicorn ni port,
+   et c'est ce que tous les devs FastAPI utilisent dans leurs tests.
+
+**Leçon** : revenir à l'essentiel. Le sandbox léger Python existant
+(`backend/sandbox.py` + `backend/kernel.py`) couvre 95% des cas. Pour les
+démos visuelles front-end, voir Phase 12.
+
+**Sous-sections 11.1 à 11.7 archivées ci-dessous à titre historique.**
+
+#### 11.1 Architecture cible
+
+| Composant | Choix |
+|---|---|
+| Base image | `python:3.14-slim` custom (Dockerfile dédié) |
+| Pré-installés | fastapi, uvicorn, pydantic, httpx, sqlalchemy + aiosqlite, pytest + pytest-asyncio |
+| Isolation | 1 container par conversation (session) |
+| Lifecycle | Créé au premier "Run complet" de la session, killé après 10min idle |
+| Filesystem | Volume éphémère `/workspace`, jeté à la destruction du container |
+| Réseau | `--network bridge` (accès PyPI pour pip install possible). Pas d'accès LAN/intranet. |
+| Limits | `--memory 512m --cpus 1 --pids-limit 100` |
+| Ports | Port haut aléatoire forwardé à chaque exposition de serveur uvicorn/flask détecté |
+| Timeout exec | 60s par cellule (vs 10s pour le sandbox light) |
+| Backend → Docker | SDK Python `docker` (pas de subprocess, plus propre) |
+
+#### 11.2 Dockerfile (`backend/sandbox/Dockerfile`)
+- [ ] `FROM python:3.14-slim`
+- [ ] Install des deps Polaris-corpus
+- [ ] User non-root `runner` (UID 1001), `WORKDIR /workspace`, `chown` à runner
+- [ ] Entrypoint = script `runner.py` qui lit du code sur stdin, l'exécute, renvoie résultat
+- [ ] Build via `docker build -t polaris-sandbox:3.14 .` (au premier démarrage backend si image absente)
+
+#### 11.3 Backend — `backend/sandbox/full_runner.py`
+- [ ] Classe `FullSandboxManager` qui gère le pool de containers par session
+- [ ] `get_or_create(session_id) → container_id`
+- [ ] `run(session_id, code, timeout=60) → RunResult { stdout, stderr, exit_code, elapsed_ms, exposed_ports[] }`
+- [ ] Détection des ports écoutés via `docker exec ... lsof -i -P -n | grep LISTEN`
+- [ ] `restart(session_id)` pour réinitialiser le container
+- [ ] Idle timer (asyncio task) qui kill les containers inactifs depuis 10min
+- [ ] Hook lifecycle FastAPI : `await manager.shutdown_all()` au stop du serveur
+
+#### 11.4 Endpoint `/api/sandbox/full/run`
+- [ ] POST `{ session_id, code }` → `RunResult`
+- [ ] POST `/api/sandbox/full/restart` → reset le container
+- [ ] WebSocket optionnel `/ws/sandbox/full` pour stream stdout en live (utile pour les longs runs comme `uvicorn`)
+
+#### 11.5 Frontend — UI "Run complet"
+- [ ] Bouton secondaire `Run complet` à côté du `Run` actuel dans le CodeBlock (icône `rocket_launch` ou `play_circle` filled)
+- [ ] Indicateur "container actif" dans la TopBar (dot vert + "Polaris kernel")
+- [ ] Quand le run expose un port → carte glass qui apparaît avec `<iframe src="http://localhost:<port>">` + bouton "ouvrir dans un onglet"
+- [ ] Panneau "Logs du container" déroulable sous l'iframe pour voir uvicorn stdout en live
+- [ ] Bouton "Restart kernel" dans la même zone
+
+#### 11.6 Garde-fous
+- [ ] Vérif au démarrage backend : Docker est dispo (`docker info`) sinon désactive la feature avec message clair
+- [ ] Confirmation utilisateur avant le premier `Run complet` (consentement explicite)
+- [ ] Indicateur visuel "réseau ouvert" pour rappeler que `pip install` ira sur PyPI
+- [ ] Quota max : 1 container à la fois par session (les autres conversations partagent ou attendent)
+- [ ] Logs structurés de chaque container créé/détruit dans `backend/logs/sandbox-full.jsonl`
+
+#### 11.7 Tests
+- [ ] Test : créer container, exécuter `print("hello")`, vérifier stdout
+- [ ] Test : lancer `uvicorn main:app` en background, détecter port, faire requête depuis le host
+- [ ] Test : `pip install requests` puis import → marche
+- [ ] Test : kernel persistant (variable définie dans run 1 visible dans run 2)
+- [ ] Test : idle timeout fonctionne (mock time)
+- [ ] Test : container kill au shutdown FastAPI
+
+### Phase 12 — Stack front-end (HTML/CSS/JS) + Aperçu iframe ✅
+
+**Constat** : Polaris se vendait comme "tuteur dev full-stack" mais
+n'indexait que TypeScript et Tailwind côté front. Pas de HTML pur, pas de
+CSS hors Tailwind, pas de JavaScript vanilla. Et le sandbox Python ne
+permet pas de rendre du HTML.
+
+**Décision** : ajouter les **3 corpus MDN** (référence absolue pour le web)
++ un système **d'aperçu live front-end** dans le chat, façon "artifacts"
+de Claude ou Code Interpreter de ChatGPT — sans serveur backend, juste un
+`<iframe srcDoc>` sandboxé par le navigateur.
+
+#### 12.1 Indexation MDN (HTML, CSS, JavaScript)
+- [x] 3 nouveaux corpus dans `backend/corpora.py` :
+  - `html` → `mdn/content` subpath `files/en-us/web/html` (253 fichiers)
+  - `css` → idem subpath `files/en-us/web/css` (1 232 fichiers)
+  - `javascript` → idem subpath `files/en-us/web/javascript` (1 330 fichiers)
+- [x] Fetch via `python -m backend.scripts.fetch_docs --corpus <name>` (clone shallow + extract subpath)
+- [x] Réindexation : **28 367 → 47 094 chunks** (+18 727, +66 %)
+- [x] Frontend : type `Corpus` étendu, `corpus-meta.ts` (couleurs HTML rouge #E34F26, CSS bleu #1572B6, JS jaune #F7DF1E), `Sidebar.tsx` CORPUS_META, `CorpusFilter.tsx` ALL_CORPORA, landing bandeau corpus, landing stat `13 → 16 corpus` et `28k → 47k chunks`
+
+#### 12.2 Composant HtmlPreview (iframe sandboxée)
+- [x] Nouveau composant `frontend/components/HtmlPreview.tsx`
+- [x] Détection automatique du `lang` du CodeBlock : si `html`/`css`/`javascript`/`js` → bouton **"Aperçu"** dans le header (icône `visibility`)
+- [x] **Smart wrapper** selon le langage :
+  - `html` : code utilisé tel quel (DOCTYPE + Tailwind CDN injectés si absents)
+  - `css` : enveloppé dans un document avec placeholder visuel (h1, p, button, ul, .card) auquel le CSS s'applique
+  - `javascript` : enveloppé avec `<div id="app">` + **console mirror visible** (`console.log` apparaît dans une carte navy en bas)
+- [x] **Tailwind CDN** auto-injecté dans `<head>` → l'utilisateur peut utiliser les classes Tailwind sans config
+- [x] `<iframe sandbox="allow-scripts">` → JS du code utilisateur tourne, mais pas d'accès à `parent`/`top`/cross-origin
+
+#### 12.3 System prompt mis à jour
+- [x] Le LLM est informé qu'il a accès à HTML/CSS/JavaScript MDN
+- [x] Nouvelle règle : pour démos visuelles, utiliser des blocs `html`/`css`/`javascript` → l'utilisateur verra le rendu en cliquant Aperçu
+- [x] Mention que Tailwind est dispo via CDN dans l'iframe par défaut (pas la peine de le re-importer)
+- [x] Règle E réécrite : **pour FastAPI utiliser `TestClient`** (pas uvicorn) — synchrone, instantané, pattern standard
+- [x] Suppression de toutes les mentions Docker/`serve()`/`pip()` du prompt (héritage Phase 11)
+
+#### 12.4 Curriculum
+- [x] 3 nouveaux niveaux ajoutés dans `frontend/lib/curriculum.ts` :
+  - **HT1** Structure & sémantique (12 concepts : DOCTYPE, balises sémantiques, titres, liens, listes, images, tables, forms, validation, médias, ARIA, SEO)
+  - **CS1** Sélecteurs, box model & layout (12 concepts : sélecteurs, spécificité, pseudo-classes, box model, display/position, flexbox, grid, unités, couleurs modernes, vars, responsive, animations)
+  - **JS1** Syntaxe moderne (12 concepts : let/const, types, array methods, destructuring, arrow, promises, modules ES, classes, closures, DOM, fetch, optional chaining)
+- [x] Chaque concept a sa question optimisée en anglais pour le RAG MDN
+- [x] **+36 concepts** dans la sidebar du curriculum
+
+#### 12.5 InteractiveHero — 9 satellites
+- [x] Passage de 6 à 9 satellites dans `InteractiveHero.tsx`
+- [x] Anneau intérieur (3 langages fondamentaux, 120° apart, radius ~25 %) :
+  Python · JavaScript · FastAPI
+- [x] Anneau extérieur (6 frameworks, 60° apart offset 30°, radius ~38 %) :
+  TypeScript · HTML · Pydantic · Next.js · Tailwind · CSS
+- [x] Démos live ajoutées pour HTML (structure sémantique), CSS (Flexbox centering), JavaScript (flatMap vs map), avec URLs vers MDN
+
+#### 12.6 Cleanup Phase 11 (Docker)
+- [x] `backend/sandbox_full/` (Dockerfile + manager.py + runner.py + __init__.py) supprimé
+- [x] `backend/routes/run_full.py` supprimé
+- [x] `backend/main.py` nettoyé (plus de `is_docker_available`, `ensure_image_built`, `FullSandboxManager` ni le bloc lifespan Docker)
+- [x] Frontend `CodeBlock.tsx` nettoyé (plus de `executeFull`, `dockerAvailable`, `hostPorts`, `LivePortsPanel`)
+- [x] Frontend `lib/api.ts` nettoyé (plus de `runPythonFull`, `restartFullSandbox`, `getFullSandboxStatus`, types `FullRunResult`/`FullSandboxStatus`)
+- [x] Image Docker locale `polaris-sandbox:3.13` à supprimer (`docker rmi polaris-sandbox:3.13`)
 
 ---
 

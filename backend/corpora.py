@@ -198,6 +198,44 @@ CORPORA: dict[str, Corpus] = {
         source_subpath="docs",
     ),
 
+    # --------------------------------------------------------------- MDN HTML
+    # Source : repo officiel Mozilla Developer Network. Markdown, structuré,
+    # tenu à jour par Mozilla + communauté web. Référence absolue pour HTML.
+    "html": Corpus(
+        name="html",
+        description="HTML (référence MDN)",
+        local_path=DOCS_ROOT / "html",
+        format="markdown",
+        file_extensions=(".md",),
+        source_repo="https://github.com/mdn/content.git",
+        source_branch="main",
+        source_subpath="files/en-us/web/html",
+    ),
+
+    # --------------------------------------------------------------- MDN CSS
+    "css": Corpus(
+        name="css",
+        description="CSS (référence MDN)",
+        local_path=DOCS_ROOT / "css",
+        format="markdown",
+        file_extensions=(".md",),
+        source_repo="https://github.com/mdn/content.git",
+        source_branch="main",
+        source_subpath="files/en-us/web/css",
+    ),
+
+    # -------------------------------------------------------- MDN JavaScript
+    "javascript": Corpus(
+        name="javascript",
+        description="JavaScript / ECMAScript (référence MDN)",
+        local_path=DOCS_ROOT / "javascript",
+        format="markdown",
+        file_extensions=(".md",),
+        source_repo="https://github.com/mdn/content.git",
+        source_branch="main",
+        source_subpath="files/en-us/web/javascript",
+    ),
+
     # ---------------------------------------------------- Code du projet courant
     # Permet au tuteur de répondre à des questions sur le code que TU as écrit
     # (« regarde mon backend/rag.py », « est-ce que mon ChatMessage.tsx est

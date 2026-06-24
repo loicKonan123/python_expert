@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { MaterialIcon } from "./MaterialIcon";
 import { restartKernel, runPython, type RunResult } from "@/lib/api";
 import { useTheme } from "@/lib/useTheme";
+import { HtmlPreview, isPreviewable } from "./HtmlPreview";
 
 // Monaco est lourd (~3 MB) — chargement dynamique côté client uniquement.
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
@@ -47,8 +48,12 @@ export function CodeBlock({
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState<RunResult | null>(null);
   const [runError, setRunError] = useState<string | null>(null);
+  /** Aperçu HTML/CSS/JS — toggle iframe sandboxée. */
+  const [showPreview, setShowPreview] = useState(false);
   const theme = useTheme();
   const monacoTheme = theme === "light" ? "vs" : "vs-dark";
+
+  const previewable = isPreviewable(lang);
 
   const langKey = normalizeLang(lang);
   const isRunnable = langKey === "python";
@@ -181,6 +186,20 @@ export function CodeBlock({
               )}
             </>
           )}
+          {previewable && (
+            <button
+              onClick={() => setShowPreview((v) => !v)}
+              className="flex items-center gap-1 text-[11px] font-mono text-accent hover:brightness-125 transition-colors"
+              aria-label={showPreview ? "Masquer l'aperçu" : "Afficher l'aperçu"}
+              title="Rendre le code dans une iframe sandboxée"
+            >
+              <MaterialIcon
+                name={showPreview ? "visibility_off" : "visibility"}
+                className="text-[14px]"
+              />
+              {showPreview ? "Masquer" : "Aperçu"}
+            </button>
+          )}
           <button
             onClick={copy}
             className="flex items-center gap-1 text-[11px] font-mono text-primary hover:text-primary-fixed transition-colors"
@@ -237,6 +256,11 @@ export function CodeBlock({
           error={runError}
           onClear={clearResult}
         />
+      )}
+
+      {/* Aperçu HTML/CSS/JS — iframe sandboxée avec Tailwind CDN */}
+      {previewable && showPreview && (
+        <HtmlPreview code={code} lang={lang.toLowerCase() as "html" | "css" | "javascript" | "js"} />
       )}
     </div>
   );

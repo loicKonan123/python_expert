@@ -95,6 +95,25 @@ export const CORPUS_META: Record<Corpus | "unknown", CorpusMeta> = {
     bgColor: "bg-[#FCC72B]/15 border-[#FCC72B]/40",
     icon: "speed",
   },
+  // ============ Phase 12 — Front-end MDN ============
+  html: {
+    label: "HTML",
+    color: "text-[#E34F26]",
+    bgColor: "bg-[#E34F26]/15 border-[#E34F26]/40",
+    icon: "html",
+  },
+  css: {
+    label: "CSS",
+    color: "text-[#1572B6]",
+    bgColor: "bg-[#1572B6]/15 border-[#1572B6]/40",
+    icon: "css",
+  },
+  javascript: {
+    label: "JavaScript",
+    color: "text-[#F7DF1E]",
+    bgColor: "bg-[#F7DF1E]/15 border-[#F7DF1E]/40",
+    icon: "javascript",
+  },
   unknown: {
     label: "Inconnu",
     color: "text-on-surface-variant",

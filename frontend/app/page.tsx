@@ -29,6 +29,9 @@ const CORPORA = [
   { label: "Zod",             color: "#3B82C4" },
   { label: "TanStack Query",  color: "#FF4154" },
   { label: "Vitest",          color: "#FCC72B" },
+  { label: "HTML",            color: "#E34F26" },
+  { label: "CSS",             color: "#1572B6" },
+  { label: "JavaScript",      color: "#F7DF1E" },
 ];
 
 export default function Landing() {
@@ -98,10 +101,10 @@ export default function Landing() {
               <CountUp to={0} suffix="ms" />
             </Stat>
             <Stat label="Corpus indexés" color="var(--color-action)">
-              <CountUp to={13} />
+              <CountUp to={16} />
             </Stat>
             <Stat label="Chunks indexés" color="var(--color-on-surface)">
-              <CountUp to={28367} duration={1800} />
+              <CountUp to={47094} duration={1800} />
             </Stat>
           </div>
         </section>
@@ -170,12 +173,15 @@ export default function Landing() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <h2 className="text-[22px] font-semibold text-on-surface">
-                      13 corpus, 28 367 chunks
+                      16 corpus indexés
                     </h2>
                     <p className="text-[14px] text-on-surface-variant leading-[1.6] mt-1">
                       Du langage au front, de l'ORM aux tests : Polaris pioche
-                      simultanément dans toutes les docs officielles + ton propre
-                      code via le corpus <span className="text-accent font-mono">self</span>.
+                      simultanément dans toutes les docs officielles (Python,
+                      FastAPI, Pydantic, Next.js, TypeScript, Tailwind, pytest,
+                      httpx, SQLAlchemy, Zod, TanStack Query, Vitest, HTML, CSS,
+                      JavaScript MDN) + ton propre code via le corpus{" "}
+                      <span className="text-accent font-mono">self</span>.
                     </p>
                   </div>
                 </div>

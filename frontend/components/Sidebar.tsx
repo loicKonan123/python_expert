@@ -20,6 +20,9 @@ const CORPUS_META: Record<Corpus, { label: string; color: string; icon: string }
   zod:            { label: "Zod",            color: "text-[#3B82C4]", icon: "verified" },
   tanstack_query: { label: "TanStack Query", color: "text-[#FF4154]", icon: "sync" },
   vitest:         { label: "Vitest",         color: "text-[#FCC72B]", icon: "science" },
+  html:           { label: "HTML",           color: "text-[#E34F26]", icon: "html" },
+  css:            { label: "CSS",            color: "text-[#1572B6]", icon: "css" },
+  javascript:     { label: "JavaScript",     color: "text-[#F7DF1E]", icon: "javascript" },
 };
 
 type Props = {

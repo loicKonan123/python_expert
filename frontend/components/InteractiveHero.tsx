@@ -20,10 +20,13 @@ import { Typewriter } from "./Typewriter";
 type CorpusKey =
   | "python"
   | "fastapi"
+  | "javascript"
   | "pydantic"
   | "nextjs"
   | "typescript"
-  | "tailwind";
+  | "tailwind"
+  | "html"
+  | "css";
 
 type Satellite = {
   key: CorpusKey;
@@ -41,15 +44,23 @@ type Satellite = {
   };
 };
 
-// Positions inset à 15-85% au lieu de 8-92% — laisse de la marge pour que
-// les pills ne débordent pas du conteneur sur écran étroit.
+// 9 satellites en 2 anneaux concentriques autour du logo Polaris central.
+//
+//   - Anneau INTÉRIEUR (3 satellites, rayon ~25%, 120° apart) : les 3
+//     langages fondamentaux qui structurent l'écosystème.
+//   - Anneau EXTÉRIEUR (6 satellites, rayon ~38%, 60° apart, offset 30°) :
+//     les frameworks et libs.
+//
+// Trigonométrie : x = 50 + r·sin(θ), y = 50 - r·cos(θ) (θ depuis le nord,
+// horaire). Origine top-left, y croît vers le bas (convention CSS).
 const SATELLITES: Satellite[] = [
+  // ━━━━━━━━━━━━━━━━ Anneau intérieur — trio langages ━━━━━━━━━━━━━━━━
   {
     key: "python",
     label: "Python",
     color: "#FFD43B",
     icon: "terminal",
-    x: 50, y: 12,
+    x: 50, y: 25,
     demo: {
       question: "Comment match-case un dataclass avec capture ?",
       intro: "Pattern guard sur un attribut :",
@@ -58,16 +69,57 @@ const SATELLITES: Satellite[] = [
     },
   },
   {
+    key: "javascript",
+    label: "JavaScript",
+    color: "#F7DF1E",
+    icon: "javascript",
+    x: 28, y: 62,
+    demo: {
+      question: "Différence entre map et flatMap ?",
+      intro: "flatMap = map + flat(1), plus efficace que la composition :",
+      code: `const arr = [1, 2, 3];\n\narr.map(x => [x, x * 2]);\n// [[1, 2], [2, 4], [3, 6]]\n\narr.flatMap(x => [x, x * 2]);\n// [1, 2, 2, 4, 3, 6]`,
+      source: "developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/flatMap",
+    },
+  },
+  {
     key: "fastapi",
     label: "FastAPI",
     color: "#009688",
     icon: "bolt",
-    x: 85, y: 30,
+    x: 72, y: 62,
     demo: {
       question: "Streamer un SSE avec dependency injection ?",
       intro: "StreamingResponse + Depends :",
-      code: `@app.get("/stream")\nasync def stream(svc: Service = Depends()):\n    return StreamingResponse(\n        svc.tokens(), media_type="text/event-stream"\n    )`,
+      code: `@app.get("/stream")\nasync def stream(svc: Service = Depends()):\n    return StreamingResponse(\n        svc.tokens(),\n        media_type="text/event-stream"\n    )`,
       source: "fastapi.tiangolo.com/advanced/custom-response/#streamingresponse",
+    },
+  },
+
+  // ━━━━━━━━━━━━━━━━ Anneau extérieur — frameworks et libs ━━━━━━━━━━━━━━━━
+  {
+    key: "typescript",
+    label: "TypeScript",
+    color: "#3178C6",
+    icon: "code",
+    x: 32, y: 15,
+    demo: {
+      question: "Conditional type qui extrait le retour d'une route ?",
+      intro: "infer dans une condition générique :",
+      code: `type RouteReturn<R> =\n  R extends (...args: any[]) => Promise<infer T> ? T :\n  R extends (...args: any[]) => infer T          ? T :\n  never;`,
+      source: "typescriptlang.org/docs/handbook/2/conditional-types.html",
+    },
+  },
+  {
+    key: "html",
+    label: "HTML",
+    color: "#E34F26",
+    icon: "html",
+    x: 68, y: 15,
+    demo: {
+      question: "Structure HTML5 sémantique d'une page de blog ?",
+      intro: "Les balises de section dédiées (mieux qu'un océan de div) :",
+      code: `<header>\n  <nav>…</nav>\n</header>\n<main>\n  <article>\n    <h1>Titre</h1>\n    <section>…</section>\n  </article>\n  <aside>Sidebar</aside>\n</main>\n<footer>…</footer>`,
+      source: "developer.mozilla.org/en-US/docs/Web/HTML/Element/article",
     },
   },
   {
@@ -75,11 +127,11 @@ const SATELLITES: Satellite[] = [
     label: "Pydantic",
     color: "#E92063",
     icon: "schema",
-    x: 85, y: 70,
+    x: 85, y: 50,
     demo: {
       question: "Validator async qui vérifie l'unicité d'un email ?",
       intro: "field_validator async avec accès DB :",
-      code: `class UserCreate(BaseModel):\n    email: EmailStr\n\n    @field_validator("email")\n    async def unique(cls, v):\n        if await db.users.find_one({"email": v}):\n            raise ValueError("déjà pris")\n        return v`,
+      code: `class UserCreate(BaseModel):\n    email: EmailStr\n\n    @field_validator("email")\n    async def unique(cls, v):\n        exists = await db.users.find_one({"email": v})\n        if exists:\n            raise ValueError("déjà pris")\n        return v`,
       source: "docs.pydantic.dev/latest/concepts/validators/#async-validators",
     },
   },
@@ -88,25 +140,12 @@ const SATELLITES: Satellite[] = [
     label: "Next.js",
     color: "#E2E8F0",
     icon: "web",
-    x: 50, y: 88,
+    x: 68, y: 85,
     demo: {
       question: "Server Action avec optimistic update ?",
       intro: "useOptimistic + 'use server' :",
-      code: `const [opt, addOpt] = useOptimistic(items);\nasync function add(form: FormData) {\n  "use server";\n  await db.items.create({ name: form.get("n") });\n  revalidatePath("/");\n}`,
+      code: `const [opt, addOpt] = useOptimistic(items);\n\nasync function add(form: FormData) {\n  "use server";\n  await db.items.create({ name: form.get("n") });\n  revalidatePath("/");\n}`,
       source: "nextjs.org/docs/app/api-reference/functions/use-optimistic",
-    },
-  },
-  {
-    key: "typescript",
-    label: "TypeScript",
-    color: "#3178C6",
-    icon: "code",
-    x: 15, y: 70,
-    demo: {
-      question: "Conditional type qui extrait le retour d'une route ?",
-      intro: "infer dans une condition générique :",
-      code: `type RouteReturn<R> =\n  R extends (...args: any[]) => Promise<infer T> ? T :\n  R extends (...args: any[]) => infer T          ? T :\n  never;`,
-      source: "typescriptlang.org/docs/handbook/2/conditional-types.html#inferring-within-conditional-types",
     },
   },
   {
@@ -114,12 +153,25 @@ const SATELLITES: Satellite[] = [
     label: "Tailwind",
     color: "#06B6D4",
     icon: "format_paint",
-    x: 15, y: 30,
+    x: 32, y: 85,
     demo: {
       question: "Container queries en v4 ?",
       intro: "Plus de plugin, c'est natif :",
       code: `<div class="@container">\n  <p class="@md:text-xl @lg:text-2xl">\n    Suit la taille du conteneur\n  </p>\n</div>`,
       source: "tailwindcss.com/docs/responsive-design#container-queries",
+    },
+  },
+  {
+    key: "css",
+    label: "CSS",
+    color: "#1572B6",
+    icon: "css",
+    x: 15, y: 50,
+    demo: {
+      question: "Centrer un élément avec Flexbox ?",
+      intro: "Le triplet justify + align + min-height :",
+      code: `.container {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  min-height: 100vh;\n}`,
+      source: "developer.mozilla.org/en-US/docs/Web/CSS/CSS_flexible_box_layout",
     },
   },
 ];

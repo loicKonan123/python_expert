@@ -29,7 +29,11 @@ export type Corpus =
   | "sqlalchemy"
   | "zod"
   | "tanstack_query"
-  | "vitest";
+  | "vitest"
+  // Phase 12 — front-end MDN
+  | "html"
+  | "css"
+  | "javascript";
 
 export type Level = {
   /** Identifiant du niveau (ex: "1", "FA1") — sert aussi de clé visuelle */
@@ -607,6 +611,111 @@ export const CURRICULUM: Level[] = [
         en: "How do animations and transitions work in Tailwind CSS? Show transition utilities, duration, easing, animate-spin/pulse/bounce, and custom keyframes." },
       { fr: "Container queries (v4)", obj: "@container et @sm:, @md:",
         en: "How do container queries work in Tailwind CSS v4? Show @container, @sm:, @md: variants based on container size rather than viewport, and use cases." },
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════ HTML (MDN)
+  {
+    num: "HT1",
+    title: "HTML · Structure & sémantique",
+    goal: "Écrire un HTML moderne, accessible et bien structuré.",
+    icon: "html",
+    corpus: "html",
+    concepts: [
+      { fr: "Squelette HTML5", obj: "<!DOCTYPE>, <html lang>, <meta charset>",
+        en: "What is the minimal HTML5 document skeleton? Show DOCTYPE, html lang, head with charset and viewport meta tags, and the role of each." },
+      { fr: "Balises sémantiques", obj: "header, main, article, section, aside, footer, nav",
+        en: "What are the semantic HTML5 sectioning elements? Explain header, nav, main, article, section, aside, footer with examples of proper nesting for a blog page." },
+      { fr: "Titres h1-h6 et structure", obj: "Hiérarchie + lecture par les screen readers",
+        en: "How should heading levels h1 through h6 be used in HTML for accessibility? Show document outline, screen reader behavior, and common mistakes." },
+      { fr: "Liens et navigation", obj: "<a href>, target, rel, ancres internes",
+        en: "How do anchor tags work in HTML? Show href types (absolute, relative, fragment, mailto, tel), target=_blank with rel=noopener, and internal anchor navigation." },
+      { fr: "Listes ul / ol / dl", obj: "Listes ordonnées, non-ordonnées, de définitions",
+        en: "What are the three list types in HTML (ul, ol, dl)? Show start, reversed, type attributes for ol, and the dt/dd pairs in definition lists." },
+      { fr: "Images et alt", obj: "<img>, srcset, sizes, picture, alt text",
+        en: "How do images work in HTML? Show img with alt attribute for accessibility, srcset for retina, the picture element for art direction, and lazy loading." },
+      { fr: "Tableaux accessibles", obj: "thead, tbody, caption, scope sur th",
+        en: "How do I write an accessible HTML table? Show table, thead, tbody, tfoot, caption, th with scope attribute, and complex tables with headers attribute." },
+      { fr: "Formulaires de base", obj: "<form>, <input>, types, labels",
+        en: "How do HTML forms work? Show form action and method, all input types (text, email, password, number, date, etc.), labels with for attribute, and form submission." },
+      { fr: "Validation HTML5", obj: "required, pattern, min/max, type=email",
+        en: "How does HTML5 form validation work without JavaScript? Show required, pattern (regex), min/max, type validation (email, url, number), and the :invalid pseudo-class." },
+      { fr: "Audio, vidéo, iframe", obj: "Médias embarqués et sécurité",
+        en: "How do audio, video, and iframe elements work in HTML? Show controls, sources for fallback formats, iframe sandbox attribute for security." },
+      { fr: "ARIA et accessibilité", obj: "role, aria-label, aria-hidden",
+        en: "What is ARIA in HTML and when do I need it? Show the first rule of ARIA, role attribute, aria-label, aria-hidden, aria-live regions, and landmark roles." },
+      { fr: "Métadonnées et SEO", obj: "<meta description>, Open Graph, robots",
+        en: "What HTML meta tags matter for SEO and social sharing? Show meta description, Open Graph (og:title, og:image), Twitter cards, robots and canonical." },
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════ CSS (MDN)
+  {
+    num: "CS1",
+    title: "CSS · Sélecteurs, box model & layout",
+    goal: "Maîtriser les fondamentaux du CSS et les systèmes de mise en page.",
+    icon: "css",
+    corpus: "css",
+    concepts: [
+      { fr: "Sélecteurs essentiels", obj: "Class, id, descendance, attribut",
+        en: "What are the main CSS selectors? Show element, class, id, descendant, child (>), adjacent (+), sibling (~), attribute selectors, and how to combine them." },
+      { fr: "Spécificité et cascade", obj: "Comment CSS résout les conflits",
+        en: "How does CSS specificity work? Show the calculation (inline, id, class, element), the cascade order, !important, and how to debug specificity issues." },
+      { fr: "Pseudo-classes et éléments", obj: ":hover, :focus, ::before",
+        en: "What are CSS pseudo-classes and pseudo-elements? Show :hover, :focus, :nth-child, :not, ::before, ::after, ::placeholder with examples." },
+      { fr: "Box model", obj: "content, padding, border, margin",
+        en: "How does the CSS box model work? Show content, padding, border, margin, and the difference between box-sizing content-box and border-box." },
+      { fr: "Display et positionnement", obj: "block, inline, flex, grid + position",
+        en: "How do display and position properties work in CSS? Show block vs inline vs inline-block, position static/relative/absolute/fixed/sticky with examples." },
+      { fr: "Flexbox", obj: "display:flex, justify-content, align-items, gap",
+        en: "How does Flexbox work in CSS? Show display:flex, flex-direction, justify-content, align-items, gap, flex-grow/shrink/basis with a centered card example." },
+      { fr: "Grid", obj: "grid-template-columns, gap, areas",
+        en: "How does CSS Grid work? Show display:grid, grid-template-columns/rows (fr units, repeat, minmax, auto-fit), gap, and grid-template-areas for layouts." },
+      { fr: "Unités CSS", obj: "px, em, rem, %, vh/vw, ch",
+        en: "What are the different CSS units? Show absolute (px) vs relative (em, rem, %, vh, vw, ch, fr), when to use each, and common pitfalls." },
+      { fr: "Couleurs modernes", obj: "rgb, hsl, oklch, color-mix",
+        en: "What are the modern CSS color formats? Show rgb/rgba, hsl/hsla, hex, oklch, color-mix(), and the new color-contrast function." },
+      { fr: "Custom properties (vars)", obj: "--my-var et calc()",
+        en: "How do CSS custom properties (variables) work? Show declaring --vars, using var() with fallback, calc() with variables, and theming with @media." },
+      { fr: "Responsive & media queries", obj: "@media et mobile-first",
+        en: "How do CSS media queries work for responsive design? Show min-width vs max-width, mobile-first approach, prefers-color-scheme, prefers-reduced-motion." },
+      { fr: "Transitions & animations", obj: "transition, @keyframes, animation",
+        en: "How do CSS transitions and animations work? Show the transition shorthand, easing functions, @keyframes, animation properties, and prefers-reduced-motion accessibility." },
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════ JavaScript (MDN)
+  {
+    num: "JS1",
+    title: "JavaScript · Syntaxe moderne",
+    goal: "Coder en JavaScript ES2024 — types, fonctions, async, DOM.",
+    icon: "javascript",
+    corpus: "javascript",
+    concepts: [
+      { fr: "let, const, var", obj: "Portée et hoisting des déclarations",
+        en: "What is the difference between let, const, and var in JavaScript? Show scope (block vs function), hoisting, the temporal dead zone, and when to use each." },
+      { fr: "Types primitifs", obj: "string, number, boolean, null, undefined, bigint, symbol",
+        en: "What are the 7 primitive types in JavaScript? Show typeof for each (string, number, boolean, null, undefined, bigint, symbol), the typeof null quirk, and coercion rules." },
+      { fr: "Tableaux et méthodes", obj: "map, filter, reduce, find, some, every",
+        en: "What are the most useful Array methods in JavaScript? Show map, filter, reduce, find, some, every, flatMap with practical examples and chaining." },
+      { fr: "Objets et destructuring", obj: "{ a, b } = obj, spread, rest",
+        en: "How does object destructuring and spread work in JavaScript? Show destructuring with rename and default values, nested destructuring, and the spread/rest operators." },
+      { fr: "Functions et arrow", obj: "function vs () => et 'this'",
+        en: "How are arrow functions different from regular functions in JavaScript? Show this binding, arguments, hoisting, and when to use each (event handlers, methods, callbacks)." },
+      { fr: "Promises et async/await", obj: "then, catch, finally, await",
+        en: "How do Promises and async/await work in JavaScript? Show Promise.all, Promise.race, error handling with try/catch in async functions, and common pitfalls." },
+      { fr: "Modules ES (import/export)", obj: "named, default, dynamic import()",
+        en: "How do ES modules work in JavaScript? Show export named vs default, import syntax, side-effect imports, dynamic import() with code splitting." },
+      { fr: "Classes et héritage", obj: "class, extends, super, #private",
+        en: "How do JavaScript classes work? Show class syntax, constructor, methods, static, extends/super, getter/setter, and the new # private fields syntax." },
+      { fr: "Closures", obj: "Une fonction qui se souvient",
+        en: "What is a closure in JavaScript? Explain lexical scope, show a counter factory, use cases (module pattern, currying), and how closures cause memory leaks." },
+      { fr: "DOM : sélection et événements", obj: "querySelector, addEventListener",
+        en: "How do I manipulate the DOM in JavaScript? Show querySelector, querySelectorAll, addEventListener, event delegation, preventDefault, and event.target vs currentTarget." },
+      { fr: "Fetch et JSON", obj: "fetch(), Response, async/await, erreurs",
+        en: "How does the Fetch API work in JavaScript? Show fetch with options (method, headers, body), parsing JSON, handling errors, and using AbortController for cancellation." },
+      { fr: "Optional chaining & nullish", obj: "?., ??, ??=",
+        en: "What are the optional chaining (?.) and nullish coalescing (??) operators in JavaScript? Show usage with nested objects, function calls, and the difference with ||." },
     ],
   },
 ];
