@@ -32,6 +32,9 @@ const CORPORA = [
   { label: "HTML",            color: "#E34F26" },
   { label: "CSS",             color: "#1572B6" },
   { label: "JavaScript",      color: "#F7DF1E" },
+  { label: "C#",              color: "#9B82E6" },
+  { label: "ASP.NET Core",    color: "#A88FE6" },
+  { label: "EF Core",         color: "#6FA9E6" },
 ];
 
 export default function Landing() {
@@ -101,10 +104,10 @@ export default function Landing() {
               <CountUp to={0} suffix="ms" />
             </Stat>
             <Stat label="Corpus indexés" color="var(--color-action)">
-              <CountUp to={16} />
+              <CountUp to={19} />
             </Stat>
             <Stat label="Chunks indexés" color="var(--color-on-surface)">
-              <CountUp to={47094} duration={1800} />
+              <CountUp to={74080} duration={1800} />
             </Stat>
           </div>
         </section>
@@ -173,14 +176,15 @@ export default function Landing() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <h2 className="text-[22px] font-semibold text-on-surface">
-                      16 corpus indexés
+                      19 corpus indexés
                     </h2>
                     <p className="text-[14px] text-on-surface-variant leading-[1.6] mt-1">
-                      Du langage au front, de l'ORM aux tests : Polaris pioche
-                      simultanément dans toutes les docs officielles (Python,
-                      FastAPI, Pydantic, Next.js, TypeScript, Tailwind, pytest,
-                      httpx, SQLAlchemy, Zod, TanStack Query, Vitest, HTML, CSS,
-                      JavaScript MDN) + ton propre code via le corpus{" "}
+                      Du langage au front, du backend au .NET, de l'ORM aux
+                      tests : Polaris pioche simultanément dans toutes les docs
+                      officielles (Python, FastAPI, Pydantic, Next.js,
+                      TypeScript, Tailwind, pytest, httpx, SQLAlchemy, Zod,
+                      TanStack Query, Vitest, HTML, CSS, JavaScript MDN, C#,
+                      ASP.NET Core, EF Core) + ton propre code via le corpus{" "}
                       <span className="text-accent font-mono">self</span>.
                     </p>
                   </div>

@@ -24,6 +24,10 @@ const ALL_CORPORA: Corpus[] = [
   "html",
   "css",
   "javascript",
+  // Phase 13 — écosystème .NET
+  "csharp",
+  "aspnet",
+  "efcore",
 ];
 
 type Props = {

@@ -95,8 +95,8 @@ Les 7 traits ci-dessous sont **rares ou inexistants** ailleurs (ChatGPT, Copilot
 
 | Brique | Valeur |
 |---|---|
-| Corpus indexés | **16** (Python 3.14, FastAPI, Pydantic, Next.js, TypeScript, Tailwind, pytest, httpx, SQLAlchemy, Zod, TanStack Query, Vitest, **HTML**, **CSS**, **JavaScript** *(MDN, Phase 12)*, **ton code**) |
-| Chunks vectoriels | **47 094** *(post-Phase 12)* |
+| Corpus indexés | **19** (Python 3.14, FastAPI, Pydantic, Next.js, TypeScript, Tailwind, pytest, httpx, SQLAlchemy, Zod, TanStack Query, Vitest, HTML, CSS, JavaScript *(MDN, Phase 12)*, **C#**, **ASP.NET Core**, **EF Core** *(Microsoft Docs, Phase 13)*, **ton code**) |
+| Chunks vectoriels | **74 080** *(post-Phase 13)* |
 | Concepts pré-rédigés dans la sidebar | **214** (24 niveaux) — +36 concepts HTML/CSS/JS Phase 12 |
 | Endpoints HTTP | 8 (`/api/ask`, `/api/run`, `/api/kernel/*`, `/api/usage`, `/api/health`, `/docs`, `/redoc`) |
 | Tests de sécurité sandbox | **8/8 passent** |
@@ -545,6 +545,45 @@ de Claude ou Code Interpreter de ChatGPT — sans serveur backend, juste un
 - [x] Frontend `CodeBlock.tsx` nettoyé (plus de `executeFull`, `dockerAvailable`, `hostPorts`, `LivePortsPanel`)
 - [x] Frontend `lib/api.ts` nettoyé (plus de `runPythonFull`, `restartFullSandbox`, `getFullSandboxStatus`, types `FullRunResult`/`FullSandboxStatus`)
 - [x] Image Docker locale `polaris-sandbox:3.13` à supprimer (`docker rmi polaris-sandbox:3.13`)
+
+### Phase 13 — Écosystème .NET (C# + ASP.NET Core + EF Core) ✅
+
+**Décision** : élargir Polaris de "tuteur full-stack web (Python + JS/TS)" vers
+**polyglot backend** en ajoutant l'écosystème .NET officiel Microsoft. Pattern
+miroir de la Phase 7 — trois corpora qui couvrent langage + framework web + ORM.
+
+#### 13.1 Trois corpora ajoutés
+
+| Corpus | Source | Subpath | Équivalent Python |
+|---|---|---|---|
+| **`csharp`** | `github.com/dotnet/docs` | `docs/csharp` | ≈ Python |
+| **`aspnet`** | `github.com/dotnet/AspNetCore.Docs` | `aspnetcore` | ≈ FastAPI |
+| **`efcore`** | `github.com/dotnet/EntityFramework.Docs` | `entity-framework/core` | ≈ SQLAlchemy |
+
+- [x] Manifeste `backend/corpora.py` : 3 entrées (`csharp` 1 031 fichiers, `aspnet` 1 674, `efcore` 180 → **2 885 fichiers .md** ajoutés)
+- [x] Frontend `lib/curriculum.ts` : type `Corpus` étendu avec les 3 nouvelles clés
+- [x] `lib/corpus-meta.ts` : couleurs officielles (C# violet `#9B82E6`, ASP.NET `#A88FE6`, EF Core `#6FA9E6`) + icônes Material Symbols (`code_blocks`, `dns`, `storage`)
+- [x] `Sidebar.tsx` CORPUS_META : 3 entrées
+- [x] `CorpusFilter.tsx` ALL_CORPORA : 3 entrées
+- [x] Landing `app/page.tsx` : 3 nouvelles pastilles dans le bandeau corpus, stat passée 16 → **19 corpus**, bento card 3 textuelle mise à jour
+
+#### 13.2 Fetch + réindex
+
+- [x] Fetch via `python -m backend.scripts.fetch_docs --corpus <name>` (10 min total)
+- [x] Réindex `build_index` : **47 094 → 74 080 chunks** (+26 986, +57 %)
+- [x] Test retrieval validé sur 3 questions distinctes :
+  - "C# async await Task syntax" → score 0.74 sur `language-reference/keywords/async.md`
+  - "ASP.NET Core endpoint routing middleware" → score 0.78 sur `fundamentals/routing/`
+  - "Entity Framework Core LINQ query DbSet" → score 0.74 sur `querying/how-query-works.md`
+
+#### 13.3 Pas de curriculum dédié (à voir)
+
+Phase 13 v1 = corpus seulement, sans concepts pré-rédigés dans la sidebar
+curriculum (contrairement à Phase 12 HTML/CSS/JS qui avait +36 concepts).
+Raison : le pattern de questions .NET est plus hétérogène (langage, framework,
+ORM tous différents), et l'utilisateur peut déjà filtrer par corpus dans le
+ChatInput. À reconsidérer si la sidebar curriculum apparaît comme la voie
+d'entrée principale pour les utilisateurs .NET.
 
 ---
 

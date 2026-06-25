@@ -114,6 +114,25 @@ export const CORPUS_META: Record<Corpus | "unknown", CorpusMeta> = {
     bgColor: "bg-[#F7DF1E]/15 border-[#F7DF1E]/40",
     icon: "javascript",
   },
+  // ============ Phase 13 — Écosystème .NET ============
+  csharp: {
+    label: "C#",
+    color: "text-[#9B82E6]",  // violet #512BD4 éclairci pour lisibilité dark
+    bgColor: "bg-[#512BD4]/15 border-[#512BD4]/40",
+    icon: "code_blocks",
+  },
+  aspnet: {
+    label: "ASP.NET Core",
+    color: "text-[#A88FE6]",
+    bgColor: "bg-[#5C2D91]/15 border-[#5C2D91]/40",
+    icon: "dns",
+  },
+  efcore: {
+    label: "EF Core",
+    color: "text-[#6FA9E6]",
+    bgColor: "bg-[#1F2D5A]/20 border-[#1F2D5A]/50",
+    icon: "storage",
+  },
   unknown: {
     label: "Inconnu",
     color: "text-on-surface-variant",

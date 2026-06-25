@@ -23,6 +23,9 @@ const CORPUS_META: Record<Corpus, { label: string; color: string; icon: string }
   html:           { label: "HTML",           color: "text-[#E34F26]", icon: "html" },
   css:            { label: "CSS",            color: "text-[#1572B6]", icon: "css" },
   javascript:     { label: "JavaScript",     color: "text-[#F7DF1E]", icon: "javascript" },
+  csharp:         { label: "C#",             color: "text-[#9B82E6]", icon: "code_blocks" },
+  aspnet:         { label: "ASP.NET Core",   color: "text-[#A88FE6]", icon: "dns" },
+  efcore:         { label: "EF Core",        color: "text-[#6FA9E6]", icon: "storage" },
 };
 
 type Props = {

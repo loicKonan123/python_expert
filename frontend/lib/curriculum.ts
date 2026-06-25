@@ -33,7 +33,11 @@ export type Corpus =
   // Phase 12 — front-end MDN
   | "html"
   | "css"
-  | "javascript";
+  | "javascript"
+  // Phase 13 — écosystème .NET
+  | "csharp"
+  | "aspnet"
+  | "efcore";
 
 export type Level = {
   /** Identifiant du niveau (ex: "1", "FA1") — sert aussi de clé visuelle */

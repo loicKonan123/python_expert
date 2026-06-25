@@ -236,6 +236,44 @@ CORPORA: dict[str, Corpus] = {
         source_subpath="files/en-us/web/javascript",
     ),
 
+    # ─────────────────────────────────────────────────────────── Écosystème .NET
+    # Trois corpus officiels Microsoft, miroir du pattern Python (langage +
+    # framework web + ORM). Couvre l'essentiel du backend dotnet moderne.
+    "csharp": Corpus(
+        name="csharp",
+        description="C# (référence officielle Microsoft)",
+        local_path=DOCS_ROOT / "csharp",
+        format="markdown",
+        file_extensions=(".md",),
+        source_repo="https://github.com/dotnet/docs.git",
+        source_branch="main",
+        source_subpath="docs/csharp",
+    ),
+
+    # ASP.NET Core — équivalent de FastAPI / Django dans le monde .NET
+    "aspnet": Corpus(
+        name="aspnet",
+        description="ASP.NET Core (web framework .NET officiel)",
+        local_path=DOCS_ROOT / "aspnet",
+        format="markdown",
+        file_extensions=(".md",),
+        source_repo="https://github.com/dotnet/AspNetCore.Docs.git",
+        source_branch="main",
+        source_subpath="aspnetcore",
+    ),
+
+    # Entity Framework Core — équivalent de SQLAlchemy dans le monde .NET
+    "efcore": Corpus(
+        name="efcore",
+        description="Entity Framework Core (ORM .NET officiel)",
+        local_path=DOCS_ROOT / "efcore",
+        format="markdown",
+        file_extensions=(".md",),
+        source_repo="https://github.com/dotnet/EntityFramework.Docs.git",
+        source_branch="main",
+        source_subpath="entity-framework/core",
+    ),
+
     # ---------------------------------------------------- Code du projet courant
     # Permet au tuteur de répondre à des questions sur le code que TU as écrit
     # (« regarde mon backend/rag.py », « est-ce que mon ChatMessage.tsx est
