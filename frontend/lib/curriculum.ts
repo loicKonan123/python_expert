@@ -725,7 +725,7 @@ export const CURRICULUM: Level[] = [
 
   // ═══════════════════════════════════════════════════ C# (Microsoft Docs)
   {
-    num: "CS1",
+    num: "CSH1",
     title: "C# · Bases du langage",
     goal: "Syntaxe, types, classes — démarrer en C# moderne (.NET 8+).",
     icon: "code_blocks",
@@ -758,7 +758,7 @@ export const CURRICULUM: Level[] = [
     ],
   },
   {
-    num: "CS2",
+    num: "CSH2",
     title: "C# · LINQ, async, génériques",
     goal: "Les outils essentiels d'un dev C# productif.",
     icon: "code_blocks",

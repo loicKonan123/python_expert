@@ -636,6 +636,49 @@ Niveaux .NET à ajouter :
 - [ ] CSS : ajouter **CS2** (Container Queries avancé, Cascade Layers, Subgrid, View Transitions)
 - [ ] JavaScript : ajouter **JS2** (Iterators/Generators, Proxy/Reflect, Web APIs, modules workers)
 
+### Phase 15 — Exécution C# (à venir)
+
+**Constat** : depuis Phase 13, Polaris indexe l'écosystème .NET (csharp +
+aspnet + efcore), mais le bouton `Run` ne sait toujours exécuter que du
+Python (via `backend/sandbox.py`). Quand l'utilisateur apprend C# via
+Polaris, il doit copier-coller dans Rider / VS Code / dotnetfiddle pour
+tester. C'est une friction qu'on peut éliminer.
+
+**3 chemins possibles** (à arbitrer ensemble avant d'attaquer) :
+
+#### 15.A — `dotnet script` (subprocess local, ~1h de boulot)
+
+- Pré-requis utilisateur : `.NET SDK` installé + `dotnet tool install -g dotnet-script`
+- Pattern identique à `backend/sandbox.py` : on écrit un fichier `.csx` jetable, on lance `dotnet script <file>`, on capture stdout/stderr
+- [ ] Détection au boot backend : `dotnet --version` et `dotnet script --version`. Si absents → le bouton "Run C#" reste caché côté front (comme l'audit Docker de la Phase 11 abandonnée)
+- [ ] Nouveau module `backend/sandbox_csharp.py` (~150 lignes) : variante de `sandbox.py` mais sans audit hook PEP 578 (pas d'équivalent natif en .NET)
+- [ ] Nouvelle route `POST /api/run/csharp` (ou champ `lang` dans le payload existant)
+- [ ] Frontend `CodeBlock.tsx` : détecte `lang === "csharp"` → bouton **"Run C#"** vert (`#9B82E6` même couleur que le corpus)
+- [ ] Tests : `Console.WriteLine`, `async`/`await`, LINQ basique
+- **Limite** : pas isolé, le code C# a accès au FS / réseau de l'utilisateur. Acceptable en outil local solo, à NE PAS déployer en multi-utilisateur sans isolation
+- **Avantages** : ~1h, code C# 100% vrai (async + LINQ + records marchent), zéro install front
+
+#### 15.B — Blazor WebAssembly dans iframe (~6-10h de boulot)
+
+- Pattern identique à `frontend/components/HtmlPreview.tsx` mais avec **Mono.WASM** chargé via CDN dans l'iframe
+- C# tourne **dans le navigateur**, sandbox iframe + WASM = isolation totale
+- [ ] Composant `frontend/components/CSharpPreview.tsx` qui injecte le bootstrap Blazor WASM
+- [ ] CDN runtime : `https://aspnetwebstack.azurewebsites.net/blazor.webassembly.js` ou auto-hosted dans `frontend/public/blazor/`
+- [ ] Roslyn pour compilation runtime (in-browser) → exécution Mono → console mirror (réutilise le pattern de `HtmlPreview` JS)
+- **Avantages** : 100% safe (browser sandbox), zéro install utilisateur, marche sur n'importe quelle machine
+- **Inconvénients** : runtime ~10 MB téléchargé au 1er clic (caché ensuite), latence init ~2-5s, certaines APIs .NET pas dispo en WASM (FileStream, Sockets bruts, etc.)
+
+#### 15.C — Statu quo (option zéro boulot)
+
+- Polaris reste un **tuteur pédagogique** pour C# : il explique, cite la doc, montre du code annotated
+- L'utilisateur copie-colle dans son IDE / dotnetfiddle.net pour tester
+- C'est ce que fait ChatGPT pour C# par défaut
+- [ ] Si on garde 15.C : envisager d'ajouter un bouton **"Ouvrir dans dotnetfiddle"** sur les CodeBlock `lang === "csharp"` qui post le code via leur API (~30 min de boulot)
+
+**Décision à prendre** avant Session A : laquelle on attaque ? Probablement
+15.A si le SDK .NET est dispo localement, sinon 15.C avec le helper
+dotnetfiddle comme bonus pédago.
+
 ---
 
 ## Naming — 5 candidats à valider
