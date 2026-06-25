@@ -585,6 +585,57 @@ ORM tous différents), et l'utilisateur peut déjà filtrer par corpus dans le
 ChatInput. À reconsidérer si la sidebar curriculum apparaît comme la voie
 d'entrée principale pour les utilisateurs .NET.
 
+### Phase 14 — Curriculum approfondi + frontend completeness audit (en cours)
+
+**Constat** : la sidebar curriculum est une voie d'entrée pédagogique
+**excellente** — cliquer un concept génère automatiquement la bonne question
+RAG (en anglais, optimisée). Mais après les Phases 7, 12, 13, on a un gros
+déséquilibre : **9 corpora sur 19 ont des niveaux dans la sidebar**, les
+**10 autres sont muets** (pytest, httpx, sqlalchemy, zod, tanstack_query,
+vitest, csharp, aspnet, efcore — tous accessibles via filtre Sources mais
+invisibles dans le curriculum).
+
+**Objectif** : pour chaque techno, atteindre une couverture curriculum
+"complète" qui maximise l'apprentissage. Cible : ~25 nouveaux niveaux, ~250
+nouveaux concepts. Découpé en 3 sessions livrables indépendamment.
+
+#### 14.A — Frontend audit + niveaux .NET (Session A)
+
+Frontend completeness à vérifier maintenant qu'on a 19 corpora :
+- [ ] Sidebar curriculum : 10 corpora muets → ajouter les sections (au moins
+      pour .NET dans cette session)
+- [ ] InteractiveHero : 9 satellites sur 19 — décider si on en ajoute,
+      ou si la sélection actuelle reste "highlight" (probablement la 2e option)
+- [ ] Landing bento card 3 : juste un paragraphe textuel — pourrait être
+      visualisé (icônes par techno ou mini-grille)
+- [ ] Vérifier autres surfaces : prompt système, AGENTS.md, etc.
+
+Niveaux .NET à ajouter :
+- [ ] **CS1** C# · Bases du langage (syntaxe, types, classes, structs, properties, records)
+- [ ] **CS2** C# · LINQ + async/await + génériques + nullable types
+- [ ] **AS1** ASP.NET Core · Bases (Minimal API, MVC, routing, model binding)
+- [ ] **AS2** ASP.NET Core · Avancé (DI, middleware, auth, SignalR, configuration)
+- [ ] **EF1** EF Core · Bases (DbContext, migrations, LINQ queries, conventions)
+- [ ] **EF2** EF Core · Avancé (relations, eager/lazy loading, change tracking, perf)
+
+#### 14.B — Niveaux écosystème Phase 7 (Session B, plus tard)
+
+- [ ] **PT1** pytest · Fixtures + parametrize + markers + async
+- [ ] **HX1** httpx · Async client + retry + auth + streaming
+- [ ] **SA1** SQLAlchemy · Core vs ORM + sessions + relationships
+- [ ] **SA2** SQLAlchemy · Async + Alembic migrations + perf
+- [ ] **ZD1** Zod · Schemas + transformations + discriminated unions
+- [ ] **TQ1** TanStack Query · Query, Mutation, invalidation, suspense
+- [ ] **VT1** Vitest · Tests unitaires + mocks + coverage
+
+#### 14.C — Approfondir corpora existants (Session C, plus tard)
+
+- [ ] Pydantic : ajouter **PD3** (settings, JSON schema, computed_field, extras avancés)
+- [ ] Tailwind : ajouter **TW3** (animations avancées, theming dynamique, Tailwind UI patterns)
+- [ ] HTML : ajouter **HT2** (Web Components, Custom Elements, Shadow DOM, accessibilité avancée)
+- [ ] CSS : ajouter **CS2** (Container Queries avancé, Cascade Layers, Subgrid, View Transitions)
+- [ ] JavaScript : ajouter **JS2** (Iterators/Generators, Proxy/Reflect, Web APIs, modules workers)
+
 ---
 
 ## Naming — 5 candidats à valider
