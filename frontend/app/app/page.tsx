@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
 import { ChatMessage, type Message } from "@/components/ChatMessage";
-import { ChatInput, type ChatInputHandle } from "@/components/ChatInput";
+import { ChatInput, type ChatInputHandle, type Intent } from "@/components/ChatInput";
 import { WelcomeHero } from "@/components/WelcomeHero";
 import { askStream, type HistoryMessage, type Source } from "@/lib/api";
 import {
@@ -19,7 +19,12 @@ import {
 import type { Concept, Corpus, Level } from "@/lib/curriculum";
 
 const SIDEBAR_STORAGE_KEY = "pyexpert.sidebarOpen";
+const INTENT_STORAGE_KEY = "polaris-intent";
 const HISTORY_TURNS = 4;
+
+const VALID_INTENTS: Intent[] = [
+  "generate", "explain", "refactor", "debug", "test", "optimize",
+];
 
 
 export default function Home() {
@@ -29,6 +34,8 @@ export default function Home() {
   const [busy, setBusy] = useState(false);
   const [activeLevelNum, setActiveLevelNum] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  /** Phase 9 — intent global (persisté localStorage). null = défaut. */
+  const [intent, setIntent] = useState<Intent | null>(null);
   const cancelRef = useRef<(() => void) | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<ChatInputHandle | null>(null);
@@ -37,6 +44,12 @@ export default function Home() {
   useEffect(() => {
     const sidebar = localStorage.getItem(SIDEBAR_STORAGE_KEY);
     if (sidebar !== null) setSidebarOpen(sidebar === "1");
+
+    // Phase 9 — restaure l'intent sauvegardé (validé contre la liste)
+    const savedIntent = localStorage.getItem(INTENT_STORAGE_KEY);
+    if (savedIntent && (VALID_INTENTS as string[]).includes(savedIntent)) {
+      setIntent(savedIntent as Intent);
+    }
 
     const loaded = loadAllConversations();
     const savedId = loadCurrentId();
@@ -58,6 +71,15 @@ export default function Home() {
   useEffect(() => {
     localStorage.setItem(SIDEBAR_STORAGE_KEY, sidebarOpen ? "1" : "0");
   }, [sidebarOpen]);
+
+  // Phase 9 — persiste l'intent à chaque changement
+  useEffect(() => {
+    if (intent === null) {
+      localStorage.removeItem(INTENT_STORAGE_KEY);
+    } else {
+      localStorage.setItem(INTENT_STORAGE_KEY, intent);
+    }
+  }, [intent]);
 
   useEffect(() => {
     if (conversations.length > 0) saveAllConversations(conversations);
@@ -269,6 +291,7 @@ export default function Home() {
           history: historyOverride ?? history,
           corpora: corporaForCall,
           rewriteQuery: true,
+          intent,  // Phase 9 — passé au backend si non-null
         },
       );
     },
@@ -394,6 +417,8 @@ export default function Home() {
           sidebarOpen={sidebarOpen}
           selectedCorpora={selectedCorpora}
           onCorporaChange={setCurrentCorpora}
+          intent={intent}
+          onIntentChange={setIntent}
         />
       </main>
     </>

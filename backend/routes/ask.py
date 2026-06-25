@@ -20,7 +20,7 @@ from __future__ import annotations
 import json
 import logging
 import time
-from typing import Iterator
+from typing import Iterator, Literal
 
 from fastapi import APIRouter, Request
 from fastapi.responses import StreamingResponse
@@ -28,7 +28,12 @@ from pydantic import BaseModel, Field
 
 from ..config import settings
 from ..llm_providers.base import LLMProviderError, Message
-from ..prompts import build_messages, build_rewrite_messages
+from ..prompts import (
+    BOOST_FACTOR,
+    INTENT_CORPUS_BOOST,
+    build_messages,
+    build_rewrite_messages,
+)
 from ..routing import choose_model
 
 
@@ -52,6 +57,11 @@ class AskRequest(BaseModel):
     corpora: list[str] | None = None
     # Réécrire la question avant retrieval (recommandé pour follow-ups + FR).
     rewrite_query: bool = True
+    # Phase 9 — Intent cliqué par l'utilisateur dans le ChatInput.
+    # Si fourni : ajoute un paragraphe au system prompt + boost les corpus
+    # listés dans INTENT_CORPUS_BOOST pour cet intent. Si None : comportement
+    # identique à avant Phase 9.
+    intent: Literal["generate", "explain", "refactor", "debug", "test", "optimize"] | None = None
 
 
 def _sse(event: str, data: str | list | dict) -> bytes:
@@ -184,10 +194,23 @@ async def ask(req: AskRequest, request: Request) -> StreamingResponse:
             yield _sse("rewrite", rewritten)
 
         # ===== Phase 1 : RETRIEVAL =====
-        logger.info("[RETRIEVAL] début (k=%d)", k)
+        # Phase 9 : si un intent boost certains corpus, on retrieve 2x plus
+        # de chunks puis on réordonne pour donner sa chance à un corpus
+        # boosté qui serait juste sous le top-K.
+        boost_corpora = (
+            INTENT_CORPUS_BOOST.get(req.intent, []) if req.intent else []
+        )
+        retrieve_k = k * 2 if boost_corpora else k
+
+        logger.info(
+            "[RETRIEVAL] début (k=%d%s%s)",
+            k,
+            f", intent={req.intent}" if req.intent else "",
+            f", boost={boost_corpora}" if boost_corpora else "",
+        )
         try:
             t_retrieve = time.perf_counter()
-            chunks = rag.retrieve(retrieval_query, k=k, corpora=req.corpora)
+            chunks = rag.retrieve(retrieval_query, k=retrieve_k, corpora=req.corpora)
             retrieve_ms = (time.perf_counter() - t_retrieve) * 1000
         except Exception as exc:
             logger.exception("[RETRIEVAL] erreur : %s", exc)
@@ -203,6 +226,21 @@ async def ask(req: AskRequest, request: Request) -> StreamingResponse:
             )
             yield _sse("done", "")
             return
+
+        # Phase 9 — Boost intent : multiplie le score des chunks dont le
+        # corpus est listé dans INTENT_CORPUS_BOOST, puis re-trie et coupe
+        # au top-k réel. Si pas de boost actif, rien ne se passe.
+        if boost_corpora:
+            for c in chunks:
+                if c.corpus in boost_corpora:
+                    c.score *= BOOST_FACTOR
+            chunks.sort(key=lambda c: c.score, reverse=True)
+            chunks = chunks[:k]
+            logger.info(
+                "[RETRIEVAL] boost %s appliqué → top_corpora=%s",
+                boost_corpora,
+                [c.corpus for c in chunks[:3]],
+            )
 
         logger.info(
             "[RETRIEVAL] %d chunks en %.0fms, top_score=%.3f, source=%s",
@@ -222,6 +260,7 @@ async def ask(req: AskRequest, request: Request) -> StreamingResponse:
             req.question,
             [c.to_dict() for c in chunks],
             history=history,
+            intent=req.intent,  # Phase 9 — injecte le prompt d'intent si fourni
         )
         total_prompt_chars = sum(len(m["content"]) for m in messages)
         logger.info(

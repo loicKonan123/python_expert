@@ -24,15 +24,36 @@ type Props = {
   sidebarOpen: boolean;
   selectedCorpora: Corpus[];
   onCorporaChange: (next: Corpus[]) => void;
+  /** Phase 9 — intent actuel (None = pas d'orientation, comportement défaut). */
+  intent: Intent | null;
+  onIntentChange: (next: Intent | null) => void;
 };
 
-type Intent = "Refactor" | "Debug" | "Generate" | "Explain";
+/**
+ * Phase 9 — 6 intents câblés.
+ *
+ * L'intent est passé en paramètre à /api/ask qui injecte un complément au
+ * system prompt (voir backend/prompts.py:INTENT_PROMPTS) ET boost certains
+ * corpus dans le retrieval (INTENT_CORPUS_BOOST).
+ *
+ * On passe de l'ancien comportement "prefix texte dans l'input" à un vrai
+ * state qui voyage avec la requête. Persistance dans localStorage.
+ */
+export type Intent =
+  | "generate"
+  | "explain"
+  | "refactor"
+  | "debug"
+  | "test"
+  | "optimize";
 
-const INTENTS: Array<{ label: Intent; icon: string }> = [
-  { label: "Refactor", icon: "auto_fix_high" },
-  { label: "Debug",    icon: "bug_report" },
-  { label: "Generate", icon: "auto_awesome" },
-  { label: "Explain",  icon: "school" },
+const INTENTS: Array<{ id: Intent; label: string; icon: string; hint: string }> = [
+  { id: "generate", label: "Generate", icon: "auto_awesome",   hint: "Partir de zéro — code runnable complet" },
+  { id: "explain",  label: "Explain",  icon: "school",          hint: "Comprendre un concept ou un code" },
+  { id: "refactor", label: "Refactor", icon: "auto_fix_high",   hint: "Améliorer la structure (avant / après)" },
+  { id: "debug",    label: "Debug",    icon: "bug_report",      hint: "Trouver et fixer un bug + test de non-régression" },
+  { id: "test",     label: "Test",     icon: "science",         hint: "Écrire des tests (golden + edges + erreurs)" },
+  { id: "optimize", label: "Optimize", icon: "speed",           hint: "Améliorer les performances (mesure avant/après)" },
 ];
 
 /**
@@ -53,6 +74,8 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
     sidebarOpen,
     selectedCorpora,
     onCorporaChange,
+    intent,
+    onIntentChange,
   },
   ref,
 ) {
@@ -109,15 +132,17 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
     }
   }
 
-  function pickIntent(intent: Intent) {
-    onChange(prefixIntent(intent, value));
+  function pickIntent(next: Intent | null) {
+    onIntentChange(next);
     setIntentOpen(false);
     requestAnimationFrame(() => taRef.current?.focus());
   }
 
   const sourcesLabel =
     selectedCorpora.length === 0 ? "Toutes" : `${selectedCorpora.length}`;
-  const detectedIntent = detectIntent(value);
+  const currentIntentLabel = intent
+    ? INTENTS.find((it) => it.id === intent)?.label ?? "—"
+    : "—";
 
   return (
     <div
@@ -157,8 +182,8 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
             <CompactPill
               icon="psychology"
               label="Intent"
-              value={detectedIntent ?? "—"}
-              active={intentOpen}
+              value={currentIntentLabel}
+              active={intentOpen || intent !== null}
               onClick={() => {
                 setIntentOpen((v) => !v);
                 setSourcesOpen(false);
@@ -167,19 +192,48 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
             {intentOpen && (
               <Popover>
                 <div className="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant/70 mb-2">
-                  Préfixer l'intention
+                  Oriente le format de la réponse (Phase 9)
                 </div>
                 <div className="flex flex-col gap-1">
-                  {INTENTS.map((it) => (
-                    <button
-                      key={it.label}
-                      onClick={() => pickIntent(it.label)}
-                      className="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[13px] text-left text-on-surface hover:bg-on-surface/5 transition-colors"
-                    >
-                      <MaterialIcon name={it.icon} className="text-[16px] text-action" />
-                      {it.label}
-                    </button>
-                  ))}
+                  {/* Option "aucun" pour revenir au comportement par défaut */}
+                  <button
+                    onClick={() => pickIntent(null)}
+                    className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[13px] text-left transition-colors ${
+                      intent === null
+                        ? "bg-accent/15 text-accent"
+                        : "text-on-surface-variant hover:bg-on-surface/5 hover:text-on-surface"
+                    }`}
+                  >
+                    <MaterialIcon name="block" className="text-[16px]" />
+                    <span>Aucun intent</span>
+                    <span className="text-[10px] text-on-surface-variant/60 ml-auto">défaut</span>
+                  </button>
+                  <div className="h-px bg-on-surface/10 my-1" />
+                  {INTENTS.map((it) => {
+                    const active = intent === it.id;
+                    return (
+                      <button
+                        key={it.id}
+                        onClick={() => pickIntent(it.id)}
+                        className={`flex items-start gap-2 px-2.5 py-1.5 rounded-md text-[13px] text-left transition-colors ${
+                          active
+                            ? "bg-accent/15 text-accent"
+                            : "text-on-surface hover:bg-on-surface/5"
+                        }`}
+                      >
+                        <MaterialIcon
+                          name={it.icon}
+                          className={`text-[16px] mt-0.5 ${active ? "text-accent" : "text-action"}`}
+                        />
+                        <span className="flex-1 min-w-0">
+                          <span className="block font-medium">{it.label}</span>
+                          <span className="block text-[11px] text-on-surface-variant/70 leading-snug">
+                            {it.hint}
+                          </span>
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </Popover>
             )}
@@ -271,19 +325,3 @@ function Popover({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** Préfixe l'input avec une intention si pas déjà présente. */
-function prefixIntent(intent: Intent, current: string): string {
-  const trimmed = current.trimStart();
-  const prefix = `${intent}: `;
-  if (trimmed.toLowerCase().startsWith(intent.toLowerCase() + ":")) return current;
-  return prefix + trimmed;
-}
-
-/** Détecte un préfixe d'intent au début de l'input pour afficher la valeur du pill. */
-function detectIntent(text: string): Intent | null {
-  const t = text.trimStart().toLowerCase();
-  for (const it of INTENTS) {
-    if (t.startsWith(it.label.toLowerCase() + ":")) return it.label;
-  }
-  return null;
-}

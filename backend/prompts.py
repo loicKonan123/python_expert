@@ -1,6 +1,8 @@
 """Prompts système et templates."""
 from __future__ import annotations
 
+from typing import Literal
+
 from .llm_providers.base import Message
 
 
@@ -134,10 +136,89 @@ def build_user_message(question: str, chunks: list[dict]) -> str:
     )
 
 
+# ===========================================================================
+# Phase 9 — Intents câblés (additif, pas de régression)
+#
+# Quand l'utilisateur clique un intent dans le ChatInput, on AJOUTE un
+# paragraphe au SYSTEM_PROMPT (sans rien retirer) qui oriente le ton et le
+# format de la réponse. C'est plus puissant que le "prefix texte" antérieur :
+# les LLM respectent mieux les system messages que les conventions textuelles
+# dans le user message.
+#
+# Si aucun intent n'est passé (= cas par défaut), comportement strictement
+# identique à avant cette phase.
+#
+# 6 intents officiels (voir docs/plan.md section 9) :
+#   generate, explain, refactor, debug, test, optimize
+# ===========================================================================
+Intent = Literal["generate", "explain", "refactor", "debug", "test", "optimize"]
+
+
+INTENT_PROMPTS: dict[str, str] = {
+    "generate": (
+        "L'utilisateur veut GÉNÉRER du code à partir de zéro. "
+        "Réponds par un bloc de code runnable complet (imports + classes + "
+        "exemple d'usage + print). Une phrase d'intro courte, puis le code, "
+        "puis 2-3 lignes max sur les choix de design clés. Pas de tutoriel."
+    ),
+    "explain": (
+        "L'utilisateur veut COMPRENDRE un concept ou un code existant. "
+        "Réponds comme à un dev en apprentissage : analogie simple en intro, "
+        "explication progressive avec exemples concrets, vocabulaire défini à "
+        "la première occurrence. Pas de jargon non expliqué. C'est OK d'être "
+        "plus long si c'est pédagogique."
+    ),
+    "refactor": (
+        "L'utilisateur veut REFACTORISER du code (améliorer la structure). "
+        "Format obligatoire : 1) bloc AVANT (le code actuel), 2) bloc APRÈS "
+        "(le code refait), 3) liste numérotée des changements avec le pourquoi "
+        "de chacun. Ne dévie pas du périmètre demandé."
+    ),
+    "debug": (
+        "L'utilisateur veut FIXER UN BUG. Démarche obligatoire : 1) identifier "
+        "la cause racine en 1-2 phrases, 2) proposer le fix minimal (bloc de "
+        "code patché), 3) donner un test de non-régression qui aurait attrapé "
+        "le bug. Ne propose pas de refactoring hors sujet."
+    ),
+    "test": (
+        "L'utilisateur veut ÉCRIRE DES TESTS pour son code. "
+        "Couvre 3 catégories explicites avec un bloc de test distinct chacune : "
+        "1) golden path (le cas nominal), 2) edge cases (limites, valeurs "
+        "spéciales), 3) erreurs (entrées invalides, exceptions attendues). "
+        "Utilise pytest (Python) ou vitest (JS/TS) suivant le contexte. "
+        "Imports et fixtures inclus."
+    ),
+    "optimize": (
+        "L'utilisateur veut OPTIMISER les performances. Démarche : 1) "
+        "identifier le bottleneck théorique en 1-2 phrases (complexité O, IO, "
+        "GC, allocations…), 2) bloc avant/après avec mesure timeit ou "
+        "benchmark explicite, 3) justifier que le gain vaut la complexité "
+        "ajoutée. Pas de micro-optimisation prématurée sans mesure."
+    ),
+}
+
+
+# Boost de retrieval par intent : certains intents privilégient certains
+# corpus dans la recherche. Le boost est multiplicatif sur le score similarity
+# d'un chunk si son corpus est listé.
+INTENT_CORPUS_BOOST: dict[str, list[str]] = {
+    "generate": [],                       # aucun boost particulier
+    "explain":  [],                       # aucun boost particulier
+    "refactor": ["self"],                 # privilégie le code de l'utilisateur
+    "debug":    ["self", "pytest"],       # self + patterns de testing
+    "test":     ["pytest", "vitest", "httpx"],
+    "optimize": ["python", "self"],       # stdlib + code du user
+}
+
+# +15 % sur le score — significatif sans dominer le ranking
+BOOST_FACTOR = 1.15
+
+
 def build_messages(
     question: str,
     chunks: list[dict],
     history: list[Message] | None = None,
+    intent: str | None = None,
 ) -> list[Message]:
     """Assemble la liste de messages [system, ...history, current_user].
 
@@ -146,8 +227,21 @@ def build_messages(
     (les messages user ne contiennent PAS les chunks de leurs tours
     précédents — uniquement la question d'origine, pour ne pas exploser
     la taille du contexte).
+
+    Phase 9 : si ``intent`` est fourni ET reconnu, un paragraphe est AJOUTÉ
+    au system prompt pour orienter le format de la réponse. Le SYSTEM_PROMPT
+    original n'est jamais modifié. Si intent = None ou inconnu, comportement
+    strictement identique à avant Phase 9.
     """
-    messages: list[Message] = [{"role": "system", "content": SYSTEM_PROMPT}]
+    system_content = SYSTEM_PROMPT
+    if intent and intent in INTENT_PROMPTS:
+        system_content = (
+            SYSTEM_PROMPT
+            + "\n\n## Intention de cette requête (Phase 9)\n\n"
+            + INTENT_PROMPTS[intent]
+        )
+
+    messages: list[Message] = [{"role": "system", "content": system_content}]
     if history:
         messages.extend(history)
     messages.append({"role": "user", "content": build_user_message(question, chunks)})

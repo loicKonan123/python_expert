@@ -319,7 +319,7 @@ suivi pour resserrer le design. Commit de référence : `bcdd857`.
 - [x] Pulse, drift, twinkle sur tout (mesh orbs, particules, satellites, étoiles)
 - [x] Tous les `<animate>` SVG + keyframes CSS respectent `prefers-reduced-motion`
 
-### Phase 9 — Intents câblés (à venir)
+### Phase 9 — Intents câblés ✅
 
 **Constat actuel** : la barre d'intents dans le `ChatInput` (Refactor, Debug,
 Generate, Explain) **ne change rien côté backend**. Cliquer un intent injecte
@@ -347,20 +347,21 @@ Pourquoi pas d'autres ?
 
 #### 9.2 Travail backend
 
-- [ ] Endpoint `/api/ask` accepte un champ `intent: Literal["generate", "explain", "refactor", "debug", "test", "optimize"] | None`
-- [ ] Dictionnaire `INTENT_PROMPTS` dans `backend/llm/prompts.py` qui mappe chaque intent vers son system prompt
-- [ ] Si `intent` est fourni → injection du system prompt correspondant en plus du system prompt de base
-- [ ] Dictionnaire `INTENT_CORPUS_BOOST` qui boost certains corpus dans le retrieval (multiplie le score `k` ou réordonne)
-- [ ] Logger l'intent dans les usage stats pour mesurer l'adoption
+- [x] Endpoint `/api/ask` accepte un champ `intent: Literal["generate", "explain", "refactor", "debug", "test", "optimize"] | None`
+- [x] Dictionnaire `INTENT_PROMPTS` dans `backend/prompts.py` qui mappe chaque intent vers son system prompt (6 entrées détaillées)
+- [x] Si `intent` est fourni → injection d'un paragraphe `## Intention de cette requête (Phase 9)` qui s'ajoute au SYSTEM_PROMPT existant (le SYSTEM_PROMPT n'est jamais modifié — 100% additif)
+- [x] Dictionnaire `INTENT_CORPUS_BOOST` qui boost +15% le score des chunks d'un corpus listé pour l'intent (retrieve k*2, applique boost, re-trie, coupe au top-k)
+- [x] Logger l'intent dans les logs RETRIEVAL avec corpus boostés effectifs
 
 #### 9.3 Travail frontend
 
-- [ ] `ChatInput` passe à 6 pills (ajout Test + Optimize)
-- [ ] Cliquer une pill n'injecte plus de préfixe texte — change un state `selectedIntent`
-- [ ] Visuel : la pill active a un glow ambre + le `Intent` label montre la pill choisie en clair
-- [ ] L'intent sélectionné est passé à `askStream()` puis au backend
-- [ ] Persistance : l'intent par défaut peut être configuré (localStorage, ex: "Generate")
-- [ ] Bot message badge : affiche l'intent utilisé (déjà fait pour modelOverride, même pattern)
+- [x] `ChatInput` passe à 6 pills (ajout Test + Optimize) avec hints courts pour chacun
+- [x] Cliquer une pill ne fait plus de prefix texte — change le state global `intent` au parent (`app/app/page.tsx`)
+- [x] Visuel : la pill active a un glow ambre + le label du pill `Intent` montre l'intent choisi
+- [x] Type `AskOptions.intent` ajouté à `lib/api.ts`, forwardé dans le body POST de `/api/ask`
+- [x] Persistance `localStorage["polaris-intent"]` avec restore au boot
+- [x] Option "Aucun intent" dans le popover pour revenir au comportement défaut
+- [ ] ~~Bot message badge~~ : volontairement non fait — l'intent est déjà visible dans le pill, pas la peine de dupliquer (décision UX)
 
 #### 9.4 Auto-routing modèle (optionnel, phase 9 bis)
 

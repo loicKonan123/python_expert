@@ -26,6 +26,8 @@ export type AskOptions = {
   corpora?: string[];
   /** Demander au LLM de réécrire la question (utile FR / follow-ups). */
   rewriteQuery?: boolean;
+  /** Phase 9 — intent cliqué par l'utilisateur (oriente system prompt + boost retrieval). */
+  intent?: "generate" | "explain" | "refactor" | "debug" | "test" | "optimize" | null;
 };
 
 export type AskEvents = {
@@ -61,6 +63,7 @@ export function askStream(
         history: options.history ?? [],
         corpora: options.corpora && options.corpora.length > 0 ? options.corpora : null,
         rewrite_query: options.rewriteQuery ?? true,
+        intent: options.intent ?? null,  // Phase 9
       };
       const resp = await fetch(`${API_BASE}/api/ask`, {
         method: "POST",
