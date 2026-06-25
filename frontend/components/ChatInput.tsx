@@ -150,7 +150,7 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
         sidebarOpen ? "left-sidebar-width" : "left-0"
       }`}
     >
-      <div className="w-full max-w-chat-max-width glass-card-strong p-2 rounded-2xl pointer-events-auto">
+      <div className="w-full max-w-chat-max-width glass-card-strong shell-deep p-2 rounded-2xl pointer-events-auto">
         <div className="relative flex items-center gap-2">
           {/* Popover Sources */}
           <div ref={sourcesRef} className="relative">

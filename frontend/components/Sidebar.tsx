@@ -71,7 +71,7 @@ export function Sidebar({ open, activeLevelNum, onPickConcept, onClose }: Props)
         />
       )}
       <aside
-        className={`fixed left-0 top-0 h-screen w-sidebar-width z-40 bg-surface-container-low/70 backdrop-blur-xl backdrop-saturate-150 border-r border-on-surface/10 flex flex-col py-gutter transition-transform duration-200 ease-in-out ${
+        className={`fixed left-0 top-0 h-screen w-sidebar-width z-40 bg-surface-container-low/70 shell-deep backdrop-blur-xl backdrop-saturate-150 border-r border-on-surface/10 flex flex-col py-gutter transition-transform duration-200 ease-in-out ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
         aria-hidden={!open}
