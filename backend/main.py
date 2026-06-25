@@ -22,6 +22,7 @@ from .llm_providers import get_provider
 from .logging_config import setup_logging
 from .rag import RAGEngine
 from .routes import ask, health, run, usage
+from .sandbox_csharp import is_dotnet_script_available
 
 
 # Le logger principal du module est configuré au démarrage.
@@ -60,6 +61,13 @@ async def lifespan(app: FastAPI):
     logger.info("RAG engine prêt (total %.1fs)", time.perf_counter() - t0)
 
     app.state.llm.warmup()
+
+    # Détection C# sandbox (Phase 15.A) — non bloquant si absent.
+    app.state.csharp_available = is_dotnet_script_available()
+    if app.state.csharp_available:
+        logger.info("Sandbox C# disponible (dotnet-script détecté)")
+    else:
+        logger.info("Sandbox C# indisponible (dotnet-script non installé)")
 
     logger.info("Backend prêt sur http://%s:%d", settings.host, settings.port)
     logger.info("Docs OpenAPI : http://%s:%d/docs", settings.host, settings.port)

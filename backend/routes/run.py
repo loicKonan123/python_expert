@@ -22,6 +22,7 @@ from pydantic import BaseModel, Field
 from ..config import settings
 from ..kernel import get_manager
 from ..sandbox import run_python
+from ..sandbox_csharp import is_dotnet_script_available, run_csharp
 
 
 logger = logging.getLogger(__name__)
@@ -126,6 +127,56 @@ def run(req: RunRequest) -> RunResponse:
         max_output_bytes=settings.sandbox_max_output_kb * 1024,
     )
     return RunResponse(
+        stdout=result.stdout,
+        stderr=result.stderr,
+        exit_code=result.exit_code,
+        elapsed_ms=result.elapsed_ms,
+        timeout=result.timeout,
+        truncated=result.truncated,
+    )
+
+
+class RunCSharpRequest(BaseModel):
+    code: str = Field(..., min_length=1, max_length=20000)
+    timeout_s: float | None = Field(default=None, ge=1.0, le=30.0)
+
+
+class RunCSharpResponse(BaseModel):
+    stdout: str
+    stderr: str
+    exit_code: int
+    elapsed_ms: int
+    timeout: bool
+    truncated: bool
+
+
+@router.get("/run/csharp/available")
+def csharp_available() -> dict:
+    """Indique si l'exécution C# est disponible sur ce backend."""
+    return {"available": is_dotnet_script_available()}
+
+
+@router.post("/run/csharp", response_model=RunCSharpResponse)
+def run_csharp_endpoint(req: RunCSharpRequest) -> RunCSharpResponse:
+    """Exécute du code C# via dotnet-script en mode one-shot.
+
+    Pas de mode kernel persistant pour C# (Phase 15.A) — chaque appel est
+    un script jetable indépendant.
+    """
+    timeout = min(
+        req.timeout_s or settings.sandbox_timeout_s,
+        settings.sandbox_timeout_s,
+    )
+    logger.info(
+        "Sandbox C# run : %d caractères, timeout %.0fs",
+        len(req.code), timeout,
+    )
+    result = run_csharp(
+        code=req.code,
+        timeout_s=timeout,
+        max_output_bytes=settings.sandbox_max_output_kb * 1024,
+    )
+    return RunCSharpResponse(
         stdout=result.stdout,
         stderr=result.stderr,
         exit_code=result.exit_code,

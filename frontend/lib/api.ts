@@ -159,6 +159,46 @@ export async function runPython(
 
 
 /**
+ * Exécute du code C# en sandbox (Phase 15.A — dotnet-script).
+ * Mode one-shot uniquement (pas de kernel persistant).
+ */
+export async function runCSharp(
+  code: string,
+  options: { timeoutS?: number } = {},
+): Promise<RunResult> {
+  const resp = await fetch(`${API_BASE}/api/run/csharp`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      code,
+      timeout_s: options.timeoutS ?? null,
+    }),
+  });
+  if (!resp.ok) {
+    const text = await resp.text();
+    throw new Error(`Sandbox C# HTTP ${resp.status} : ${text.slice(0, 200)}`);
+  }
+  return resp.json();
+}
+
+
+/**
+ * Indique si le backend a dotnet-script installé et donc peut exécuter du C#.
+ * Le résultat est mis en cache au boot frontend (1 fetch par session).
+ */
+export async function checkCSharpAvailable(): Promise<boolean> {
+  try {
+    const resp = await fetch(`${API_BASE}/api/run/csharp/available`);
+    if (!resp.ok) return false;
+    const data = await resp.json();
+    return Boolean(data?.available);
+  } catch {
+    return false;
+  }
+}
+
+
+/**
  * Redémarre le kernel d'une session (vide les variables, recharge un Python frais).
  */
 export async function restartKernel(sessionId: string): Promise<void> {

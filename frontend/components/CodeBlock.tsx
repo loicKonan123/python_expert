@@ -3,7 +3,13 @@
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { MaterialIcon } from "./MaterialIcon";
-import { restartKernel, runPython, type RunResult } from "@/lib/api";
+import {
+  checkCSharpAvailable,
+  restartKernel,
+  runCSharp,
+  runPython,
+  type RunResult,
+} from "@/lib/api";
 import { useTheme } from "@/lib/useTheme";
 import { HtmlPreview, isPreviewable } from "./HtmlPreview";
 
@@ -57,6 +63,19 @@ export function CodeBlock({
 
   const langKey = normalizeLang(lang);
   const isRunnable = langKey === "python";
+  const isCSharp = langKey === "csharp";
+  const [csharpAvailable, setCsharpAvailable] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (!isCSharp) return;
+    let cancelled = false;
+    checkCSharpAvailable().then((ok) => {
+      if (!cancelled) setCsharpAvailable(ok);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isCSharp]);
 
   // Calcule la hauteur en fonction du nombre de lignes (max 480px).
   const lineHeight = 22;
@@ -91,6 +110,21 @@ export function CodeBlock({
     setResult(null);
     try {
       const r = await runPython(fullCode, { sessionId });
+      setResult(r);
+    } catch (err) {
+      setRunError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setRunning(false);
+    }
+  }
+
+  async function executeCSharp() {
+    if (running) return;
+    setRunning(true);
+    setRunError(null);
+    setResult(null);
+    try {
+      const r = await runCSharp(code);
       setResult(r);
     } catch (err) {
       setRunError(err instanceof Error ? err.message : String(err));
@@ -185,6 +219,22 @@ export function CodeBlock({
                 </button>
               )}
             </>
+          )}
+          {isCSharp && csharpAvailable && (
+            <button
+              onClick={executeCSharp}
+              disabled={running}
+              className="flex items-center gap-1 text-[11px] font-mono hover:brightness-125 disabled:opacity-50 disabled:cursor-wait transition-all"
+              style={{ color: "#9B82E6" }}
+              aria-label="Exécuter le code C#"
+              title="Exécute ce bloc via dotnet-script (timeout 10s, sandbox jetable)"
+            >
+              <MaterialIcon
+                name={running ? "hourglass_empty" : "play_arrow"}
+                className={`text-[14px] ${running ? "animate-spin" : ""}`}
+              />
+              {running ? "Compilation..." : "Run C#"}
+            </button>
           )}
           {previewable && (
             <button
@@ -394,6 +444,7 @@ function normalizeLang(lang: string): string {
   if (l === "js" || l === "jsx") return "javascript";
   if (l === "ts" || l === "tsx") return "typescript";
   if (l === "sh" || l === "bash" || l === "zsh") return "shell";
+  if (l === "cs" || l === "c#" || l === "csharp") return "csharp";
   return l;
 }
 
@@ -415,6 +466,9 @@ function prettyLangLabel(lang: string): string {
       json: "JSON",
       yaml: "YAML",
       sql: "SQL",
+      csharp: "C#",
+      cs: "C#",
+      "c#": "C#",
     }[l] ?? "Code"
   );
 }
