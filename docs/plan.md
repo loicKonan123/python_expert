@@ -628,13 +628,18 @@ Niveaux .NET à ajouter :
 - [ ] **TQ1** TanStack Query · Query, Mutation, invalidation, suspense
 - [ ] **VT1** Vitest · Tests unitaires + mocks + coverage
 
-#### 14.C — Approfondir corpora existants (Session C, plus tard)
+#### 14.C — Approfondir corpora existants ✅
 
-- [ ] Pydantic : ajouter **PD3** (settings, JSON schema, computed_field, extras avancés)
-- [ ] Tailwind : ajouter **TW3** (animations avancées, theming dynamique, Tailwind UI patterns)
-- [ ] HTML : ajouter **HT2** (Web Components, Custom Elements, Shadow DOM, accessibilité avancée)
-- [ ] CSS : ajouter **CS2** (Container Queries avancé, Cascade Layers, Subgrid, View Transitions)
-- [ ] JavaScript : ajouter **JS2** (Iterators/Generators, Proxy/Reflect, Web APIs, modules workers)
+- [x] Pydantic : **PD3** ajouté (12 concepts : pydantic-settings, computed_field, model_validator, alias generator, JSON schema custom, model_dump options, discriminated unions, generic models, strict mode, TypeAdapter, perf, intégrations)
+- [x] Tailwind : **TW3** ajouté (12 concepts : @theme directive v4, CSS variables, dark mode strategy, container queries, animations custom, variants avancés, arbitrary properties, gradients modernes, view transitions, plugins officiels, JIT, design system)
+- [x] HTML : **HT2** ajouté (12 concepts : Custom Elements, Shadow DOM, template+slot, dialog moderne, details+summary, ARIA live, focus management, picture, input types avancés, meter+progress, microdata, Permissions-Policy)
+- [x] CSS : **CS2** ajouté (12 concepts : Container Queries, Cascade Layers, Subgrid, View Transitions API, Anchor Positioning, :has(), :focus-visible, scroll-driven animations, color functions modernes, logical properties, custom properties dynamiques, container style queries)
+- [x] JavaScript : **JS2** ajouté (12 concepts : Iterators, Generators, Map/Set/WeakMap, Proxy/Reflect, Object.defineProperty, Symbol, structuredClone, Web Workers, Streams API, IntersectionObserver, ResizeObserver/MutationObserver, dynamic imports + top-level await)
+
+**Bilan Phase 14 complète** : 25 → 42 niveaux (+17 niveaux, +215 concepts).
+Couverture sidebar curriculum : 18/19 corpora (manque seulement `self` qui
+est spécial). Tous les corpora indexés ont maintenant au moins un niveau
+dans le curriculum.
 
 ### Phase 15 — Exécution C# (à venir)
 
