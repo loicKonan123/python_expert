@@ -41,9 +41,8 @@ type Props = {
 
 export function Sidebar({ open, activeLevelNum, onPickConcept, onClose }: Props) {
   const [filter, setFilter] = useState("");
-  const [expanded, setExpanded] = useState<Set<string>>(
-    () => new Set([CURRICULUM[0].num]),
-  );
+  // Tout collapsed au démarrage — l'utilisateur ouvre les sections qu'il veut.
+  const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
 
   const filtered = useMemo(() => filterCurriculum(filter), [filter]);
 
