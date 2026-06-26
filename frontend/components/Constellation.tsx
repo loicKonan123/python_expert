@@ -24,6 +24,7 @@ type Props = {
 };
 
 const STATIC_STARS: Array<[string, string, number, number]> = [
+  // Set originel — zones haute/basse
   ["10%", "20%", 1, 0.6],
   ["25%", "15%", 0.8, 0.4],
   ["40%", "30%", 1.2, 0.7],
@@ -36,6 +37,21 @@ const STATIC_STARS: Array<[string, string, number, number]> = [
   ["80%", "85%", 0.9, 0.4],
   ["95%", "60%", 1, 0.6],
   ["5%", "50%", 0.8, 0.5],
+  // Renforts latéraux pour densifier autour du titre central
+  ["3%",  "30%", 1.1, 0.55],
+  ["8%",  "65%", 0.7, 0.45],
+  ["12%", "42%", 0.9, 0.5],
+  ["18%", "8%",  1.0, 0.55],
+  ["22%", "55%", 0.7, 0.4],
+  ["30%", "5%",  0.6, 0.4],
+  ["45%", "92%", 0.8, 0.5],
+  ["50%", "8%",  1.1, 0.6],
+  ["62%", "65%", 0.9, 0.5],
+  ["72%", "92%", 0.7, 0.45],
+  ["82%", "45%", 1.0, 0.55],
+  ["88%", "5%",  0.8, 0.5],
+  ["92%", "75%", 1.1, 0.6],
+  ["97%", "35%", 0.7, 0.45],
 ];
 
 const TWINKLES: Array<[string, string, number, string, string]> = [
@@ -44,6 +60,12 @@ const TWINKLES: Array<[string, string, number, string, string]> = [
   ["50%", "60%", 1.5, "white", "2.5s"],
   ["85%", "35%", 1.2, "indigo", "3.5s"],
   ["30%", "55%", 1.2, "amber", "2.8s"],
+  // Twinkles supplémentaires pour vibrer le nuage
+  ["13%", "25%", 1.3, "amber", "3.2s"],
+  ["48%", "20%", 1.1, "indigo", "4.2s"],
+  ["78%", "65%", 1.4, "white", "3.8s"],
+  ["8%",  "82%", 1.2, "amber", "2.6s"],
+  ["92%", "20%", 1.3, "indigo", "3.6s"],
 ];
 
 const LINES: Array<[string, string, string, string, string, string]> = [

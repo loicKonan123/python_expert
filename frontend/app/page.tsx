@@ -9,6 +9,7 @@ import { CountUp } from "@/components/CountUp";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { LandingNav } from "@/components/LandingNav";
 import { InteractiveHero } from "@/components/InteractiveHero";
+import { TechIcon, TECH_LABELS, type TechKey } from "@/components/TechIcon";
 
 export const metadata = {
   title: "Polaris — Le tuteur dev qui ne ment pas",
@@ -16,26 +17,63 @@ export const metadata = {
     "Chaque réponse est citée dans la doc officielle de Python, FastAPI, Pydantic, Next.js, TypeScript et Tailwind. Le code généré peut être exécuté en direct.",
 };
 
-const CORPORA = [
-  { label: "Python 3.14",     color: "#FFD43B" },
-  { label: "FastAPI",         color: "#009688" },
-  { label: "Pydantic v2",     color: "#E92063" },
-  { label: "Next.js 16",      color: "#FFFFFF" },
-  { label: "TypeScript 5",    color: "#3178C6" },
-  { label: "Tailwind v4",     color: "#06B6D4" },
-  { label: "pytest",          color: "#0A9EDC" },
-  { label: "httpx",           color: "#6BC04B" },
-  { label: "SQLAlchemy",      color: "#D71F00" },
-  { label: "Zod",             color: "#3B82C4" },
-  { label: "TanStack Query",  color: "#FF4154" },
-  { label: "Vitest",          color: "#FCC72B" },
-  { label: "HTML",            color: "#E34F26" },
-  { label: "CSS",             color: "#1572B6" },
-  { label: "JavaScript",      color: "#F7DF1E" },
-  { label: "C#",              color: "#9B82E6" },
-  { label: "ASP.NET Core",    color: "#A88FE6" },
-  { label: "EF Core",         color: "#6FA9E6" },
+/**
+ * 6 piliers de l'expertise full-stack Polaris.
+ * Chaque pilier groupe ses technos avec leurs icônes officielles.
+ */
+const PILLARS: Array<{
+  title: string;
+  subtitle: string;
+  icon: string;
+  accent: string;
+  techs: TechKey[];
+}> = [
+  {
+    title: "Backend Python",
+    subtitle: "Du langage au framework moderne",
+    icon: "code",
+    accent: "#FFD43B",
+    techs: ["python", "fastapi", "pydantic", "sqlalchemy", "httpx", "pytest"],
+  },
+  {
+    title: "Frontend Web",
+    subtitle: "Next.js 16, TypeScript strict, Tailwind v4",
+    icon: "web",
+    accent: "#06B6D4",
+    techs: ["nextjs", "typescript", "tailwind", "zod", "tanstack_query", "vitest"],
+  },
+  {
+    title: "Standards web",
+    subtitle: "HTML, CSS, JavaScript — la référence MDN",
+    icon: "language",
+    accent: "#E34F26",
+    techs: ["html", "css", "javascript"],
+  },
+  {
+    title: "Écosystème .NET",
+    subtitle: "C#, ASP.NET Core, EF Core — Microsoft docs officiels",
+    icon: "code_blocks",
+    accent: "#9B82E6",
+    techs: ["csharp", "aspnet", "efcore"],
+  },
+  {
+    title: "Architecture",
+    subtitle: "Les méthodologies qui structurent le code",
+    icon: "view_module",
+    accent: "#79589F",
+    techs: ["twelve_factor"],
+  },
+  {
+    title: "DevOps",
+    subtitle: "Conteneurisation + CI/CD modernes",
+    icon: "rocket_launch",
+    accent: "#2496ED",
+    techs: ["docker", "github_actions"],
+  },
 ];
+
+/** Liste plate des 21 technos pour la belt finale (préserve l'ordre des piliers). */
+const ALL_TECHS: TechKey[] = PILLARS.flatMap((p) => p.techs);
 
 export default function Landing() {
   return (
@@ -45,7 +83,7 @@ export default function Landing() {
       <LandingNav />
 
       {/* Hero — copie centrée en haut, panneau interactif plein largeur dessous */}
-      <section className="relative px-gutter pt-10 pb-20 max-w-6xl mx-auto">
+      <section className="relative px-gutter min-h-[88vh] flex items-center justify-center max-w-6xl mx-auto w-full">
         <Constellation
           className="absolute inset-0 -z-10 pointer-events-none"
           density={3}
@@ -53,23 +91,32 @@ export default function Landing() {
         />
         <ParticlesLayer />
 
-        {/* Copie centrée */}
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <h1 className="text-[clamp(40px,6.5vw,80px)] font-extrabold tracking-[-0.02em] leading-[1.02] mb-5">
-            Le tuteur dev qui<br />
-            <span className="text-accent">ne ment pas.</span>
+        {/* Copie centrée — prend tout l'espace vertical du viewport */}
+        <div className="text-center max-w-3xl mx-auto">
+          {/* Kicker : positionnement full-stack */}
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass-card mb-6">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+            <span className="text-[11px] font-mono uppercase tracking-widest text-accent">
+              Tuteur Full-Stack · 21 technos officielles
+            </span>
+          </div>
+
+          <h1 className="text-[clamp(36px,6vw,72px)] font-extrabold tracking-[-0.02em] leading-[1.05] mb-5">
+            L&apos;expert full-stack
+            <br />
+            <span className="text-accent">qui ne ment pas.</span>
           </h1>
 
           <p className="text-[17px] sm:text-[19px] text-on-surface-variant leading-[1.55] mb-8 max-w-2xl mx-auto">
-            Chaque réponse est{" "}
+            Python, .NET, Next.js, Docker, CI/CD —{" "}
             <span className="text-on-surface font-medium">
-              citée dans la doc officielle
+              chaque réponse est citée dans la doc officielle
             </span>
-            . Chaque ligne de Python est{" "}
+            , chaque ligne de code est{" "}
             <span className="text-on-surface font-medium">
               exécutée en sandbox
             </span>
-            . Zéro hallucination.
+            . Zéro hallucination, zéro version périmée.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-3">
@@ -81,15 +128,36 @@ export default function Landing() {
               Commencer
             </Link>
             <a
-              href="#how"
+              href="#demo"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-surface-container-low border border-outline-variant/60 text-[15px] text-on-surface hover:border-action/40 hover:bg-surface-container transition-colors"
             >
               Voir la démo
             </a>
           </div>
-        </div>
 
-        {/* Panneau interactif plein largeur — constellation + démo côte à côte */}
+          {/* Cue de scroll discret pour signaler le contenu en-dessous */}
+          <a
+            href="#demo"
+            aria-label="Voir la démo en dessous"
+            className="mt-16 inline-flex flex-col items-center gap-2 text-on-surface-variant/50 hover:text-on-surface-variant transition-colors"
+          >
+            <span className="text-[10px] font-mono uppercase tracking-widest">
+              Scroll
+            </span>
+            <MaterialIcon name="keyboard_arrow_down" className="text-[20px] animate-bounce" />
+          </a>
+        </div>
+      </section>
+
+      {/* Démo interactive — section dédiée sous le pli */}
+      <section id="demo" className="relative px-gutter pb-24 pt-8 max-w-6xl mx-auto w-full">
+        <Reveal>
+          <SectionHeader
+            kicker="Démo live"
+            title="Polaris en action"
+            subtitle="Une vraie conversation, des vraies sources, du code qui tourne."
+          />
+        </Reveal>
         <InteractiveHero />
       </section>
 
@@ -166,7 +234,7 @@ export default function Landing() {
             </Tilt3D>
           </Reveal>
 
-          {/* Card 3 — Multi-corpus (col-span-12) avec belt animé */}
+          {/* Card 3 — Full-stack overview (col-span-12) */}
           <Reveal delay={240} className="md:col-span-12">
             <Tilt3D className="h-full" maxTilt={3}>
               <article className="glass-card-strong p-7 rounded-3xl space-y-5 hover:border-accent/30 transition-colors">
@@ -176,29 +244,26 @@ export default function Landing() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <h2 className="text-[22px] font-semibold text-on-surface">
-                      22 corpus indexés
+                      L'expertise full-stack en 22 corpus
                     </h2>
                     <p className="text-[14px] text-on-surface-variant leading-[1.6] mt-1">
-                      Du langage au front, du backend au .NET, de l'ORM aux
-                      tests, de l'archi au DevOps : Polaris pioche simultanément
-                      dans toutes les docs officielles (Python, FastAPI, Pydantic,
-                      Next.js, TypeScript, Tailwind, pytest, httpx, SQLAlchemy, Zod,
-                      TanStack Query, Vitest, HTML, CSS, JavaScript MDN, C#,
-                      ASP.NET Core, EF Core, 12 Factor App, Docker, GitHub
-                      Actions) + ton propre code via le corpus{" "}
+                      Du langage au framework, du frontend au .NET, de l'ORM
+                      aux tests, de l'archi au DevOps. Toutes les docs sont{" "}
+                      <span className="text-on-surface font-medium">
+                        officielles, à jour, et indexées localement
+                      </span>
+                      . Plus ton propre code via le corpus{" "}
                       <span className="text-accent font-mono">self</span>.
                     </p>
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {CORPORA.map((c, i) => (
-                    <Reveal key={c.label} delay={i * 30} translateY={8}>
+                {/* Belt avec icônes officielles */}
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {ALL_TECHS.map((tech, i) => (
+                    <Reveal key={tech} delay={i * 30} translateY={8}>
                       <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full glass-card text-[12px] font-mono">
-                        <span
-                          className="w-1.5 h-1.5 rounded-full"
-                          style={{ background: c.color }}
-                        />
-                        {c.label}
+                        <TechIcon tech={tech} size={14} />
+                        {TECH_LABELS[tech]}
                       </span>
                     </Reveal>
                   ))}
@@ -206,6 +271,59 @@ export default function Landing() {
               </article>
             </Tilt3D>
           </Reveal>
+        </div>
+      </section>
+
+      {/* Stack expert — 6 piliers avec icônes officielles */}
+      <section id="stack" className="px-gutter pb-24 max-w-6xl mx-auto w-full">
+        <Reveal>
+          <SectionHeader
+            kicker="Stack expert"
+            title="6 piliers, 21 technos, une seule étoile"
+            subtitle="Polaris couvre tout ce dont un dev full-stack a besoin pour livrer en production : du code au déploiement, en passant par les tests et l'architecture."
+          />
+        </Reveal>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {PILLARS.map((pillar, i) => (
+            <Reveal key={pillar.title} delay={i * 80}>
+              <Tilt3D maxTilt={5} className="h-full">
+                <article className="glass-card-strong h-full p-6 rounded-2xl space-y-4 hover:border-accent/30 transition-colors">
+                  <div className="flex items-start gap-3">
+                    <div
+                      className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+                      style={{
+                        background: `linear-gradient(135deg, ${pillar.accent}30, ${pillar.accent}10)`,
+                        border: `1px solid ${pillar.accent}40`,
+                      }}
+                    >
+                      <span style={{ color: pillar.accent }}>
+                        <MaterialIcon name={pillar.icon} filled className="text-[20px]" />
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-[15px] font-semibold text-on-surface leading-tight">
+                        {pillar.title}
+                      </h3>
+                      <p className="text-[12px] text-on-surface-variant/80 leading-[1.4] mt-0.5">
+                        {pillar.subtitle}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {pillar.techs.map((tech) => (
+                      <span
+                        key={tech}
+                        className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-surface-container-low/60 border border-outline-variant/30 text-[11px] font-mono text-on-surface-variant hover:border-outline-variant/60 transition-colors"
+                      >
+                        <TechIcon tech={tech} size={12} />
+                        {TECH_LABELS[tech]}
+                      </span>
+                    ))}
+                  </div>
+                </article>
+              </Tilt3D>
+            </Reveal>
+          ))}
         </div>
       </section>
 
@@ -338,19 +456,29 @@ function ComparisonTable() {
       generic: "Affirmations sans source vérifiable",
     },
     {
-      feature: "Code Python",
-      polaris: "Exécuté en sandbox + kernel persistant",
+      feature: "Exécution code",
+      polaris: "Python (kernel persistant) + C# (dotnet-script) en sandbox",
       generic: "Texte non vérifié, à copier-coller",
     },
     {
+      feature: "Couverture stack",
+      polaris: "Backend, frontend, .NET, archi, DevOps (21 technos)",
+      generic: "Réponses génériques, profondeur inégale",
+    },
+    {
       feature: "Versions",
-      polaris: "Python 3.14, Next.js 16, Tailwind v4",
+      polaris: "Python 3.14, .NET 9, Next.js 16, Tailwind v4",
       generic: "Souvent périmées (knowledge cutoff)",
     },
     {
       feature: "Corpus",
-      polaris: "13 sources spécialisées (28 367 chunks)",
+      polaris: "22 sources officielles (86 278 chunks vectorisés)",
       generic: "Données génériques mélangées",
+    },
+    {
+      feature: "Curriculum guidé",
+      polaris: "465 concepts structurés en 45 niveaux pédagogiques",
+      generic: "Aucun parcours, l'utilisateur se débrouille",
     },
     {
       feature: "Vie privée",
@@ -561,21 +689,33 @@ function MiniCodeWindow() {
   );
 }
 
-/** Couche de 12 particules réparties horizontalement avec délais variés. */
+/** Couche de 24 particules réparties horizontalement avec délais variés. */
 function ParticlesLayer() {
   const particles = [
-    { left: "8%",  color: "var(--color-accent)", dur: "9s",  delay: "0s" },
-    { left: "16%", color: "#818cf8", dur: "11s", delay: "1.5s" },
-    { left: "24%", color: "#818cf8", dur: "8s",  delay: "3s" },
-    { left: "32%", color: "var(--color-accent)", dur: "10s", delay: "0.8s" },
-    { left: "42%", color: "#818cf8", dur: "12s", delay: "2.2s" },
-    { left: "50%", color: "var(--color-accent)", dur: "9s",  delay: "4s" },
-    { left: "58%", color: "#818cf8", dur: "11s", delay: "1.2s" },
-    { left: "66%", color: "#818cf8", dur: "8s",  delay: "3.5s" },
-    { left: "76%", color: "var(--color-accent)", dur: "10s", delay: "2s" },
-    { left: "84%", color: "#818cf8", dur: "12s", delay: "0.5s" },
-    { left: "92%", color: "#818cf8", dur: "9s",  delay: "4.5s" },
-    { left: "96%", color: "var(--color-accent)", dur: "11s", delay: "3.2s" },
+    { left: "4%",  color: "var(--color-accent)", dur: "9s",  delay: "0s" },
+    { left: "8%",  color: "#818cf8", dur: "11s", delay: "1.5s" },
+    { left: "13%", color: "#818cf8", dur: "8s",  delay: "3s" },
+    { left: "17%", color: "var(--color-accent)", dur: "10s", delay: "0.8s" },
+    { left: "21%", color: "#818cf8", dur: "12s", delay: "2.2s" },
+    { left: "26%", color: "var(--color-accent)", dur: "9s",  delay: "4s" },
+    { left: "31%", color: "#818cf8", dur: "11s", delay: "1.2s" },
+    { left: "36%", color: "#a78bfa", dur: "8s",  delay: "3.5s" },
+    { left: "41%", color: "var(--color-accent)", dur: "10s", delay: "2s" },
+    { left: "46%", color: "#818cf8", dur: "12s", delay: "0.5s" },
+    { left: "51%", color: "#a78bfa", dur: "9s",  delay: "4.5s" },
+    { left: "55%", color: "var(--color-accent)", dur: "11s", delay: "3.2s" },
+    { left: "60%", color: "#818cf8", dur: "10s", delay: "0.3s" },
+    { left: "64%", color: "var(--color-accent)", dur: "8s",  delay: "2.7s" },
+    { left: "68%", color: "#818cf8", dur: "12s", delay: "1s" },
+    { left: "72%", color: "#a78bfa", dur: "9s",  delay: "4.2s" },
+    { left: "76%", color: "var(--color-accent)", dur: "11s", delay: "2.4s" },
+    { left: "80%", color: "#818cf8", dur: "10s", delay: "0.6s" },
+    { left: "84%", color: "var(--color-accent)", dur: "8s",  delay: "3.8s" },
+    { left: "88%", color: "#a78bfa", dur: "12s", delay: "1.8s" },
+    { left: "91%", color: "#818cf8", dur: "9s",  delay: "4.8s" },
+    { left: "94%", color: "var(--color-accent)", dur: "11s", delay: "0.9s" },
+    { left: "97%", color: "#818cf8", dur: "10s", delay: "2.6s" },
+    { left: "99%", color: "var(--color-accent)", dur: "12s", delay: "3.4s" },
   ];
   return (
     <div className="absolute inset-0 -z-10 pointer-events-none overflow-hidden" aria-hidden="true">
