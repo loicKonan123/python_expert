@@ -641,7 +641,63 @@ Couverture sidebar curriculum : 18/19 corpora (manque seulement `self` qui
 est spécial). Tous les corpora indexés ont maintenant au moins un niveau
 dans le curriculum.
 
-### Phase 15 — Exécution C# (à venir)
+### Phase 15 — Exécution C# (✅ livré)
+
+**Livré** : 15.A (subprocess `dotnet script`) + 15.B (préprocesseur intelligent).
+
+- `backend/sandbox_csharp.py` : subprocess + env clean + temp dir + timeout
+- Routes `POST /api/run/csharp` + `GET /api/run/csharp/available`
+- Détection au boot, bouton "Run C#" violet `#9B82E6` côté frontend
+- Préprocesseur Phase 15.B :
+  * Promote `Main()` body au top-level (programmes C# classiques)
+  * Strip wrapper `class Program` si collision avec top-level (CS7022)
+  * Auto-inject `string[] args = new string[0]` pour `Main(string[] args)`
+  * Auto-inject `#r "nuget: EFCore.*"` pour code EF Core
+  * Message clair pour ASP.NET (non runnable en .csx → `dotnet new web`)
+  * Filtre warnings noise : CS7022, CS0219, CS0649, CS0168, CS8321, CS0414
+- **23/23 tests verts** : Hello, classique, args, decimal, LINQ, async, multi-classes, records, patterns, generics, try/catch, throw, switch expression, etc.
+
+**Limites assumées** :
+- Pas d'audit hook (PEP 578 sans équivalent .NET) → protections subprocess seulement
+- ~5-7s par exécution (Roslyn cold start, inévitable sans `dotnet watch`)
+- One-shot uniquement (pas de kernel persistant pour C#)
+- `using var x = ...` au top-level non supporté par le parser .csx → utiliser `using (var x) { }`
+
+### Phase 16 — Architecture + DevOps (en cours)
+
+**Constat** : Polaris couvre langage + framework web + ORM + tests +
+front-end + écosystème, mais il manque deux pans pour un tuteur full-stack
+complet : l'**architecture** (comment structurer un système) et le **DevOps**
+(comment le livrer + faire tourner en prod).
+
+**Décision** : 3 corpus officiels prioritaires (option C — focus avant
+extension).
+
+| Corpus | Source officielle | Fichiers MD |
+|---|---|---|
+| `twelve_factor` | github.com/heroku/12factor (content/en) | 16 |
+| `docker` | github.com/docker/docs (content) | 1 251 |
+| `github_actions` | github.com/github/docs (content/actions) | 244 |
+
+**Pourquoi ces 3 d'abord** :
+- **12factor** : foundational pour tout SaaS moderne (config, processes, logs, dispose…)
+- **Docker** : conteneurisation = base d'à peu près toute archi 2026
+- **GitHub Actions** : CI/CD le plus utilisé chez les devs solo + équipes
+
+**Suite envisagée (Phase 16.B)** : Kubernetes (~10k chunks), Terraform,
+nginx, AWS Well-Architected, Microsoft Architecture Guides. À déclencher
+après validation de la qualité du retrieval sur Phase 16.A.
+
+- [x] Ajout des 3 corpora dans `backend/corpora.py`
+- [x] Fetch des 3 repos (longpaths Windows nécessaire pour Docker)
+- [x] Frontend : `corpus-meta.ts`, `Sidebar.tsx`, `CorpusFilter.tsx`, type `Corpus`
+- [x] Update stats landing : 19 → 22 corpus
+- [ ] Reindex global (en cours, ~2-3 h CPU)
+- [ ] Update stats finales avec le vrai nombre de chunks
+- [ ] Tests UI : poser une question DevOps réelle ("Comment écrire un Dockerfile multi-stage pour FastAPI ?")
+- [ ] (Optionnel Phase 16.C) Curriculum levels pour twelve_factor + docker + github_actions
+
+### Phase 15 — Naming reference (archivé)
 
 **Constat** : depuis Phase 13, Polaris indexe l'écosystème .NET (csharp +
 aspnet + efcore), mais le bouton `Run` ne sait toujours exécuter que du

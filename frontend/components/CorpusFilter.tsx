@@ -28,6 +28,10 @@ const ALL_CORPORA: Corpus[] = [
   "csharp",
   "aspnet",
   "efcore",
+  // Phase 16 — Architecture + DevOps
+  "twelve_factor",
+  "docker",
+  "github_actions",
 ];
 
 type Props = {

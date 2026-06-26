@@ -26,6 +26,9 @@ const CORPUS_META: Record<Corpus, { label: string; color: string; icon: string }
   csharp:         { label: "C#",             color: "text-[#9B82E6]", icon: "code_blocks" },
   aspnet:         { label: "ASP.NET Core",   color: "text-[#A88FE6]", icon: "dns" },
   efcore:         { label: "EF Core",        color: "text-[#6FA9E6]", icon: "storage" },
+  twelve_factor:  { label: "12 Factor App",  color: "text-[#79589F]", icon: "view_module" },
+  docker:         { label: "Docker",         color: "text-[#2496ED]", icon: "deployed_code" },
+  github_actions: { label: "GitHub Actions", color: "text-[#9E91F2]", icon: "play_circle" },
 };
 
 type Props = {

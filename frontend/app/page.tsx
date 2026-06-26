@@ -104,10 +104,10 @@ export default function Landing() {
               <CountUp to={0} suffix="ms" />
             </Stat>
             <Stat label="Corpus indexés" color="var(--color-action)">
-              <CountUp to={19} />
+              <CountUp to={22} />
             </Stat>
             <Stat label="Chunks indexés" color="var(--color-on-surface)">
-              <CountUp to={74080} duration={1800} />
+              <CountUp to={86278} duration={1800} />
             </Stat>
           </div>
         </section>
@@ -176,15 +176,16 @@ export default function Landing() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <h2 className="text-[22px] font-semibold text-on-surface">
-                      19 corpus indexés
+                      22 corpus indexés
                     </h2>
                     <p className="text-[14px] text-on-surface-variant leading-[1.6] mt-1">
                       Du langage au front, du backend au .NET, de l'ORM aux
-                      tests : Polaris pioche simultanément dans toutes les docs
-                      officielles (Python, FastAPI, Pydantic, Next.js,
-                      TypeScript, Tailwind, pytest, httpx, SQLAlchemy, Zod,
+                      tests, de l'archi au DevOps : Polaris pioche simultanément
+                      dans toutes les docs officielles (Python, FastAPI, Pydantic,
+                      Next.js, TypeScript, Tailwind, pytest, httpx, SQLAlchemy, Zod,
                       TanStack Query, Vitest, HTML, CSS, JavaScript MDN, C#,
-                      ASP.NET Core, EF Core) + ton propre code via le corpus{" "}
+                      ASP.NET Core, EF Core, 12 Factor App, Docker, GitHub
+                      Actions) + ton propre code via le corpus{" "}
                       <span className="text-accent font-mono">self</span>.
                     </p>
                   </div>

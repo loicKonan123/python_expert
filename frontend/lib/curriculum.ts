@@ -37,7 +37,11 @@ export type Corpus =
   // Phase 13 — écosystème .NET
   | "csharp"
   | "aspnet"
-  | "efcore";
+  | "efcore"
+  // Phase 16 — Architecture + DevOps
+  | "twelve_factor"
+  | "docker"
+  | "github_actions";
 
 export type Level = {
   /** Identifiant du niveau (ex: "1", "FA1") — sert aussi de clé visuelle */

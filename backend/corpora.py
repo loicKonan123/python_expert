@@ -274,6 +274,47 @@ CORPORA: dict[str, Corpus] = {
         source_subpath="entity-framework/core",
     ),
 
+    # ============================================================
+    # Phase 16 — Architecture + DevOps (sources officielles)
+    # ============================================================
+
+    # Architecture : 12 Factor App — bible du SaaS moderne, repo officiel Heroku.
+    # Court mais foundational. ~12 pages markdown.
+    "twelve_factor": Corpus(
+        name="twelve_factor",
+        description="The Twelve-Factor App (méthodologie SaaS)",
+        local_path=DOCS_ROOT / "twelve-factor",
+        format="markdown",
+        file_extensions=(".md",),
+        source_repo="https://github.com/heroku/12factor.git",
+        source_branch="main",
+        source_subpath="content/en",
+    ),
+
+    # DevOps : Docker — repo officiel docs.docker.com.
+    "docker": Corpus(
+        name="docker",
+        description="Docker (officiel docs.docker.com)",
+        local_path=DOCS_ROOT / "docker",
+        format="markdown",
+        file_extensions=(".md",),
+        source_repo="https://github.com/docker/docs.git",
+        source_branch="main",
+        source_subpath="content",
+    ),
+
+    # DevOps : GitHub Actions — repo officiel docs.github.com, subpath actions.
+    "github_actions": Corpus(
+        name="github_actions",
+        description="GitHub Actions (CI/CD officiel GitHub)",
+        local_path=DOCS_ROOT / "github-actions",
+        format="markdown",
+        file_extensions=(".md",),
+        source_repo="https://github.com/github/docs.git",
+        source_branch="main",
+        source_subpath="content/actions",
+    ),
+
     # ---------------------------------------------------- Code du projet courant
     # Permet au tuteur de répondre à des questions sur le code que TU as écrit
     # (« regarde mon backend/rag.py », « est-ce que mon ChatMessage.tsx est

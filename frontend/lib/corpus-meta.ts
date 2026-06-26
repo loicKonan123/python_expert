@@ -133,6 +133,25 @@ export const CORPUS_META: Record<Corpus | "unknown", CorpusMeta> = {
     bgColor: "bg-[#1F2D5A]/20 border-[#1F2D5A]/50",
     icon: "storage",
   },
+  // ============ Phase 16 — Architecture + DevOps ============
+  twelve_factor: {
+    label: "12 Factor",
+    color: "text-[#79589F]",  // violet Heroku adouci pour dark mode
+    bgColor: "bg-[#79589F]/15 border-[#79589F]/40",
+    icon: "view_module",
+  },
+  docker: {
+    label: "Docker",
+    color: "text-[#2496ED]",  // Docker blue officiel
+    bgColor: "bg-[#2496ED]/15 border-[#2496ED]/40",
+    icon: "deployed_code",
+  },
+  github_actions: {
+    label: "GitHub Actions",
+    color: "text-[#9E91F2]",  // violet GH Actions (#2088FF éclairci pour lisibilité)
+    bgColor: "bg-[#2088FF]/15 border-[#2088FF]/40",
+    icon: "play_circle",
+  },
   unknown: {
     label: "Inconnu",
     color: "text-on-surface-variant",
