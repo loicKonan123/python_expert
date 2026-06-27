@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CURRICULUM, TOTAL_CONCEPTS, type Concept, type Corpus, type Level } from "@/lib/curriculum";
+import { CURRICULUM, type Concept, type Corpus, type Level } from "@/lib/curriculum";
 import { MaterialIcon } from "./MaterialIcon";
 
 
@@ -88,9 +88,6 @@ export function Sidebar({ open, activeLevelNum, onPickConcept, onClose }: Props)
             <h2 className="text-[20px] leading-tight font-semibold text-primary">
               Curriculum
             </h2>
-            <p className="text-[14px] text-on-surface-variant leading-tight">
-              {TOTAL_CONCEPTS} concepts · {new Set(CURRICULUM.map((l) => l.corpus)).size} technos
-            </p>
           </div>
         </div>
       </div>
