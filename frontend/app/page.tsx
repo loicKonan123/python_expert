@@ -10,6 +10,7 @@ import { ScrollToTop } from "@/components/ScrollToTop";
 import { LandingNav } from "@/components/LandingNav";
 import { InteractiveHero } from "@/components/InteractiveHero";
 import { TechIcon, TECH_LABELS, type TechKey } from "@/components/TechIcon";
+import { SnapScroll } from "@/components/SnapScroll";
 
 export const metadata = {
   title: "Polaris — Le tuteur dev qui ne ment pas",
@@ -78,12 +79,13 @@ const ALL_TECHS: TechKey[] = PILLARS.flatMap((p) => p.techs);
 export default function Landing() {
   return (
     <main className="relative min-h-screen flex flex-col tech-grid overflow-x-hidden">
+      <SnapScroll />
       <ScrollProgress />
       <ScrollToTop />
       <LandingNav />
 
-      {/* Hero — copie centrée en haut, panneau interactif plein largeur dessous */}
-      <section className="relative px-gutter min-h-[88vh] flex items-center justify-center max-w-6xl mx-auto w-full">
+      {/* Hero — section pleine viewport, copie centrée, stats sous le CTA */}
+      <section className="snap-section relative px-gutter min-h-screen flex items-center justify-center max-w-6xl mx-auto w-full">
         <Constellation
           className="absolute inset-0 -z-10 pointer-events-none"
           density={3}
@@ -126,36 +128,8 @@ export default function Landing() {
             </a>
           </div>
 
-          {/* Cue de scroll discret pour signaler le contenu en-dessous */}
-          <a
-            href="#demo"
-            aria-label="Voir la démo en dessous"
-            className="mt-16 inline-flex flex-col items-center gap-2 text-on-surface-variant/50 hover:text-on-surface-variant transition-colors"
-          >
-            <span className="text-[10px] font-mono uppercase tracking-widest">
-              Scroll
-            </span>
-            <MaterialIcon name="keyboard_arrow_down" className="text-[20px] animate-bounce" />
-          </a>
-        </div>
-      </section>
-
-      {/* Démo interactive — section dédiée sous le pli */}
-      <section id="demo" className="relative px-gutter pb-24 pt-8 max-w-6xl mx-auto w-full">
-        <Reveal>
-          <SectionHeader
-            kicker="Démo live"
-            title="Polaris en action"
-            subtitle="Une vraie conversation, des vraies sources, du code qui tourne."
-          />
-        </Reveal>
-        <InteractiveHero />
-      </section>
-
-      {/* Bandeau stats */}
-      <Reveal>
-        <section className="px-gutter pb-20 max-w-6xl mx-auto w-full">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {/* Mini bandeau stats — absorbé dans le hero pour libérer un viewport */}
+          <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-3 max-w-3xl mx-auto">
             <Stat label="Truth accuracy" color="var(--color-accent)">
               <CountUp to={99.8} decimals={1} suffix="%" />
             </Stat>
@@ -169,11 +143,35 @@ export default function Landing() {
               <CountUp to={86278} duration={1800} />
             </Stat>
           </div>
-        </section>
-      </Reveal>
+
+          {/* Cue de scroll discret pour signaler le contenu en-dessous */}
+          <a
+            href="#demo"
+            aria-label="Voir la démo en dessous"
+            className="mt-10 inline-flex flex-col items-center gap-2 text-on-surface-variant/50 hover:text-on-surface-variant transition-colors"
+          >
+            <span className="text-[10px] font-mono uppercase tracking-widest">
+              Scroll
+            </span>
+            <MaterialIcon name="keyboard_arrow_down" className="text-[20px] animate-bounce" />
+          </a>
+        </div>
+      </section>
+
+      {/* Démo interactive — section dédiée sous le pli */}
+      <section id="demo" className="snap-section relative px-gutter py-16 max-w-6xl mx-auto w-full flex flex-col justify-center">
+        <Reveal>
+          <SectionHeader
+            kicker="Démo live"
+            title="Polaris en action"
+            subtitle="Une vraie conversation, des vraies sources, du code qui tourne."
+          />
+        </Reveal>
+        <InteractiveHero />
+      </section>
 
       {/* Bento grid USPs — style Stitch (7+5+12) */}
-      <section id="how" className="px-gutter pb-24 max-w-6xl mx-auto w-full">
+      <section id="how" className="snap-section px-gutter py-16 max-w-6xl mx-auto w-full flex flex-col justify-center">
         <Reveal>
           <SectionHeader
             kicker="Comment ça marche"
@@ -265,7 +263,7 @@ export default function Landing() {
       </section>
 
       {/* Stack expert — 6 piliers avec icônes officielles */}
-      <section id="stack" className="px-gutter pb-24 max-w-6xl mx-auto w-full">
+      <section id="stack" className="snap-section px-gutter py-16 max-w-6xl mx-auto w-full flex flex-col justify-center">
         <Reveal>
           <SectionHeader
             kicker="Stack expert"
@@ -319,7 +317,7 @@ export default function Landing() {
 
       {/* Showcase identité — 3 variantes du logo */}
       <Reveal>
-        <section id="brand" className="px-gutter pb-24 max-w-5xl mx-auto w-full">
+        <section id="brand" className="snap-section px-gutter py-16 max-w-5xl mx-auto w-full flex flex-col justify-center">
           <SectionHeader
             kicker="Identité"
             title="Une étoile, trois visages"
@@ -335,7 +333,7 @@ export default function Landing() {
 
       {/* Comparaison */}
       <Reveal>
-        <section id="comparison" className="px-gutter pb-24 max-w-5xl mx-auto w-full">
+        <section id="comparison" className="snap-section px-gutter py-16 max-w-5xl mx-auto w-full flex flex-col justify-center">
           <SectionHeader
             kicker="Comparaison"
             title="Polaris vs LLM générique"
@@ -347,7 +345,7 @@ export default function Landing() {
 
       {/* CTA final */}
       <Reveal>
-      <section className="px-gutter pb-24 max-w-3xl mx-auto w-full text-center">
+      <section className="snap-section px-gutter py-16 max-w-3xl mx-auto w-full text-center flex flex-col justify-center">
         <Tilt3D maxTilt={6}>
         <div className="glass-card-strong p-10 rounded-3xl space-y-5">
           <div className="flex justify-center">

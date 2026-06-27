@@ -506,6 +506,29 @@ html[data-theme="dark"] .shell-deep {
 }
 
 /* ============================================================
+   Polaris — Snap-scroll landing
+
+   Quand <html> reçoit la classe .snap-landing (via <SnapScroll />),
+   le scroll vertical se verrouille section par section. Chaque
+   section.snap-section occupe au moins 1 viewport et s'aligne au
+   haut de l'écran lors d'un scroll.
+
+   Désactivé sur mobile (<768px) — l'expérience tactile est meilleure
+   en scroll libre.
+   ============================================================ */
+@media (min-width: 768px) {
+  html.snap-landing {
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+  }
+  html.snap-landing .snap-section {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    min-height: 100vh;
+  }
+}
+
+/* ============================================================
    Polaris — tech-grid (motif de points radiaux, inspiré du mockup Stitch)
 
    Utilisée sur la landing en arrière-plan pour donner une texture
