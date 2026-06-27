@@ -5,7 +5,7 @@ import { MaterialIcon } from "./MaterialIcon";
 import { CodeBlock } from "./CodeBlock";
 import { Sources, type SourcesHandle } from "./Sources";
 import { PolarisLogo } from "./PolarisLogo";
-import { parseMarkdown } from "@/lib/markdown";
+import { parseMarkdown, renderInlineMarkdown } from "@/lib/markdown";
 import { metaForCorpus } from "@/lib/corpus-meta";
 import type { Source } from "@/lib/api";
 
@@ -262,7 +262,7 @@ function InlineText({
         return (
           <span
             key={i}
-            dangerouslySetInnerHTML={{ __html: renderInline(part.text) }}
+            dangerouslySetInnerHTML={{ __html: renderInlineMarkdown(part.text) }}
           />
         );
       })}
@@ -315,26 +315,6 @@ function splitWithCitations(text: string): TextPart[] {
 }
 
 /** Rendu inline markdown sans les citations (gérées séparément). */
-function renderInline(text: string): string {
-  let s = escapeHTML(text);
-  s = s.replace(/^#{1,6}\s+(.+)$/gm, "<strong>$1</strong>");
-  s = s.replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>");
-  s = s.replace(/`([^`\n]+)`/g, "<code>$1</code>");
-  return s;
-}
-
-function escapeHTML(s: string): string {
-  return s.replace(/[&<>"']/g, (c) =>
-    ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;",
-    })[c]!,
-  );
-}
-
 /** Récupère la liste unique des corpus présents dans les sources, ordre conservé. */
 function uniqueCorpora(sources: Source[] | undefined): string[] {
   if (!sources) return [];
