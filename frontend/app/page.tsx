@@ -93,14 +93,6 @@ export default function Landing() {
 
         {/* Copie centrée — prend tout l'espace vertical du viewport */}
         <div className="text-center max-w-3xl mx-auto">
-          {/* Kicker : positionnement full-stack */}
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass-card mb-6">
-            <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-            <span className="text-[11px] font-mono uppercase tracking-widest text-accent">
-              Tuteur Full-Stack · 21 technos officielles
-            </span>
-          </div>
-
           <h1 className="text-[clamp(36px,6vw,72px)] font-extrabold tracking-[-0.02em] leading-[1.05] mb-5">
             L&apos;expert full-stack
             <br />
@@ -122,9 +114,8 @@ export default function Landing() {
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/app"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-action text-white text-[15px] font-semibold shadow-[0_10px_30px_-8px_rgba(99,102,241,0.5)] hover:brightness-110 hover:-translate-y-0.5 transition-all"
+              className="inline-flex items-center px-6 py-3 rounded-xl bg-accent text-surface text-[15px] font-semibold shadow-[0_10px_30px_-8px_rgba(251,191,36,0.4)] hover:brightness-110 hover:-translate-y-0.5 transition-all"
             >
-              <MaterialIcon name="rocket_launch" className="text-[18px]" />
               Commencer
             </Link>
             <a
@@ -252,8 +243,7 @@ export default function Landing() {
                       <span className="text-on-surface font-medium">
                         officielles, à jour, et indexées localement
                       </span>
-                      . Plus ton propre code via le corpus{" "}
-                      <span className="text-accent font-mono">self</span>.
+                      .
                     </p>
                   </div>
                 </div>
@@ -372,7 +362,7 @@ export default function Landing() {
           </p>
           <Link
             href="/app"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-action text-white text-[15px] font-semibold shadow-[0_10px_40px_-10px_rgba(99,102,241,0.6)] hover:brightness-110 hover:-translate-y-0.5 transition-all"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-accent text-surface text-[15px] font-semibold shadow-[0_10px_40px_-10px_rgba(251,191,36,0.5)] hover:brightness-110 hover:-translate-y-0.5 transition-all"
           >
             <MaterialIcon name="arrow_forward" />
             Ouvrir Polaris

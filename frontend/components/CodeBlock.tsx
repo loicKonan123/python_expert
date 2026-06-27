@@ -224,8 +224,7 @@ export function CodeBlock({
             <button
               onClick={executeCSharp}
               disabled={running}
-              className="flex items-center gap-1 text-[11px] font-mono hover:brightness-125 disabled:opacity-50 disabled:cursor-wait transition-all"
-              style={{ color: "#9B82E6" }}
+              className="flex items-center gap-1 text-[11px] font-mono text-secondary hover:brightness-125 disabled:opacity-50 disabled:cursor-wait transition-all"
               aria-label="Exécuter le code C#"
               title="Exécute ce bloc via dotnet-script (timeout 10s, sandbox jetable)"
             >

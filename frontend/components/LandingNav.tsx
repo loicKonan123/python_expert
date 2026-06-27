@@ -105,7 +105,7 @@ export function LandingNav() {
           </a>
           <Link
             href="/app"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-action text-white text-[14px] font-medium shadow-[0_10px_40px_-10px_rgba(99,102,241,0.6)] hover:brightness-110 hover:-translate-y-0.5 transition-all"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-accent text-surface text-[14px] font-medium shadow-[0_10px_40px_-10px_rgba(251,191,36,0.5)] hover:brightness-110 hover:-translate-y-0.5 transition-all"
           >
             <span className="hidden sm:inline">Ouvrir Polaris</span>
             <MaterialIcon name="arrow_forward" className="text-[18px]" />
