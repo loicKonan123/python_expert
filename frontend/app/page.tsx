@@ -78,7 +78,7 @@ const ALL_TECHS: TechKey[] = PILLARS.flatMap((p) => p.techs);
 
 export default function Landing() {
   return (
-    <main className="relative min-h-screen flex flex-col tech-grid overflow-x-hidden">
+    <main className="relative min-h-screen flex flex-col tech-grid overflow-x-clip">
       <SnapScroll />
       <ScrollProgress />
       <ScrollToTop />
