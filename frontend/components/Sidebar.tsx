@@ -193,13 +193,6 @@ export function Sidebar({ open, activeLevelNum, onPickConcept, onClose }: Props)
           </div>
         )}
       </nav>
-
-      {/* Footer minimaliste — juste la signature RAG local */}
-      <div className="px-4 mt-auto pt-3 border-t border-outline-variant/20">
-        <div className="text-[10px] font-mono text-on-surface-variant/60 text-center uppercase tracking-widest">
-          RAG local · doc officielle
-        </div>
-      </div>
     </aside>
     </>
   );

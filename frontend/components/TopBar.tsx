@@ -1,17 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { MaterialIcon } from "./MaterialIcon";
 import { ConversationsMenu } from "./ConversationsMenu";
 import { PolarisLogo } from "./PolarisLogo";
 import { ThemeToggle } from "./ThemeToggle";
 import type { Conversation } from "@/lib/conversations";
-
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
-
-type Health = "checking" | "online" | "offline";
 
 type Props = {
   sidebarOpen: boolean;
@@ -34,38 +28,6 @@ export function TopBar({
   onDeleteConversation,
   onClearConversation,
 }: Props) {
-  const [health, setHealth] = useState<Health>("checking");
-
-  useEffect(() => {
-    let alive = true;
-    const checkHealth = async () => {
-      try {
-        const r = await fetch(`${API_BASE}/`, { cache: "no-store" });
-        if (alive) setHealth(r.ok ? "online" : "offline");
-      } catch {
-        if (alive) setHealth("offline");
-      }
-    };
-    checkHealth();
-    const id = setInterval(checkHealth, 10_000);
-    return () => {
-      alive = false;
-      clearInterval(id);
-    };
-  }, []);
-
-  const statusColor = {
-    checking: "bg-on-surface-variant",
-    online: "bg-green-500 animate-pulse",
-    offline: "bg-error",
-  }[health];
-
-  const statusLabel = {
-    checking: "Connexion...",
-    online: "Backend connecté",
-    offline: "Backend hors-ligne",
-  }[health];
-
   return (
     <header
       className={`fixed top-0 right-0 z-30 h-16 px-gutter bg-background/40 backdrop-blur-2xl backdrop-saturate-150 border-b border-white/10 flex justify-between items-center transition-[left] duration-200 ${
@@ -99,18 +61,6 @@ export function TopBar({
             Polaris
           </h1>
         </Link>
-        <span
-          className={`w-2 h-2 rounded-full ${statusColor}`}
-          title={statusLabel}
-          aria-label={statusLabel}
-        />
-
-        {/* Liens secondaires (style Stitch dashboard) */}
-        <nav className="hidden lg:flex items-center gap-4 ml-4 pl-4 border-l border-outline-variant/30">
-          <TopBarLink href="#" label="Docs" active />
-          <TopBarLink href="#" label="Sandbox" />
-          <TopBarLink href="#" label="Forum" />
-        </nav>
       </div>
       <div className="flex items-center gap-2">
         {/* Compteur tokens/coût retiré de l'UI (Phase 8 — design moins encombré).
@@ -161,26 +111,4 @@ export function TopBar({
   );
 }
 
-function TopBarLink({
-  href,
-  label,
-  active,
-}: {
-  href: string;
-  label: string;
-  active?: boolean;
-}) {
-  return (
-    <a
-      href={href}
-      className={`text-[11px] font-mono uppercase tracking-widest transition-colors ${
-        active
-          ? "text-accent border-b border-accent/60 pb-0.5"
-          : "text-on-surface-variant hover:text-accent"
-      }`}
-    >
-      {label}
-    </a>
-  );
-}
 
