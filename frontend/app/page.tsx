@@ -159,7 +159,7 @@ export default function Landing() {
       </section>
 
       {/* Démo interactive — section dédiée sous le pli */}
-      <section id="demo" className="snap-section relative px-gutter py-16 max-w-6xl mx-auto w-full flex flex-col justify-center">
+      <section id="demo" className="snap-section relative px-gutter py-10 max-w-6xl mx-auto w-full flex flex-col justify-center">
         <Reveal>
           <SectionHeader
             kicker="Démo live"
@@ -171,7 +171,7 @@ export default function Landing() {
       </section>
 
       {/* Bento grid USPs — style Stitch (7+5+12) */}
-      <section id="how" className="snap-section px-gutter py-16 max-w-6xl mx-auto w-full flex flex-col justify-center">
+      <section id="how" className="snap-section px-gutter py-10 max-w-6xl mx-auto w-full flex flex-col justify-center">
         <Reveal>
           <SectionHeader
             kicker="Comment ça marche"
@@ -263,7 +263,7 @@ export default function Landing() {
       </section>
 
       {/* Stack expert — 6 piliers avec icônes officielles */}
-      <section id="stack" className="snap-section px-gutter py-16 max-w-6xl mx-auto w-full flex flex-col justify-center">
+      <section id="stack" className="snap-section px-gutter py-10 max-w-6xl mx-auto w-full flex flex-col justify-center">
         <Reveal>
           <SectionHeader
             kicker="Stack expert"
@@ -317,7 +317,7 @@ export default function Landing() {
 
       {/* Showcase identité — 3 variantes du logo */}
       <Reveal>
-        <section id="brand" className="snap-section px-gutter py-16 max-w-5xl mx-auto w-full flex flex-col justify-center">
+        <section id="brand" className="snap-section px-gutter py-10 max-w-5xl mx-auto w-full flex flex-col justify-center">
           <SectionHeader
             kicker="Identité"
             title="Une étoile, trois visages"
@@ -333,7 +333,7 @@ export default function Landing() {
 
       {/* Comparaison */}
       <Reveal>
-        <section id="comparison" className="snap-section px-gutter py-16 max-w-5xl mx-auto w-full flex flex-col justify-center">
+        <section id="comparison" className="snap-section px-gutter py-10 max-w-5xl mx-auto w-full flex flex-col justify-center">
           <SectionHeader
             kicker="Comparaison"
             title="Polaris vs LLM générique"
@@ -345,7 +345,7 @@ export default function Landing() {
 
       {/* CTA final */}
       <Reveal>
-      <section className="snap-section px-gutter py-16 max-w-3xl mx-auto w-full text-center flex flex-col justify-center">
+      <section className="snap-section px-gutter py-10 max-w-3xl mx-auto w-full text-center flex flex-col justify-center">
         <Tilt3D maxTilt={6}>
         <div className="glass-card-strong p-10 rounded-3xl space-y-5">
           <div className="flex justify-center">
@@ -387,7 +387,7 @@ function SectionHeader({
   subtitle?: string;
 }) {
   return (
-    <div className="mb-10 text-center">
+    <div className="mb-6 text-center">
       <p className="text-[11px] font-mono uppercase tracking-widest text-accent mb-3">
         {kicker}
       </p>

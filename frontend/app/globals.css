@@ -225,9 +225,12 @@ html, body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+  /* clip (et non hidden) : empêche le débordement horizontal SANS transformer
+     html/body en conteneurs de scroll. Indispensable pour que le
+     scroll-snap-type sur html.snap-landing fonctionne. */
+  overflow-x: clip;
   scroll-behavior: smooth;
-  scroll-padding-top: 80px;
+  scroll-padding-top: 0;
 }
 @media (prefers-reduced-motion: reduce) {
   html, body { scroll-behavior: auto; }
@@ -523,8 +526,12 @@ html[data-theme="dark"] .shell-deep {
   }
   html.snap-landing .snap-section {
     scroll-snap-align: start;
-    scroll-snap-stop: always;
-    min-height: 100vh;
+    /* Chaque section = exactement 1 écran. Le contenu est centré
+       verticalement (flex justify-center dans le JSX) et l'overflow est
+       masqué pour garantir le "une page = une section". */
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
   }
 }
 
