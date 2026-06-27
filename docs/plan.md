@@ -95,12 +95,14 @@ Les 7 traits ci-dessous sont **rares ou inexistants** ailleurs (ChatGPT, Copilot
 
 | Brique | Valeur |
 |---|---|
-| Corpus indexés | **19** (Python 3.14, FastAPI, Pydantic, Next.js, TypeScript, Tailwind, pytest, httpx, SQLAlchemy, Zod, TanStack Query, Vitest, HTML, CSS, JavaScript *(MDN, Phase 12)*, **C#**, **ASP.NET Core**, **EF Core** *(Microsoft Docs, Phase 13)*, **ton code**) |
-| Chunks vectoriels | **74 080** *(post-Phase 13)* |
-| Concepts pré-rédigés dans la sidebar | **214** (24 niveaux) — +36 concepts HTML/CSS/JS Phase 12 |
-| Endpoints HTTP | 8 (`/api/ask`, `/api/run`, `/api/kernel/*`, `/api/usage`, `/api/health`, `/docs`, `/redoc`) |
-| Tests de sécurité sandbox | **8/8 passent** |
-| LOC repo (hors corpus + node_modules) | ~10 000 |
+| Corpus indexés | **22** (Python 3.14, FastAPI, Pydantic, Next.js, TypeScript, Tailwind, pytest, httpx, SQLAlchemy, Zod, TanStack Query, Vitest, HTML, CSS, JavaScript *(MDN, Phase 12)*, **C#**, **ASP.NET Core**, **EF Core** *(Microsoft Docs, Phase 13)*, **12 Factor App**, **Docker**, **GitHub Actions** *(Phase 16)*, **ton code**) |
+| Chunks vectoriels | **86 278** *(post-Phase 16)* |
+| Concepts pré-rédigés dans la sidebar | **465** (45 niveaux, 21 technos) |
+| Sandboxes d'exécution | Python (PEP 578 audit hook + kernel persistant) + **C#** (dotnet-script + préprocesseur 23/23 tests) |
+| Endpoints HTTP | 10 (`/api/ask`, `/api/run`, `/api/run/csharp`, `/api/run/csharp/available`, `/api/kernel/*`, `/api/usage`, `/api/health`, `/docs`, `/redoc`) |
+| Tests de sécurité sandbox Python | **8/8 passent** |
+| Tests d'exécution sandbox C# | **23/23 passent** |
+| LOC repo (hors corpus + node_modules) | ~12 000 |
 | Aperçu front live | ✅ via `<HtmlPreview>` (iframe sandboxée + Tailwind CDN) |
 
 ---
@@ -663,82 +665,71 @@ dans le curriculum.
 - One-shot uniquement (pas de kernel persistant pour C#)
 - `using var x = ...` au top-level non supporté par le parser .csx → utiliser `using (var x) { }`
 
-### Phase 16 — Architecture + DevOps (en cours)
+### Phase 16 — Architecture + DevOps (✅ livré)
 
-**Constat** : Polaris couvre langage + framework web + ORM + tests +
-front-end + écosystème, mais il manque deux pans pour un tuteur full-stack
-complet : l'**architecture** (comment structurer un système) et le **DevOps**
-(comment le livrer + faire tourner en prod).
+**Constat** : Polaris couvrait langage + framework web + ORM + tests +
+front-end + écosystème, mais il manquait deux pans pour un tuteur
+full-stack complet : l'**architecture** (comment structurer un système) et
+le **DevOps** (comment le livrer + faire tourner en prod).
 
-**Décision** : 3 corpus officiels prioritaires (option C — focus avant
-extension).
+**Décision** : option C — 3 corpus officiels prioritaires d'abord, focus
+avant extension.
 
-| Corpus | Source officielle | Fichiers MD |
-|---|---|---|
-| `twelve_factor` | github.com/heroku/12factor (content/en) | 16 |
-| `docker` | github.com/docker/docs (content) | 1 251 |
-| `github_actions` | github.com/github/docs (content/actions) | 244 |
+| Corpus | Source officielle | Fichiers MD | Chunks indexés |
+|---|---|---|---|
+| `twelve_factor` | github.com/heroku/12factor (content/en) | 16 | **25** |
+| `docker` | github.com/docker/docs (content) | 1 251 | **10 065** |
+| `github_actions` | github.com/github/docs (content/actions) | 244 | **2 041** |
 
-**Pourquoi ces 3 d'abord** :
-- **12factor** : foundational pour tout SaaS moderne (config, processes, logs, dispose…)
-- **Docker** : conteneurisation = base d'à peu près toute archi 2026
-- **GitHub Actions** : CI/CD le plus utilisé chez les devs solo + équipes
+**Total ajouté** : ~12 200 chunks → 74 080 → **86 278 chunks**.
 
-**Suite envisagée (Phase 16.B)** : Kubernetes (~10k chunks), Terraform,
-nginx, AWS Well-Architected, Microsoft Architecture Guides. À déclencher
-après validation de la qualité du retrieval sur Phase 16.A.
+**Retrieval validé en live** :
+- "What is the config factor in 12 factor app?" → 3/3 top `twelve_factor` (dist 0.27)
+- "Multi-stage Dockerfile for Python?" → 3/3 top `docker` (dist 0.30)
+- "GitHub Actions workflow with matrix strategy?" → 3/3 top `github_actions` (dist 0.30)
 
-- [x] Ajout des 3 corpora dans `backend/corpora.py`
-- [x] Fetch des 3 repos (longpaths Windows nécessaire pour Docker)
-- [x] Frontend : `corpus-meta.ts`, `Sidebar.tsx`, `CorpusFilter.tsx`, type `Corpus`
-- [x] Update stats landing : 19 → 22 corpus
-- [ ] Reindex global (en cours, ~2-3 h CPU)
-- [ ] Update stats finales avec le vrai nombre de chunks
-- [ ] Tests UI : poser une question DevOps réelle ("Comment écrire un Dockerfile multi-stage pour FastAPI ?")
-- [ ] (Optionnel Phase 16.C) Curriculum levels pour twelve_factor + docker + github_actions
+**Sous-phases livrées** :
+- **16.A — Corpora** : 3 entrées dans `backend/corpora.py` + `fetch_docs`
+  (longpaths Windows nécessaire pour Docker à cause de chemins onetrust > 260 car.)
+- **16.B — Reindex** : ~8 h CPU sur MiniLM-L6, ChromaDB persisté
+- **16.C — Curriculum** : 3 niveaux × 12 concepts =  **36 concepts**
+  * `TF1` — 12 Factor App (factors I à XII)
+  * `DK1` — Docker (images, Dockerfile, multi-stage, layers, volumes, networks, compose, ARG/ENV, HEALTHCHECK, alpine, BuildKit secrets)
+  * `GA1` — GitHub Actions (workflow, triggers, matrix, marketplace, secrets, caching, artifacts, reusable, concurrency, conditions, environments, self-hosted)
 
-### Phase 15 — Naming reference (archivé)
+**Frontend** : `corpus-meta.ts`, `Sidebar.tsx`, `CorpusFilter.tsx`, type
+`Corpus`, stats landing 19→22 corpus + 74k→86 278 chunks, tableau
+comparaison mis à jour avec curriculum 465 concepts / 45 niveaux.
 
-**Constat** : depuis Phase 13, Polaris indexe l'écosystème .NET (csharp +
-aspnet + efcore), mais le bouton `Run` ne sait toujours exécuter que du
-Python (via `backend/sandbox.py`). Quand l'utilisateur apprend C# via
-Polaris, il doit copier-coller dans Rider / VS Code / dotnetfiddle pour
-tester. C'est une friction qu'on peut éliminer.
+**Suite envisagée (Phase 17 éventuelle)** : Kubernetes (~10k chunks),
+Terraform, nginx, AWS Well-Architected, Microsoft Architecture Guides. À
+déclencher si validation produit ou demande utilisateur le justifie.
 
-**3 chemins possibles** (à arbitrer ensemble avant d'attaquer) :
+---
 
-#### 15.A — `dotnet script` (subprocess local, ~1h de boulot)
+### Polish UX (post-Phase 16) ✅
 
-- Pré-requis utilisateur : `.NET SDK` installé + `dotnet tool install -g dotnet-script`
-- Pattern identique à `backend/sandbox.py` : on écrit un fichier `.csx` jetable, on lance `dotnet script <file>`, on capture stdout/stderr
-- [ ] Détection au boot backend : `dotnet --version` et `dotnet script --version`. Si absents → le bouton "Run C#" reste caché côté front (comme l'audit Docker de la Phase 11 abandonnée)
-- [ ] Nouveau module `backend/sandbox_csharp.py` (~150 lignes) : variante de `sandbox.py` mais sans audit hook PEP 578 (pas d'équivalent natif en .NET)
-- [ ] Nouvelle route `POST /api/run/csharp` (ou champ `lang` dans le payload existant)
-- [ ] Frontend `CodeBlock.tsx` : détecte `lang === "csharp"` → bouton **"Run C#"** vert (`#9B82E6` même couleur que le corpus)
-- [ ] Tests : `Console.WriteLine`, `async`/`await`, LINQ basique
-- **Limite** : pas isolé, le code C# a accès au FS / réseau de l'utilisateur. Acceptable en outil local solo, à NE PAS déployer en multi-utilisateur sans isolation
-- **Avantages** : ~1h, code C# 100% vrai (async + LINQ + records marchent), zéro install front
+- **Landing page refonte** (commit `5d13970`) :
+  * Hero plein viewport (`min-h-[88vh]` centré, pattern Stripe/Linear)
+  * Démo (`InteractiveHero`) déplacée en section dédiée "Polaris en action"
+  * H1 reformulé : "L'expert full-stack qui ne ment pas"
+  * Kicker animé "TUTEUR FULL-STACK · 21 TECHNOS OFFICIELLES"
+  * Nouvelle section "Stack expert" : 6 piliers (Backend Python, Frontend
+    Web, Standards web, .NET, Architecture, DevOps)
+  * Composant `TechIcon` avec SVG officiels via `cdn.simpleicons.org`
+  * Constellation densifiée : 12→26 étoiles, 5→10 twinkles, 12→24 particules
+  * Tableau comparaison à jour : 22 corpus / 86 278 chunks / .NET 9 / curriculum
 
-#### 15.B — Blazor WebAssembly dans iframe (~6-10h de boulot)
+- **Sidebar curriculum** (commit `16bd3d5`) : tout collapsed par défaut
+  pour rendre l'exploration de 45 niveaux / 465 concepts gérable
 
-- Pattern identique à `frontend/components/HtmlPreview.tsx` mais avec **Mono.WASM** chargé via CDN dans l'iframe
-- C# tourne **dans le navigateur**, sandbox iframe + WASM = isolation totale
-- [ ] Composant `frontend/components/CSharpPreview.tsx` qui injecte le bootstrap Blazor WASM
-- [ ] CDN runtime : `https://aspnetwebstack.azurewebsites.net/blazor.webassembly.js` ou auto-hosted dans `frontend/public/blazor/`
-- [ ] Roslyn pour compilation runtime (in-browser) → exécution Mono → console mirror (réutilise le pattern de `HtmlPreview` JS)
-- **Avantages** : 100% safe (browser sandbox), zéro install utilisateur, marche sur n'importe quelle machine
-- **Inconvénients** : runtime ~10 MB téléchargé au 1er clic (caché ensuite), latence init ~2-5s, certaines APIs .NET pas dispo en WASM (FileStream, Sockets bruts, etc.)
+- **Dark mode chrome** (commit `2558d6d`) : nouvelle classe `.shell-deep`
+  scopée à `html[data-theme="dark"]` qui assombrit ChatInput / Sidebar /
+  ConversationsMenu, light mode strictement inchangé
 
-#### 15.C — Statu quo (option zéro boulot)
-
-- Polaris reste un **tuteur pédagogique** pour C# : il explique, cite la doc, montre du code annotated
-- L'utilisateur copie-colle dans son IDE / dotnetfiddle.net pour tester
-- C'est ce que fait ChatGPT pour C# par défaut
-- [ ] Si on garde 15.C : envisager d'ajouter un bouton **"Ouvrir dans dotnetfiddle"** sur les CodeBlock `lang === "csharp"` qui post le code via leur API (~30 min de boulot)
-
-**Décision à prendre** avant Session A : laquelle on attaque ? Probablement
-15.A si le SDK .NET est dispo localement, sinon 15.C avec le helper
-dotnetfiddle comme bonus pédago.
+- **Curriculum** : JS2 déplacé juste après JS1 pour grouper l'exploration
+  JavaScript en sidebar (les autres "avancés" PD3/TW3/HT2/CS2 restent
+  groupés en bas pour le moment — réorga possible si nécessaire)
 
 ---
 
