@@ -832,6 +832,111 @@ dans 6 mois, marche bien en light ET dark, valorise le côté "produit fini".
 
 ---
 
+## 4¾. Mise en production : Auth + Déploiement + Monétisation
+
+> Section dédiée — les 3 chantiers pour passer de « projet local » à
+> « produit en ligne qui peut rapporter ». À attaquer dans cet ordre :
+> Auth → Déploiement → Monétisation (chaque étape débloque la suivante).
+
+### A. Authentification (prérequis multi-user)
+
+**Objectif** : chaque utilisateur a son compte, son historique, ses
+conversations, son quota. Indispensable avant tout déploiement public ou
+toute facturation.
+
+**Stack recommandée** : **Clerk** (gratuit < 10 000 MAU, puis ~$25/mois).
+Alternative : Supabase Auth (gratuit, plus de config) ou Auth.js (self-hosted).
+
+- [ ] Intégrer Clerk côté frontend (`@clerk/nextjs`) — middleware + `<SignIn>` / `<UserButton>`
+- [ ] Protéger les routes `/app` (redirection si non connecté)
+- [ ] Backend : vérifier le JWT Clerk sur chaque requête `/api/*` (dépendance FastAPI `verify_token`)
+- [ ] Associer les conversations à un `user_id` (aujourd'hui en localStorage → migrer en DB)
+- [ ] **Base de données** : Postgres (Neon/Supabase, free tier) pour users + conversations + usage
+- [ ] Quotas par user : X questions/jour en gratuit, illimité en payant
+- **Effort** : 1-1,5 j
+
+**Décision clé** : aujourd'hui l'historique est en `localStorage` (par
+navigateur). Multi-device = besoin d'une vraie DB. C'est le gros morceau.
+
+### B. Déploiement public
+
+**Objectif** : URL partageable, accessible depuis n'importe où.
+
+| Brique | Service recommandé | Coût |
+|---|---|---|
+| Frontend Next.js | **Vercel** (Hobby gratuit, Pro $20/mois) | $0-20 |
+| Backend FastAPI + Chroma | **Railway** ou **Render** ou **DigitalOcean Droplet** | $24-126 |
+| Base de données | **Neon** ou **Supabase** Postgres (free tier) | $0 |
+| Stockage index Chroma | Volume persistant sur le droplet (le `chroma_db/` ~500 MB) | inclus |
+| LLM | DeepSeek API (cloud) — Ollama impossible en prod cheap | au token |
+
+- [ ] **Sandbox sécurisé OBLIGATOIRE avant public** : le subprocess + audit
+      hook PEP 578 suffit en local solo mais PAS en multi-user public.
+      Passer au container Docker éphémère sans réseau (cf Phase 11 abandonnée
+      — à ressortir) ou un service type **E2B** / **Judge0** pour l'exécution
+      de code isolée. **Ne jamais exposer `/api/run` public sans isolation.**
+- [ ] Dockeriser le backend (Dockerfile multi-stage — le corpus Docker du
+      Phase 16 sert ici 😄)
+- [ ] Variables d'env en secrets (jamais la clé DeepSeek en clair)
+- [ ] CORS configuré sur le domaine de prod uniquement
+- [ ] CI/CD GitHub Actions : tests + déploiement auto sur push main
+      (corpus GitHub Actions Phase 16 = doc à portée de main)
+- [ ] Monitoring : Sentry (erreurs) + Better Stack (uptime)
+- [ ] Domaine + SSL (Let's Encrypt auto sur Vercel/Railway)
+- **Effort** : 3 h technique de base, +4-6 h pour le sandbox Docker sécurisé
+
+### C. Plan de monétisation / business
+
+**Positionnement honnête** (cf analyse SaaS) : le produit est techniquement
+viable, le marché est saturé (ChatGPT/Cursor/Phind). Le vrai enjeu n'est pas
+le produit mais **l'acquisition** et **le pricing power**. Deux pistes :
+
+#### Piste 1 — B2C freemium (grand public)
+
+- **Gratuit** : 20 questions/jour, pas d'exécution C#, 1 device
+- **Pro à 9 €/mois** : illimité, exécution Python+C#, multi-device, historique cloud
+- **Cible** : étudiants + devs en reconversion (FR d'abord = avantage local vs outils US)
+
+**Économie (scénario 1 000 abonnés à 9 $/mois)** — chiffres réels calculés :
+
+| Poste | Montant/mois |
+|---|---|
+| Revenu brut | **+9 000 $** |
+| DeepSeek API (V4-Flash, ~$0.0005/question, cache 50%) | −280 $ |
+| Stripe (US/EU mix ~5%) | −450 $ |
+| Infra (Droplet 4vCPU/16GB + Vercel + DB + monitoring) | −202 $ |
+| Refunds/chargebacks (~2%) | −180 $ |
+| Marketing (Google Ads + contenu) | −1 500 $ |
+| **Profit net** | **≈ 6 400 $/mois (marge ~71%)** |
+
+→ Le LLM ne coûte que **3% du revenu** (DeepSeek est ultra cheap). Le vrai
+coût est le **marketing / acquisition**. LTV/CAC estimé ~20 (excellent SI on
+trouve le canal d'acquisition).
+
+**Le mur** : trouver les 1 000 premiers users. C'est ça le problème, pas la
+technique.
+
+#### Piste 2 — B2B écoles / bootcamps (plus défendable)
+
+- Vendre Polaris (curriculum + tuteur sourcé) en marque blanche à des écoles
+- **20 écoles à 300 €/mois = 6 000 €/mois récurrents**
+- Pas de CAC à 9$, pas de churn user-par-user, pas de Stripe 5%, ARPU x30
+- Plus stable, ceiling plus bas, mais **bien plus simple à atteindre en solo**
+- Canal : LinkedIn ciblé responsables pédagogiques + démo live
+
+**Recommandation** : Polaris = d'abord **portfolio** (décrocher un job/freelance
+bien payé), ensuite **B2B écoles** si envie de business (meilleur ratio
+effort/revenu que le B2C grand public).
+
+- [ ] Rotation de la clé DeepSeek exposée en chat (sécurité — à faire AVANT prod)
+- [ ] Page pricing + intégration Stripe Checkout
+- [ ] Quotas + compteur d'usage par user (le backend `/api/usage` existe déjà)
+- [ ] Landing B2B séparée (argumentaire écoles)
+- [ ] 1 cas d'usage démo packagé pour la prospection
+- **Effort** : Stripe + quotas ~1 j, prospection = continu
+
+---
+
 ## 4½. Où vivent physiquement les corpus
 
 Les 13 corpus ne sont pas tous au même endroit sur le disque. Trois familles :
