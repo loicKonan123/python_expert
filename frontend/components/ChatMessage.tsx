@@ -5,7 +5,7 @@ import { MaterialIcon } from "./MaterialIcon";
 import { CodeBlock } from "./CodeBlock";
 import { Sources, type SourcesHandle } from "./Sources";
 import { PolarisLogo } from "./PolarisLogo";
-import { parseMarkdown, renderInlineMarkdown } from "@/lib/markdown";
+import { parseMarkdown, renderInlineMarkdown, splitTables } from "@/lib/markdown";
 import { metaForCorpus } from "@/lib/corpus-meta";
 import type { Source } from "@/lib/api";
 
@@ -244,9 +244,13 @@ function InlineText({
   text: string;
   onCitationClick: (idx: number) => void;
 }) {
-  // On rend le markdown léger en HTML puis on ré-injecte les citations comme
-  // composants React via un split sur la regex.
-  const parts = splitWithCitations(text);
+  // 1) On extrait d'abord les TABLEAUX (avant le split des citations, sinon une
+  //    citation [N] dans une cellule fragmenterait le tableau et il ne se
+  //    rendrait jamais). Les tableaux deviennent des placeholders ` T<i> `.
+  // 2) On split les citations sur le texte restant (hors tableaux).
+  // 3) Pour chaque fragment texte : rendu inline + ré-injection des tableaux.
+  const { text: noTables, tables } = splitTables(text);
+  const parts = splitWithCitations(noTables);
   return (
     <div className="md text-[16px] text-on-surface leading-[1.6] whitespace-pre-wrap">
       {parts.map((part, i) => {
@@ -259,11 +263,11 @@ function InlineText({
             />
           );
         }
+        let html = renderInlineMarkdown(part.text);
+        // Ré-injecte le HTML des tableaux à la place des placeholders @@TBL<i>@@.
+        html = html.replace(/@@TBL(\d+)@@/g, (_, n) => tables[Number(n)] ?? "");
         return (
-          <span
-            key={i}
-            dangerouslySetInnerHTML={{ __html: renderInlineMarkdown(part.text) }}
-          />
+          <span key={i} dangerouslySetInnerHTML={{ __html: html }} />
         );
       })}
     </div>

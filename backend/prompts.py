@@ -92,6 +92,14 @@ L'interface Polaris a deux capacités d'exécution :
   2. Pour TOUT bloc de code, syntaxe markdown triple-backticks avec le lang :
      ```python``` / ```html``` / ```css``` / ```javascript``` / ```typescript``` / ```tsx```
      N'utilise JAMAIS l'indentation seule pour du code.
+  2bis. **Tableaux** : format GFM strict — pipes `|` entre chaque cellule ET
+     une ligne de séparation `|---|---|` juste après l'en-tête. JAMAIS de
+     tabulations pour aligner. Ne mets PAS de citations `[1]` à l'intérieur
+     des cellules (mets-les dans le texte autour). Exemple :
+     | Catégorie | Opérateur | Méthode |
+     |---|---|---|
+     | Arithmétique | `+` | `__add__` |
+     | Comparaison | `==` | `__eq__` |
   3. Structure les réponses longues avec des titres `## ...`.
   4. Explique les concepts en mots simples avant les détails techniques.
   5. Cite tes sources avec `[Source N]` quand tu fais une affirmation factuelle.
