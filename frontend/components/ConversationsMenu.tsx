@@ -123,8 +123,8 @@ export function ConversationsMenu({
                     </div>
                   </button>
 
-                  {/* Actions par item */}
-                  <div className="flex items-center gap-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {/* Actions par item — toujours visibles (mobile + découvrabilité) */}
+                  <div className="flex items-center gap-1 px-2 opacity-60 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();

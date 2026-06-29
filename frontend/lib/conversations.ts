@@ -181,9 +181,14 @@ export function downloadAsMarkdown(conv: Conversation): void {
   const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const safeTitle = conv.title
-    .replace(/[^a-zA-Z0-9_-]+/g, "_")
-    .slice(0, 50);
-  const filename = `${safeTitle}_${conv.id.slice(-6)}.md`;
+    .replace(/[^a-zA-Z0-9_-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 40)
+    .toLowerCase() || "conversation";
+  // Date locale YYYY-MM-DD pour un nom de fichier lisible et triable.
+  const date = new Date(conv.updatedAt).toLocaleDateString("sv-SE"); // sv-SE = ISO
+  const filename = `polaris-${safeTitle}-${date}.md`;
   const a = document.createElement("a");
   a.href = url;
   a.download = filename;
