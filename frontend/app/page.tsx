@@ -271,17 +271,17 @@ export default function Landing() {
             subtitle="Polaris couvre tout ce dont un dev full-stack a besoin pour livrer en production : du code au déploiement, en passant par les tests et l'architecture."
           />
         </Reveal>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-5">
           {PILLARS.map((pillar, i) => (
             <Reveal key={pillar.title} delay={i * 80}>
               <Tilt3D maxTilt={5} className="h-full">
-                <article className="glass-card-strong h-full p-6 rounded-2xl space-y-4 hover:border-accent/30 transition-colors">
+                <article className="glass-card h-full p-6 rounded-2xl flex flex-col gap-4 hover:border-accent/30 transition-colors">
                   <div className="flex items-start gap-3">
                     <div
-                      className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+                      className="w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0"
                       style={{
-                        background: `linear-gradient(135deg, ${pillar.accent}30, ${pillar.accent}10)`,
-                        border: `1px solid ${pillar.accent}40`,
+                        background: `linear-gradient(135deg, ${pillar.accent}26, ${pillar.accent}0d)`,
+                        border: `1px solid ${pillar.accent}33`,
                       }}
                     >
                       <span style={{ color: pillar.accent }}>
@@ -301,7 +301,7 @@ export default function Landing() {
                     {pillar.techs.map((tech) => (
                       <span
                         key={tech}
-                        className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-surface-container-low/60 border border-outline-variant/30 text-[11px] font-mono text-on-surface-variant hover:border-outline-variant/60 transition-colors"
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-on-surface/[0.04] border border-on-surface/10 text-[11px] font-mono text-on-surface-variant hover:border-on-surface/20 transition-colors"
                       >
                         <TechIcon tech={tech} size={12} />
                         {TECH_LABELS[tech]}
