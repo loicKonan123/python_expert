@@ -54,14 +54,14 @@ const PILLARS: Array<{
     title: "Écosystème .NET",
     subtitle: "C#, ASP.NET Core, EF Core — Microsoft docs officiels",
     icon: "code_blocks",
-    accent: "#9B82E6",
+    accent: "#a78bfa",
     techs: ["csharp", "aspnet", "efcore"],
   },
   {
     title: "Architecture",
     subtitle: "Les méthodologies qui structurent le code",
     icon: "view_module",
-    accent: "#79589F",
+    accent: "#9B82E6",
     techs: ["twelve_factor"],
   },
   {
@@ -75,6 +75,34 @@ const PILLARS: Array<{
 
 /** Liste plate des 21 technos pour la belt finale (préserve l'ordre des piliers). */
 const ALL_TECHS: TechKey[] = PILLARS.flatMap((p) => p.techs);
+
+/**
+ * Données exactes du mockup standalone pour les chips de la section Stack expert :
+ * pastille colorée + initiale (glyph) + label. Reproduit fidèlement le HTML.
+ */
+const TECH: Record<TechKey, { color: string; glyph: string; label: string }> = {
+  python:         { color: "#FFD43B", glyph: "Py", label: "Python" },
+  fastapi:        { color: "#009688", glyph: "F",  label: "FastAPI" },
+  pydantic:       { color: "#E92063", glyph: "Pd", label: "Pydantic" },
+  sqlalchemy:     { color: "#bb4b2c", glyph: "SQ", label: "SQLAlchemy" },
+  httpx:          { color: "#7a52c7", glyph: "Hx", label: "HTTPX" },
+  pytest:         { color: "#0a9edc", glyph: "Pt", label: "pytest" },
+  nextjs:         { color: "#e8e9ee", glyph: "N",  label: "Next.js" },
+  typescript:     { color: "#3178C6", glyph: "TS", label: "TypeScript" },
+  tailwind:       { color: "#06B6D4", glyph: "TW", label: "Tailwind" },
+  zod:            { color: "#3068B7", glyph: "Z",  label: "Zod" },
+  tanstack_query: { color: "#FF4154", glyph: "TQ", label: "TanStack Query" },
+  vitest:         { color: "#FCC72B", glyph: "Vi", label: "Vitest" },
+  html:           { color: "#E34F26", glyph: "H5", label: "HTML" },
+  css:            { color: "#1572B6", glyph: "C3", label: "CSS" },
+  javascript:     { color: "#F7DF1E", glyph: "JS", label: "JavaScript" },
+  csharp:         { color: "#9B82E6", glyph: "C#", label: "C#" },
+  aspnet:         { color: "#7c4ddb", glyph: "A",  label: "ASP.NET Core" },
+  efcore:         { color: "#7c4ddb", glyph: "EF", label: "EF Core" },
+  twelve_factor:  { color: "#79589F", glyph: "12", label: "12-Factor" },
+  docker:         { color: "#2496ED", glyph: "D",  label: "Docker" },
+  github_actions: { color: "#3a8eff", glyph: "GH", label: "GitHub Actions" },
+};
 
 export default function Landing() {
   return (
@@ -275,13 +303,13 @@ export default function Landing() {
           {PILLARS.map((pillar, i) => (
             <Reveal key={pillar.title} delay={i * 80}>
               <Tilt3D maxTilt={5} className="h-full">
-                <article className="glass-card h-full p-6 rounded-2xl flex flex-col gap-4 hover:border-accent/30 transition-colors">
+                <article className="glass-card h-full rounded-2xl flex flex-col gap-4 p-6 hover:border-accent/30 transition-colors">
                   <div className="flex items-start gap-3">
                     <div
                       className="w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0"
                       style={{
-                        background: `linear-gradient(135deg, ${pillar.accent}26, ${pillar.accent}0d)`,
-                        border: `1px solid ${pillar.accent}33`,
+                        background: `linear-gradient(135deg, ${pillar.accent}4d, ${pillar.accent}14)`,
+                        border: `1px solid ${pillar.accent}59`,
                       }}
                     >
                       <span style={{ color: pillar.accent }}>
@@ -298,15 +326,23 @@ export default function Landing() {
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-1.5 pt-1">
-                    {pillar.techs.map((tech) => (
-                      <span
-                        key={tech}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-on-surface/[0.04] border border-on-surface/10 text-[11px] font-mono text-on-surface-variant hover:border-on-surface/20 transition-colors"
-                      >
-                        <TechIcon tech={tech} size={12} />
-                        {TECH_LABELS[tech]}
-                      </span>
-                    ))}
+                    {pillar.techs.map((tech) => {
+                      const t = TECH[tech];
+                      return (
+                        <span
+                          key={tech}
+                          className="inline-flex items-center gap-1.5 px-[9px] py-[5px] rounded-[7px] bg-on-surface/[0.03] border border-on-surface/[0.08] text-[11px] font-mono text-on-surface-variant"
+                        >
+                          <span
+                            className="w-3 h-3 rounded-[3px] inline-flex items-center justify-center text-[7px] font-bold shrink-0"
+                            style={{ background: t.color, color: "#0a0a14" }}
+                          >
+                            {t.glyph}
+                          </span>
+                          {t.label}
+                        </span>
+                      );
+                    })}
                   </div>
                 </article>
               </Tilt3D>
