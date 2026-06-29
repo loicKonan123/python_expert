@@ -97,15 +97,6 @@ export function TopBar({
             <MaterialIcon name="delete_sweep" />
           </button>
         )}
-        <a
-          href="https://github.com/loicKonan123/python_expert"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hidden sm:inline-flex p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant transition-colors"
-          title="Voir sur GitHub"
-        >
-          <MaterialIcon name="code" />
-        </a>
       </div>
     </header>
   );

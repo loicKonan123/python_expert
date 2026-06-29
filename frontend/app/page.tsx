@@ -540,14 +540,6 @@ function FooterLanding() {
           ]}
         />
         <FooterCol
-          title="Projet"
-          links={[
-            { label: "GitHub", href: "https://github.com/loicKonan123/python_expert" },
-            { label: "Roadmap", href: "https://github.com/loicKonan123/python_expert/blob/main/docs/plan.md" },
-            { label: "Changelog", href: "https://github.com/loicKonan123/python_expert/commits/main" },
-          ]}
-        />
-        <FooterCol
           title="Légal"
           links={[
             { label: "Confidentialité", href: "#" },

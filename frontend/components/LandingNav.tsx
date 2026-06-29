@@ -94,15 +94,6 @@ export function LandingNav() {
 
         <div className="flex items-center gap-3">
           <ThemeToggle />
-          <a
-            href="https://github.com/loicKonan123/python_expert"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden sm:inline-flex items-center gap-1.5 text-[13px] text-on-surface-variant hover:text-on-surface transition-colors"
-          >
-            <MaterialIcon name="code" className="text-[16px]" />
-            GitHub
-          </a>
           <Link
             href="/app"
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-accent text-surface text-[14px] font-medium shadow-[0_10px_40px_-10px_rgba(251,191,36,0.5)] hover:brightness-110 hover:-translate-y-0.5 transition-all"
@@ -144,15 +135,6 @@ export function LandingNav() {
               {s.label}
             </a>
           ))}
-          <a
-            href="https://github.com/loicKonan123/python_expert"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] text-on-surface-variant hover:bg-on-surface/5 hover:text-on-surface"
-          >
-            <MaterialIcon name="code" className="text-[16px]" />
-            GitHub
-          </a>
         </div>
       </div>
     </header>
