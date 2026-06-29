@@ -549,12 +549,8 @@ function FooterLanding() {
         />
       </div>
 
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-6 border-t border-on-surface/10 text-[11px] font-mono uppercase tracking-widest text-on-surface-variant/60">
-        <span>v1.0.0 · © 2026 Polaris Engineering</span>
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-          <span className="text-green-400/80">Systems operational</span>
-        </div>
+      <div className="flex items-center justify-center sm:justify-start pt-6 border-t border-on-surface/10 text-[11px] font-mono uppercase tracking-widest text-on-surface-variant/60">
+        <span>v1.0.0 · © 2026 Polaris </span>
       </div>
     </footer>
   );
