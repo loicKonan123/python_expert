@@ -9,7 +9,7 @@ import { CountUp } from "@/components/CountUp";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { LandingNav } from "@/components/LandingNav";
 import { InteractiveHero } from "@/components/InteractiveHero";
-import { TechIcon, TECH_LABELS, type TechKey } from "@/components/TechIcon";
+import type { TechKey } from "@/components/TechIcon";
 import { SnapScroll } from "@/components/SnapScroll";
 
 export const metadata = {
@@ -273,16 +273,24 @@ export default function Landing() {
                     </p>
                   </div>
                 </div>
-                {/* Belt avec icônes officielles */}
+                {/* Belt — pastille colorée + initiale + label (style cohérent avec Stack expert) */}
                 <div className="flex flex-wrap gap-2 pt-2">
-                  {ALL_TECHS.map((tech, i) => (
-                    <Reveal key={tech} delay={i * 30} translateY={8}>
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full glass-card text-[12px] font-mono">
-                        <TechIcon tech={tech} size={14} />
-                        {TECH_LABELS[tech]}
-                      </span>
-                    </Reveal>
-                  ))}
+                  {ALL_TECHS.map((tech, i) => {
+                    const t = TECH[tech];
+                    return (
+                      <Reveal key={tech} delay={i * 30} translateY={8}>
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full glass-card text-[12px] font-mono">
+                          <span
+                            className="w-3 h-3 rounded-[3px] inline-flex items-center justify-center text-[7px] font-bold shrink-0"
+                            style={{ background: t.color, color: "#0a0a14" }}
+                          >
+                            {t.glyph}
+                          </span>
+                          {t.label}
+                        </span>
+                      </Reveal>
+                    );
+                  })}
                 </div>
               </article>
             </Tilt3D>
