@@ -939,9 +939,9 @@ effort/revenu que le B2C grand public).
 
 ## 4½. Où vivent physiquement les corpus
 
-Les 13 corpus ne sont pas tous au même endroit sur le disque. Trois familles :
+Les 22 corpus ne sont pas tous au même endroit sur le disque. Trois familles :
 
-### 🌐 Cloné depuis GitHub (la majorité — 10 corpus)
+### 🌐 Cloné depuis GitHub (la majorité — 19 corpus)
 ```
 docs-sources/
 ├── fastapi/        ← github.com/fastapi/fastapi/docs/en/docs
@@ -953,8 +953,19 @@ docs-sources/
 ├── sqlalchemy/     ← github.com/sqlalchemy/sqlalchemy/doc/build
 ├── zod/            ← github.com/colinhacks/zod/packages/docs
 ├── tanstack-query/ ← github.com/TanStack/query/docs/framework/react
-└── vitest/         ← github.com/vitest-dev/vitest/docs
+├── vitest/         ← github.com/vitest-dev/vitest/docs
+├── html/           ← github.com/mdn/content/files/en-us/web/html
+├── css/            ← github.com/mdn/content/files/en-us/web/css
+├── javascript/     ← github.com/mdn/content/files/en-us/web/javascript
+├── csharp/         ← github.com/dotnet/docs/docs/csharp              (Phase 13)
+├── aspnet/         ← github.com/dotnet/AspNetCore.Docs/aspnetcore     (Phase 13)
+├── efcore/         ← github.com/dotnet/EntityFramework.Docs/...core   (Phase 13)
+├── twelve-factor/  ← github.com/heroku/12factor/content/en           (Phase 16)
+├── docker/         ← github.com/docker/docs/content                  (Phase 16)
+└── github-actions/ ← github.com/github/docs/content/actions          (Phase 16)
 ```
+**Note Windows** : `docker` et `github_actions` nécessitent
+`git config --global core.longpaths true` avant le clone (chemins > 260 car.).
 **Mise à jour** : `python -m backend.scripts.fetch_docs --corpus <nom>`
 ou `python -m backend.scripts.fetch_docs` (tous d'un coup).
 
@@ -1046,10 +1057,13 @@ Réponse honnête : **ça dépend pour qui et pour quoi**.
 
 ### ✅ Complet pour : ton apprentissage de développeur web full-stack
 
-Tu as toutes les briques nécessaires pour apprendre, expérimenter, et écrire
-du code Python + TypeScript autour de FastAPI + Next.js + Pydantic + Tailwind.
-Tu peux travailler offline (Ollama) ou avec qualité max (DeepSeek). Tu peux
-exécuter ton code. Tu connais le coût. Tu peux exporter tes apprentissages.
+Tu as toutes les briques pour apprendre, expérimenter et écrire du code sur
+**22 corpus / 21 technos** : backend Python (FastAPI, Pydantic, SQLAlchemy,
+pytest, httpx), frontend web (Next.js, TypeScript, Tailwind, Zod, TanStack
+Query, Vitest, HTML/CSS/JS), écosystème .NET (C#, ASP.NET Core, EF Core) et
+architecture/DevOps (12 Factor, Docker, GitHub Actions). Tu peux travailler
+offline (Ollama) ou en qualité max (DeepSeek), exécuter du Python ET du C#
+en sandbox, et suivre un curriculum de 465 concepts.
 **Rien à ajouter pour ton usage quotidien.**
 
 ### ⚠️ Partiellement complet pour : un usage public / produit
@@ -1074,7 +1088,8 @@ Le tuteur ne couvre pas (et ne doit pas couvrir) :
 - **Backend non-FastAPI** : pas de Django, Flask, Litestar
 - **Frontend non-Next** : pas de Vue, Svelte, Solid, Angular
 - **Mobile** : pas de React Native, Flutter, Swift, Kotlin
-- **DevOps** : pas de Docker, Kubernetes, Terraform, AWS, GCP
+- **DevOps avancé** : Docker + GitHub Actions sont couverts (Phase 16), mais
+  pas Kubernetes, Terraform, AWS, GCP (envisagés Phase 17)
 - **Bases de données** : pas de PostgreSQL, Redis, MongoDB en profondeur
 - **Sécurité offensive** : pas par design (refus politique)
 
@@ -1088,7 +1103,7 @@ Architecture déjà prête.
 - **Pour montrer dans un portfolio dev** : 🟢 **complet**
 - **Pour partager avec quelques amis qui apprennent** : 🟡 **manque auth + mobile + Docker**
 - **Pour en faire un SaaS public** : 🟠 **encore 3-5 jours de boulot**
-- **Pour couvrir TOUTE la programmation moderne** : 🔴 **ce n'est pas l'objectif et ça ne devrait jamais l'être** — un outil expert sur 6 technos vaut mieux qu'un outil moyen sur 60
+- **Pour couvrir TOUTE la programmation moderne** : 🔴 **ce n'est pas l'objectif et ça ne devrait jamais l'être** — un outil expert sur 21 technos ciblées vaut mieux qu'un outil moyen sur 100
 
 ---
 
