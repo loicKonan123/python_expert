@@ -212,9 +212,6 @@ export default function Landing() {
           <Reveal delay={0} className="md:col-span-7">
             <Tilt3D className="h-full" maxTilt={6}>
               <article className="glass-card-strong h-full p-7 rounded-3xl space-y-4 hover:border-accent/30 transition-colors">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#6366f1]/30 to-accent/20 flex items-center justify-center">
-                  <MaterialIcon name="verified" filled className="text-action text-[24px]" />
-                </div>
                 <h2 className="text-[22px] font-semibold text-on-surface">
                   Sourcé, jamais inventé
                 </h2>
@@ -256,9 +253,6 @@ export default function Landing() {
             <Tilt3D className="h-full" maxTilt={3}>
               <article className="glass-card-strong p-7 rounded-3xl space-y-5 hover:border-accent/30 transition-colors">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#818cf8]/30 to-[#6366f1]/20 flex items-center justify-center shrink-0">
-                    <MaterialIcon name="hub" filled className="text-action text-[24px]" />
-                  </div>
                   <div className="flex-1 min-w-0">
                     <h2 className="text-[22px] font-semibold text-on-surface">
                       L'expertise full-stack en 22 corpus
