@@ -148,8 +148,22 @@ export default function AgentPage() {
           </div>
         )}
 
+        {/* Bandeau live : dès que l'agent démarre, on montre qu'il travaille */}
+        {(running || steps.length > 0) && (
+          <div className="flex items-center gap-2 text-[13px]">
+            <span
+              className={`w-2 h-2 rounded-full ${running ? "bg-accent animate-pulse" : "bg-green-500"}`}
+            />
+            <span className="font-mono uppercase tracking-widest text-[11px] text-on-surface-variant">
+              {running
+                ? `Agent en cours · ${steps.length} étape${steps.length > 1 ? "s" : ""}`
+                : `Terminé · ${steps.length} étapes`}
+            </span>
+          </div>
+        )}
+
         {/* Cheminement de l'agent — timeline connectée */}
-        {steps.length > 0 && (
+        {(running || steps.length > 0) && (
           <div className="relative pl-8">
             {/* Rail vertical qui relie les étapes */}
             <div className="absolute left-[11px] top-2 bottom-2 w-px bg-gradient-to-b from-accent/50 via-outline-variant/40 to-transparent" />
@@ -165,7 +179,9 @@ export default function AgentPage() {
                   <span className="agent-thinking-dot" />
                   <span className="agent-thinking-dot" style={{ animationDelay: "150ms" }} />
                   <span className="agent-thinking-dot" style={{ animationDelay: "300ms" }} />
-                  <span className="ml-1">L&apos;agent réfléchit…</span>
+                  <span className="ml-1">
+                    {steps.length === 0 ? "L'agent démarre…" : "L'agent réfléchit…"}
+                  </span>
                 </div>
               </div>
             )}
