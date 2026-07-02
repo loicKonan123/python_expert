@@ -18,6 +18,9 @@ docs-sources/
 # Clones git temporaires pendant fetch_docs
 .cache/
 
+# Workspaces de l'agent (Phase 17) — dossiers de session jetables
+.agent_workspaces/
+
 # ============= Python =============
 __pycache__/
 *.py[cod]
