@@ -15,20 +15,33 @@ Flux SSE :
 """
 from __future__ import annotations
 
+import io
 import json
 import logging
 import queue
 import threading
 import uuid
+import zipfile
 
-from fastapi import APIRouter, Request
-from fastapi.responses import StreamingResponse
+from fastapi import APIRouter, HTTPException, Request
+from fastapi.responses import Response, StreamingResponse
 from pydantic import BaseModel, Field
 
 from ..agent.executor import LocalExecutor
 from ..agent.loop import run_agent
 from ..agent.state import AgentSession, Step
-from ..agent.workspace import Workspace
+from ..agent.workspace import WORKSPACES_ROOT, Workspace
+
+
+# Dossiers/bruit à masquer dans l'explorateur et le zip.
+_HIDDEN = (".pytest_cache", "__pycache__", ".git")
+
+
+def _visible_files(ws: Workspace) -> list[str]:
+    return [
+        f for f in ws.list_files().files
+        if not any(part in f.split("/") for part in _HIDDEN)
+    ]
 
 
 logger = logging.getLogger(__name__)
@@ -89,7 +102,7 @@ def agent(req: AgentRequest, request: Request) -> StreamingResponse:
                     "state": session.state,
                     "success": session.success,
                     "summary": session.summary,
-                    "files": list(ws.list_files().files),
+                    "files": _visible_files(ws),
                 },
             ))
         except Exception as exc:  # noqa: BLE001
@@ -109,3 +122,52 @@ def agent(req: AgentRequest, request: Request) -> StreamingResponse:
         yield _sse("end", "")
 
     return StreamingResponse(generate(), media_type="text/event-stream")
+
+
+def _open_workspace(session_id: str) -> Workspace:
+    """Ouvre le workspace d'une session existante (404 si absent)."""
+    ws = Workspace(session_id)
+    if not (WORKSPACES_ROOT / ws.session_id).is_dir():
+        raise HTTPException(status_code=404, detail="session introuvable")
+    return ws
+
+
+@router.get("/agent/{session_id}/files")
+def list_agent_files(session_id: str) -> dict:
+    """Liste les fichiers du workspace d'une session (sans le bruit)."""
+    ws = _open_workspace(session_id)
+    return {"session_id": ws.session_id, "files": _visible_files(ws)}
+
+
+@router.get("/agent/{session_id}/file")
+def read_agent_file(session_id: str, path: str) -> dict:
+    """Renvoie le contenu d'un fichier du workspace (path-jailed)."""
+    ws = _open_workspace(session_id)
+    r = ws.read_file(path)
+    if not r.ok:
+        raise HTTPException(status_code=404, detail=r.error or "fichier introuvable")
+    return {"path": r.path, "content": r.content}
+
+
+@router.get("/agent/{session_id}/download")
+def download_agent_project(session_id: str) -> Response:
+    """Zippe le workspace (fichiers visibles) et le renvoie en téléchargement."""
+    ws = _open_workspace(session_id)
+    files = _visible_files(ws)
+    if not files:
+        raise HTTPException(status_code=404, detail="workspace vide")
+
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+        for rel in files:
+            r = ws.read_file(rel)
+            if r.ok:
+                zf.writestr(rel, r.content)
+    buffer.seek(0)
+
+    filename = f"{ws.session_id}.zip"
+    return Response(
+        content=buffer.getvalue(),
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )

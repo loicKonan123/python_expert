@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MaterialIcon } from "@/components/MaterialIcon";
 import {
   runAgentStream,
+  fetchAgentFile,
+  agentDownloadUrl,
   type AgentStep,
   type AgentDone,
 } from "@/lib/api";
@@ -31,6 +33,7 @@ export default function AgentPage() {
   const [done, setDone] = useState<AgentDone | null>(null);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const cancelRef = useRef<(() => void) | null>(null);
 
   function launch() {
@@ -39,8 +42,10 @@ export default function AgentPage() {
     setSteps([]);
     setDone(null);
     setError(null);
+    setSessionId(null);
     setRunning(true);
     cancelRef.current = runAgentStream(t, {
+      onStart: (info) => setSessionId(info.session_id),
       onStep: (s) => setSteps((prev) => [...prev, s]),
       onDone: (d) => {
         setDone(d);
@@ -192,20 +197,12 @@ export default function AgentPage() {
               </span>
             </div>
             <p className="text-[14px] text-on-surface-variant leading-[1.55]">{done.summary}</p>
-            {done.files.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {done.files.map((f) => (
-                  <span
-                    key={f}
-                    className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-on-surface/[0.04] border border-on-surface/10 text-[11px] font-mono text-on-surface-variant"
-                  >
-                    <MaterialIcon name="draft" className="text-[12px]" />
-                    {f}
-                  </span>
-                ))}
-              </div>
-            )}
           </div>
+        )}
+
+        {/* Explorateur + visualiseur du projet généré */}
+        {sessionId && done && done.files.length > 0 && (
+          <FilesPanel sessionId={sessionId} files={done.files} />
         )}
       </div>
     </main>
@@ -284,6 +281,92 @@ function StepCard({ step }: { step: AgentStep }) {
             {step.observation}
           </pre>
         )}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Explorateur + visualiseur des fichiers générés par l'agent
+// ---------------------------------------------------------------------------
+
+function FilesPanel({ sessionId, files }: { sessionId: string; files: string[] }) {
+  const [selected, setSelected] = useState<string | null>(files[0] ?? null);
+  const [content, setContent] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!selected) return;
+    let cancelled = false;
+    setLoading(true);
+    setErr(null);
+    fetchAgentFile(sessionId, selected)
+      .then((c) => {
+        if (!cancelled) setContent(c);
+      })
+      .catch((e) => {
+        if (!cancelled) setErr(e instanceof Error ? e.message : String(e));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionId, selected]);
+
+  return (
+    <div className="glass-card rounded-2xl overflow-hidden">
+      {/* En-tête : titre + télécharger */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-on-surface/10">
+        <div className="flex items-center gap-2">
+          <MaterialIcon name="folder_code" filled className="text-accent text-[18px]" />
+          <span className="text-[14px] font-semibold text-on-surface">
+            Projet généré · {files.length} fichier{files.length > 1 ? "s" : ""}
+          </span>
+        </div>
+        <a
+          href={agentDownloadUrl(sessionId)}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent text-surface text-[13px] font-medium hover:brightness-110 transition-all"
+        >
+          <MaterialIcon name="download" className="text-[16px]" />
+          Télécharger .zip
+        </a>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-[200px_1fr]">
+        {/* Liste des fichiers */}
+        <div className="border-b sm:border-b-0 sm:border-r border-on-surface/10 max-h-[420px] overflow-y-auto custom-scrollbar">
+          {files.map((f) => (
+            <button
+              key={f}
+              onClick={() => setSelected(f)}
+              className={`w-full text-left px-3 py-2 text-[12px] font-mono truncate transition-colors flex items-center gap-1.5 ${
+                selected === f
+                  ? "bg-accent/10 text-accent"
+                  : "text-on-surface-variant hover:bg-on-surface/5 hover:text-on-surface"
+              }`}
+              title={f}
+            >
+              <MaterialIcon name="draft" className="text-[13px] shrink-0" />
+              {f}
+            </button>
+          ))}
+        </div>
+
+        {/* Contenu du fichier sélectionné */}
+        <div className="min-w-0 max-h-[420px] overflow-auto custom-scrollbar bg-on-surface/[0.02]">
+          {loading ? (
+            <div className="p-4 text-[13px] text-on-surface-variant">Chargement…</div>
+          ) : err ? (
+            <div className="p-4 text-[13px] text-error">{err}</div>
+          ) : (
+            <pre className="p-4 text-[12.5px] font-mono text-on-surface whitespace-pre-wrap break-words leading-[1.55]">
+              {content || "(fichier vide)"}
+            </pre>
+          )}
+        </div>
       </div>
     </div>
   );

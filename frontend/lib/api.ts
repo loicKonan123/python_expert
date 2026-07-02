@@ -241,6 +241,24 @@ export type AgentEvents = {
   onError: (err: Error) => void;
 };
 
+/** Récupère le contenu d'un fichier généré par l'agent. */
+export async function fetchAgentFile(
+  sessionId: string,
+  path: string,
+): Promise<string> {
+  const resp = await fetch(
+    `${API_BASE}/api/agent/${encodeURIComponent(sessionId)}/file?path=${encodeURIComponent(path)}`,
+  );
+  if (!resp.ok) throw new Error(`Fichier introuvable (${resp.status})`);
+  const data = await resp.json();
+  return data.content ?? "";
+}
+
+/** URL de téléchargement du projet généré (zip). */
+export function agentDownloadUrl(sessionId: string): string {
+  return `${API_BASE}/api/agent/${encodeURIComponent(sessionId)}/download`;
+}
+
 /** Lance l'agent sur une tâche et streame ses étapes. Renvoie une fonction d'annulation. */
 export function runAgentStream(
   task: string,
