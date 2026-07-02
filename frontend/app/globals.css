@@ -509,6 +509,37 @@ html[data-theme="dark"] .shell-deep {
 }
 
 /* ============================================================
+   Polaris — Mode Agent : animations de la timeline de raisonnement
+   ============================================================ */
+@keyframes agent-step-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.agent-step-in {
+  animation: agent-step-in 0.35s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .agent-step-in { animation: none; }
+}
+
+/* Points « l'agent réfléchit » qui pulsent en cascade */
+.agent-thinking-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 9999px;
+  background: var(--color-accent);
+  display: inline-block;
+  animation: agent-think 1s ease-in-out infinite;
+}
+@keyframes agent-think {
+  0%, 100% { opacity: 0.25; transform: scale(0.8); }
+  50%      { opacity: 1;    transform: scale(1.1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .agent-thinking-dot { animation: none; opacity: 0.6; }
+}
+
+/* ============================================================
    Polaris — Snap-scroll landing
 
    Quand <html> reçoit la classe .snap-landing (via <SnapScroll />),

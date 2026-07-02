@@ -143,16 +143,25 @@ export default function AgentPage() {
           </div>
         )}
 
-        {/* Timeline des étapes */}
+        {/* Cheminement de l'agent — timeline connectée */}
         {steps.length > 0 && (
-          <div className="space-y-3">
-            {steps.map((s) => (
-              <StepCard key={s.index} step={s} />
-            ))}
+          <div className="relative pl-8">
+            {/* Rail vertical qui relie les étapes */}
+            <div className="absolute left-[11px] top-2 bottom-2 w-px bg-gradient-to-b from-accent/50 via-outline-variant/40 to-transparent" />
+            <div className="space-y-3">
+              {steps.map((s) => (
+                <StepCard key={s.index} step={s} />
+              ))}
+            </div>
             {running && (
-              <div className="flex items-center gap-2 text-[13px] text-on-surface-variant px-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-                L&apos;agent réfléchit…
+              <div className="relative mt-3">
+                <span className="absolute -left-[25px] top-1.5 w-3.5 h-3.5 rounded-full bg-accent/30 border-2 border-accent animate-pulse" />
+                <div className="flex items-center gap-2 text-[13px] text-on-surface-variant italic">
+                  <span className="agent-thinking-dot" />
+                  <span className="agent-thinking-dot" style={{ animationDelay: "150ms" }} />
+                  <span className="agent-thinking-dot" style={{ animationDelay: "300ms" }} />
+                  <span className="ml-1">L&apos;agent réfléchit…</span>
+                </div>
               </div>
             )}
           </div>
@@ -218,54 +227,63 @@ function StepCard({ step }: { step: AgentStep }) {
             : "";
 
   return (
-    <div className="glass-card rounded-xl overflow-hidden">
-      <div className="flex items-start gap-3 p-4">
-        <div
-          className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-          style={{ background: `${meta.color}22`, border: `1px solid ${meta.color}44` }}
-        >
-          <span style={{ color: meta.color }}>
-            <MaterialIcon name={meta.icon} filled className="text-[16px]" />
-          </span>
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-mono uppercase tracking-wider" style={{ color: meta.color }}>
-              {meta.label}
-            </span>
-            {argsPreview && (
-              <span className="text-[11px] font-mono text-on-surface-variant/70 truncate">
-                {argsPreview}
-              </span>
-            )}
-            {!step.ok && (
-              <span className="text-[10px] font-mono text-error">✗ échec</span>
-            )}
+    <div className="relative agent-step-in">
+      {/* Point sur le rail */}
+      <span
+        className="absolute -left-[25px] top-3 w-3.5 h-3.5 rounded-full shrink-0"
+        style={{ background: meta.color, boxShadow: `0 0 0 3px ${meta.color}22` }}
+      />
+      <div className="glass-card rounded-xl overflow-hidden">
+        {/* Le RAISONNEMENT en tête — c'est le cheminement de l'agent */}
+        {step.thought && (
+          <div className="flex items-start gap-2 px-4 pt-4">
+            <MaterialIcon name="psychology" className="text-accent text-[16px] mt-0.5 shrink-0" />
+            <p className="text-[14px] text-on-surface leading-[1.55]">{step.thought}</p>
           </div>
-          {step.thought && (
-            <p className="text-[13px] text-on-surface-variant leading-[1.5] mt-1 italic">
-              {step.thought}
-            </p>
+        )}
+        {/* L'action décidée */}
+        <div className="flex items-center gap-2 px-4 py-3 flex-wrap">
+          <span
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-mono"
+            style={{ background: `${meta.color}1f`, border: `1px solid ${meta.color}44`, color: meta.color }}
+          >
+            <MaterialIcon name={meta.icon} filled className="text-[13px]" />
+            {meta.label}
+          </span>
+          {argsPreview && (
+            <span className="text-[11px] font-mono text-on-surface-variant/80 truncate max-w-[60%]">
+              {argsPreview}
+            </span>
+          )}
+          {step.observation && step.ok && (
+            <span className="text-[11px] text-green-500 inline-flex items-center gap-0.5">
+              <MaterialIcon name="check" className="text-[13px]" /> ok
+            </span>
+          )}
+          {step.observation && !step.ok && (
+            <span className="text-[11px] text-error inline-flex items-center gap-0.5">
+              <MaterialIcon name="close" className="text-[13px]" /> échec
+            </span>
           )}
           {step.observation && (
             <button
               onClick={() => setOpen((v) => !v)}
-              className="mt-2 text-[11px] font-mono text-on-surface-variant/70 hover:text-on-surface flex items-center gap-1"
+              className="ml-auto text-[11px] font-mono text-on-surface-variant/70 hover:text-on-surface flex items-center gap-1"
             >
               <MaterialIcon name={open ? "expand_less" : "expand_more"} className="text-[14px]" />
-              {open ? "masquer" : "voir"} l&apos;observation
+              {open ? "masquer" : "sortie"}
             </button>
           )}
-          {open && step.observation && (
-            <pre
-              className={`mt-2 text-[11.5px] font-mono whitespace-pre-wrap break-words max-h-64 overflow-y-auto custom-scrollbar rounded-lg p-3 bg-on-surface/[0.03] border border-on-surface/10 ${
-                step.ok ? "text-on-surface-variant" : "text-error/90"
-              }`}
-            >
-              {step.observation}
-            </pre>
-          )}
         </div>
+        {open && step.observation && (
+          <pre
+            className={`mx-4 mb-4 text-[11.5px] font-mono whitespace-pre-wrap break-words max-h-64 overflow-y-auto custom-scrollbar rounded-lg p-3 bg-on-surface/[0.03] border border-on-surface/10 ${
+              step.ok ? "text-on-surface-variant" : "text-error/90"
+            }`}
+          >
+            {step.observation}
+          </pre>
+        )}
       </div>
     </div>
   );
