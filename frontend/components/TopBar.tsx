@@ -66,6 +66,15 @@ export function TopBar({
         {/* Compteur tokens/coût retiré de l'UI (Phase 8 — design moins encombré).
             Les données restent disponibles via GET /api/usage si on veut les
             réafficher plus tard (ex: dans un panneau Réglages). */}
+        <Link
+          href="/agent"
+          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-accent hover:bg-accent/10 transition-colors text-[13px] font-medium"
+          title="Mode Agent — l'agent code et vérifie en autonomie"
+        >
+          <MaterialIcon name="smart_toy" filled className="text-[18px]" />
+          <span className="hidden sm:inline">Agent</span>
+        </Link>
+
         <button
           onClick={onNewConversation}
           className="p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant transition-colors"

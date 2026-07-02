@@ -213,6 +213,89 @@ export async function restartKernel(sessionId: string): Promise<void> {
 }
 
 
+// ---------------------------------------------------------------------------
+// Mode Agent (Phase 17) — streaming SSE des étapes
+// ---------------------------------------------------------------------------
+
+export type AgentStep = {
+  index: number;
+  thought: string;
+  tool: string;
+  args: Record<string, unknown>;
+  ok: boolean;
+  observation: string;
+  done: boolean;
+};
+
+export type AgentDone = {
+  state: string;
+  success: boolean;
+  summary: string;
+  files: string[];
+};
+
+export type AgentEvents = {
+  onStart?: (info: { session_id: string; task: string }) => void;
+  onStep: (step: AgentStep) => void;
+  onDone: (done: AgentDone) => void;
+  onError: (err: Error) => void;
+};
+
+/** Lance l'agent sur une tâche et streame ses étapes. Renvoie une fonction d'annulation. */
+export function runAgentStream(
+  task: string,
+  events: AgentEvents,
+  maxIterations = 12,
+): () => void {
+  const controller = new AbortController();
+
+  (async () => {
+    try {
+      const resp = await fetch(`${API_BASE}/api/agent`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ task, max_iterations: maxIterations }),
+        signal: controller.signal,
+      });
+      if (!resp.ok || !resp.body) {
+        throw new Error(`Serveur a répondu ${resp.status}`);
+      }
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        let idx;
+        while ((idx = buffer.indexOf("\n\n")) !== -1) {
+          const raw = buffer.slice(0, idx);
+          buffer = buffer.slice(idx + 2);
+          const evt = parseSSE(raw);
+          if (!evt) continue;
+          const data = evt.data.replace(/\\n/g, "\n");
+          if (evt.event === "start") {
+            try { events.onStart?.(JSON.parse(data)); } catch { /* ignore */ }
+          } else if (evt.event === "step") {
+            try { events.onStep(JSON.parse(data)); } catch { /* ignore */ }
+          } else if (evt.event === "done") {
+            try { events.onDone(JSON.parse(data)); } catch { /* ignore */ }
+          } else if (evt.event === "error") {
+            events.onError(new Error(data));
+          }
+        }
+      }
+    } catch (err) {
+      if (controller.signal.aborted) return;
+      events.onError(err instanceof Error ? err : new Error(String(err)));
+    }
+  })();
+
+  return () => controller.abort();
+}
+
+
 type SSEEvent = { event: string; data: string };
 
 function parseSSE(raw: string): SSEEvent | null {
