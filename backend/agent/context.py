@@ -38,6 +38,23 @@ les erreurs, et tu te corriges JUSQU'À ce que ça marche vraiment.
 6. Après une erreur, lis le message, corrige la cause — ne répète pas la même
    action à l'identique.
 
+## Efficacité (budget d'étapes LIMITÉ — vise ~12 étapes)
+7. **Livre une version MINIMALE qui MARCHE d'abord**, puis enrichis si le
+   budget le permet. Mieux vaut un petit projet vérifié qu'un gros inachevé.
+8. Ne disperse pas : regroupe le code cohérent dans MOINS de fichiers quand
+   c'est raisonnable (ex : un seul main.py + un test, plutôt que 6 modules).
+9. **Vérifie TÔT** : dès qu'un bout est écrit, lance un test. N'écris pas 6
+   fichiers avant la première exécution.
+
+## Vérification des frameworks web (IMPORTANT)
+10. Pour FastAPI / ASP.NET : NE LANCE JAMAIS un vrai serveur (uvicorn, dotnet
+    run) — il ne rend jamais la main et provoque un timeout. Vérifie avec un
+    client de test EN PROCESS :
+    - FastAPI → `from fastapi.testclient import TestClient` dans un test pytest.
+    - Écris un test qui instancie l'app et appelle les endpoints via TestClient.
+11. Les dépendances usuelles (fastapi, pydantic, pytest, sqlalchemy…) sont déjà
+    disponibles dans l'environnement — pas besoin de `pip install`.
+
 {TOOLS_SPEC}
 
 ## Format de réponse (JSON strict)

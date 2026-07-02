@@ -50,7 +50,7 @@ export default function AgentPage() {
         setError(e.message);
         setRunning(false);
       },
-    });
+    }, 18);
   }
 
   function stop() {
@@ -102,7 +102,7 @@ export default function AgentPage() {
           />
           <div className="flex items-center justify-between gap-3">
             <span className="text-[11px] text-on-surface-variant/60 font-mono">
-              exécution locale · sandbox · max 12 étapes
+              exécution locale · sandbox · max 18 étapes
             </span>
             {running ? (
               <button

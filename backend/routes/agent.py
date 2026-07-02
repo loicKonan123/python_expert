@@ -38,7 +38,7 @@ router = APIRouter(prefix="/api", tags=["agent"])
 
 class AgentRequest(BaseModel):
     task: str = Field(..., min_length=1, max_length=4000)
-    max_iterations: int = Field(default=12, ge=1, le=20)
+    max_iterations: int = Field(default=18, ge=1, le=30)
 
 
 def _sse(event: str, data) -> bytes:
