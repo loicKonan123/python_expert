@@ -522,6 +522,21 @@ html[data-theme="dark"] .shell-deep {
   .agent-step-in { animation: none; }
 }
 
+/* Curseur clignotant pendant que l'agent « tape » le code */
+.agent-cursor {
+  display: inline-block;
+  width: 7px;
+  height: 1.1em;
+  vertical-align: text-bottom;
+  margin-left: 1px;
+  background: var(--color-accent);
+  animation: agent-blink 0.8s steps(1) infinite;
+}
+@keyframes agent-blink {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
+}
+
 /* Points « l'agent réfléchit » qui pulsent en cascade */
 .agent-thinking-dot {
   width: 5px;

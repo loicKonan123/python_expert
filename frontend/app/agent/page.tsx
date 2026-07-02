@@ -272,6 +272,10 @@ function StepCard({ step }: { step: AgentStep }) {
             </button>
           )}
         </div>
+        {/* Aperçu du code écrit — s'anime comme si l'agent le tapait */}
+        {step.tool === "write_file" && typeof step.args.content === "string" && (
+          <WrittenCode content={step.args.content as string} />
+        )}
         {open && step.observation && (
           <pre
             className={`mx-4 mb-4 text-[11.5px] font-mono whitespace-pre-wrap break-words max-h-64 overflow-y-auto custom-scrollbar rounded-lg p-3 bg-on-surface/[0.03] border border-on-surface/10 ${
@@ -282,6 +286,42 @@ function StepCard({ step }: { step: AgentStep }) {
           </pre>
         )}
       </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Aperçu du code écrit, animé comme une frappe (l'agent "tape" le fichier)
+// ---------------------------------------------------------------------------
+
+function WrittenCode({ content }: { content: string }) {
+  const [shown, setShown] = useState(0);
+
+  useEffect(() => {
+    const full = content.length;
+    if (full === 0) return;
+    // Révélation progressive sur ~0.8s quelle que soit la taille (fluide).
+    const duration = 800;
+    const start = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - start) / duration);
+      setShown(Math.floor(p * full));
+      if (p < 1) raf = requestAnimationFrame(tick);
+      else setShown(full);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [content]);
+
+  const typing = shown < content.length;
+
+  return (
+    <div className="mx-4 mb-4">
+      <pre className="text-[11.5px] font-mono whitespace-pre-wrap break-words max-h-72 overflow-y-auto custom-scrollbar rounded-lg p-3 bg-[#0b1020] text-slate-200 border border-on-surface/10">
+        <code>{content.slice(0, shown)}</code>
+        {typing && <span className="agent-cursor" />}
+      </pre>
     </div>
   );
 }

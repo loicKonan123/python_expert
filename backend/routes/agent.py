@@ -33,15 +33,35 @@ from ..agent.state import AgentSession, Step
 from ..agent.workspace import WORKSPACES_ROOT, Workspace
 
 
-# Dossiers/bruit à masquer dans l'explorateur et le zip.
-_HIDDEN = (".pytest_cache", "__pycache__", ".git")
+# Dossiers de build/artefacts à masquer (bruit, souvent binaire).
+_HIDDEN_DIRS = frozenset({
+    ".pytest_cache", "__pycache__", ".git", ".vs", ".idea",
+    "bin", "obj", "node_modules", "dist", "build", "target",
+    ".next", "venv", ".venv", ".mypy_cache", ".ruff_cache",
+})
+# Extensions binaires / non pertinentes à ne jamais afficher ni zipper.
+_BINARY_EXT = (
+    ".dll", ".exe", ".pdb", ".bin", ".so", ".dylib", ".o", ".a",
+    ".pyc", ".pyo", ".class", ".jar", ".zip", ".gz", ".tar",
+    ".png", ".jpg", ".jpeg", ".gif", ".ico", ".webp", ".pdf",
+    ".pack", ".idx", ".cache", ".dat", ".lock", ".woff", ".woff2",
+)
+_MAX_VISIBLE = 120
 
 
 def _visible_files(ws: Workspace) -> list[str]:
-    return [
-        f for f in ws.list_files().files
-        if not any(part in f.split("/") for part in _HIDDEN)
-    ]
+    """Fichiers source pertinents : sans dossiers de build ni binaires."""
+    out: list[str] = []
+    for f in ws.list_files().files:
+        parts = f.split("/")
+        if any(p in _HIDDEN_DIRS for p in parts):
+            continue
+        if f.lower().endswith(_BINARY_EXT):
+            continue
+        out.append(f)
+        if len(out) >= _MAX_VISIBLE:
+            break
+    return out
 
 
 logger = logging.getLogger(__name__)
