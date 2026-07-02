@@ -772,14 +772,124 @@ User: "crée une API FastAPI de todos + tests pytest"
 4. DONE : l'agent résume ce qu'il a créé, l'utilisateur voit l'arborescence
 ```
 
-### Tools de l'agent (MVP)
+### Système logique de l'agent (le cœur)
 
-| Tool | Rôle |
-|---|---|
-| `write_file(path, content)` | Écrit dans le workspace isolé de la session |
-| `read_file(path)` | Relit un fichier (pour se corriger) |
-| `run_command(cmd)` | Exécute dans le sandbox (réutilise `sandbox.py` / `sandbox_csharp.py`) |
-| `search_docs(query, corpus?)` | RAG explicite — l'agent consulte la doc quand il hésite |
+L'agent n'est PAS "un LLM dans une boucle for". C'est une **machine à états**
+avec un cycle de raisonnement explicite, une gestion de contexte, une mémoire
+et une politique de récupération d'erreur. Voici le système complet.
+
+#### 1. Machine à états
+
+```
+                ┌──────────────────────────────────────────┐
+                ▼                                          │
+  IDLE → PLAN → ACT → OBSERVE → REFLECT ──(continue)───────┘
+                                   │
+                                   ├──(succès global)──→ DONE
+                                   ├──(bloqué / ambigu)─→ NEEDS_USER
+                                   └──(échec fatal / max)→ FAILED
+```
+
+- **IDLE** : attend une tâche utilisateur.
+- **PLAN** : décompose la tâche en un plan (liste de sous-objectifs ordonnés).
+- **ACT** : choisit et émet UNE action (un tool call) pour le sous-objectif courant.
+- **OBSERVE** : exécute l'action, capture le résultat structuré (stdout, stderr,
+  exit code, diff fichier).
+- **REFLECT** : évalue l'observation → l'étape a-t-elle réussi ? faut-il corriger,
+  re-planifier, passer à l'étape suivante, demander à l'utilisateur, ou terminer ?
+- **DONE / FAILED / NEEDS_USER** : états terminaux.
+
+#### 2. Le cycle de raisonnement (ReAct structuré)
+
+Chaque tour de boucle, le LLM produit une sortie STRUCTURÉE (JSON strict) :
+
+```json
+{
+  "thought": "Le test échoue car median() ne gère pas la liste vide.",
+  "plan_update": "Étape 2/4 en échec → corriger le edge case avant de continuer.",
+  "action": {
+    "tool": "write_file",
+    "args": { "path": "median.py", "content": "..." }
+  },
+  "done": false
+}
+```
+
+- `thought` : raisonnement explicite (améliore la qualité sur modèle mid-tier).
+- `plan_update` : l'agent tient son plan à jour (où il en est).
+- `action` : le tool à exécuter (ou `null` si `done: true`).
+- `done` : true → l'agent estime la tâche finie (déclenche une VÉRIFICATION finale
+  avant de passer à DONE — on ne le croit pas sur parole, on relance les tests).
+
+#### 3. Le Planner (décomposition + re-planification)
+
+- **Plan initial** : à la réception de la tâche, un appel LLM dédié produit un
+  plan structuré (`todo: [{id, objectif, corpus_pertinents, done:false}]`).
+- **Re-planification** : si REFLECT détecte que le plan ne tient plus (3 échecs
+  sur la même étape, ou découverte d'un blocage), on relance le Planner avec
+  le contexte de l'échec. Évite l'entêtement sur une mauvaise approche.
+- Le plan est **visible dans l'UI** (l'utilisateur voit la todo se cocher).
+
+#### 4. Gestion du contexte (LE point critique sur modèle mid-tier)
+
+Un agent accumule vite trop d'historique pour la fenêtre de contexte. Stratégie :
+
+- **Fenêtre système figée** (cache) : rôle, périmètre technos, protocole de tools.
+- **Plan courant** : toujours injecté (compact).
+- **Working set** : contenu des fichiers PERTINENTS pour l'étape courante
+  seulement (pas tous les fichiers, pas tout l'historique).
+- **Historique des actions** : résumé glissant — les K dernières actions en
+  détail, les plus anciennes compressées en une ligne ("étapes 1-3 : setup OK").
+- **Docs récupérées** : les chunks RAG de l'étape courante, jetés au tour suivant.
+- **Budget de tokens** par tour, avec troncature déterministe si dépassement.
+
+C'est ici que se gagne ou se perd la qualité de l'agent. Un contexte propre et
+ciblé compense largement un modèle plus modeste.
+
+#### 5. Mémoire (3 niveaux)
+
+| Niveau | Contenu | Portée |
+|---|---|---|
+| **Court terme** | Les K dernières actions + observations | Tour courant |
+| **Travail** | Arborescence + contenu des fichiers du workspace | Toute la tâche |
+| **Épisodique** (opt., 17.C+) | "Ce qui a marché" pour des tâches similaires | Entre sessions |
+
+#### 6. Récupération d'erreur (politique explicite)
+
+REFLECT applique une politique déterministe, pas "au feeling" :
+
+- **Erreur de syntaxe/import** → correction directe (le message d'erreur suffit).
+- **Test qui échoue** → lire le fichier, relire la doc du symbole en cause
+  (`search_docs`), corriger.
+- **Même erreur 2× de suite** → changer d'approche (re-planifier), ne pas répéter.
+- **3 échecs sur une étape** → escalade : demander à l'utilisateur (NEEDS_USER)
+  plutôt que de brûler des itérations.
+- **Tool interdit / hors périmètre** → refus explicite, pas de contournement.
+
+#### 7. Terminaison (conditions strictes)
+
+L'agent s'arrête sur la PREMIÈRE condition atteinte :
+
+- ✅ `done:true` **confirmé par une vérification finale** (re-run des tests).
+- 🧑 NEEDS_USER : ambiguïté ou blocage nécessitant une décision humaine.
+- ⛔ Max itérations atteint (défaut 12) → FAILED avec rapport de ce qui a été fait.
+- 💸 Cap de dépense LLM atteint → FAILED propre.
+- 🔁 Détection de boucle (mêmes actions répétées) → FAILED.
+
+### Tools de l'agent
+
+| Tool | Rôle | Réutilise |
+|---|---|---|
+| `write_file(path, content)` | Écrit dans le workspace isolé | (nouveau) |
+| `read_file(path)` | Relit un fichier (pour se corriger) | (nouveau) |
+| `list_files()` | Arborescence du workspace | (nouveau) |
+| `run_command(cmd)` | Exécute dans le sandbox | `sandbox.py` / `sandbox_csharp.py` |
+| `search_docs(query, corpus?)` | RAG explicite — consulte la doc quand il hésite | `rag.py` |
+| `finish(summary)` | Déclare la tâche finie → vérification finale | (nouveau) |
+
+Tous les tools renvoient une **observation structurée** : `{ ok, stdout, stderr,
+exit_code, elapsed_ms, error }` — jamais du texte libre, pour que REFLECT décide
+de façon fiable.
 
 ### ⚠️ Prérequis bloquant : isolation Docker
 
@@ -789,16 +899,107 @@ one-shot, pas pour un agent qui boucle). Il FAUT un **conteneur Docker éphémè
 par session** (workspace jetable, pas de réseau, limites CPU/RAM). C'est le
 prérequis n°1 — cf Phase 11 abandonnée à ressortir, ou service type E2B.
 
-### Découpage prudent (anti rabbit-hole)
+### Modèle de données (backend)
 
-- **17.A — MVP mono-fichier** : l'agent génère UN script + ses tests, les lance,
-  se corrige (loop run→erreur→fix, max 10 itérations). Périmètre : Python d'abord.
-  Valide la boucle de base. ~1 semaine.
-- **17.B — Multi-fichiers** : petits projets (2-5 fichiers), arborescence,
-  workspace Docker isolé. ~1-2 semaines.
-- **17.C — UI temps réel** : l'agent montre ses actions en direct ("j'écris
-  main.py", "je lance pytest", "1 test échoue → je corrige") comme un vrai
-  copilote. Streaming des étapes.
+```python
+# backend/agent/state.py
+@dataclass
+class ToolCall:      # une action décidée par le LLM
+    tool: str
+    args: dict
+
+@dataclass
+class Observation:   # résultat structuré d'un tool
+    ok: bool
+    stdout: str = ""
+    stderr: str = ""
+    exit_code: int | None = None
+    elapsed_ms: int = 0
+    error: str | None = None
+
+@dataclass
+class Step:          # un tour complet de la boucle
+    index: int
+    thought: str
+    action: ToolCall | None
+    observation: Observation | None
+    reflection: str | None
+
+@dataclass
+class PlanItem:
+    id: int
+    objectif: str
+    corpus: list[str]     # corpus RAG pertinents pour cette étape
+    done: bool = False
+
+@dataclass
+class AgentSession:
+    id: str
+    task: str
+    workspace_path: str       # dossier isolé (Docker volume)
+    plan: list[PlanItem]
+    steps: list[Step]
+    state: str                # PLAN | ACT | OBSERVE | REFLECT | DONE | FAILED | NEEDS_USER
+    tokens_used: int = 0
+    max_iterations: int = 12
+```
+
+### Structure de modules (backend)
+
+```
+backend/agent/
+├── __init__.py
+├── state.py       # dataclasses ci-dessus
+├── loop.py        # la machine à états : run_agent(session) → itère PLAN/ACT/OBSERVE/REFLECT
+├── planner.py     # décomposition initiale + re-planification (appel LLM dédié)
+├── context.py     # construit le prompt de chaque tour (fenêtre glissante, budget tokens)
+├── tools.py       # implémentation des tools + dispatch + schémas JSON (function calling)
+├── reflect.py     # politique de récupération d'erreur / détection de blocage
+├── workspace.py   # gestion du dossier isolé (create, write, read, list, cleanup)
+└── prompts.py     # SYSTEM_PROMPT agent + template ReAct + template planner
+```
+
+Route : `POST /api/agent` (SSE) qui streame chaque `Step` au frontend.
+Frontend : `frontend/components/AgentPanel.tsx` — plan cochable + timeline des
+actions en temps réel + arborescence du workspace + fichiers générés.
+
+### Plan de démarrage pratique (étape par étape)
+
+**Étape 0 — Fondation d'isolation (prérequis)**
+- [ ] `backend/agent/workspace.py` : créer/nettoyer un dossier de session
+- [ ] Isolation : conteneur Docker éphémère (image avec Python + .NET + Node),
+      montage du workspace en volume, `--network none`, limites `--memory`/`--cpus`,
+      `--pids-limit` (anti fork-bomb), user non-root, timeout par commande
+
+**Étape 1 — Boucle minimale (17.A)**
+- [ ] `state.py` + `tools.py` (write_file, read_file, run_command, finish)
+- [ ] `context.py` : prompt système + protocole ReAct JSON + fenêtre d'historique
+- [ ] `loop.py` : machine à états, parsing de la sortie JSON, dispatch tool,
+      garde-fous (max_iter, détection de boucle, cap tokens)
+- [ ] Function calling DeepSeek : schémas des tools
+- [ ] Test bout-en-bout : "écris median(nums) + 3 tests pytest, fais-les passer"
+      → l'agent doit itérer run→échec→fix→succès de façon autonome
+
+**Étape 2 — Grounding (17.A+)**
+- [ ] `search_docs` tool branché sur `rag.py`
+- [ ] `planner.py` associe des corpus à chaque étape → l'agent consulte la doc
+      AVANT de coder, pas seulement en cas d'erreur
+- [ ] Discipline périmètre : refus explicite hors des 22 corpus
+
+**Étape 3 — Multi-fichiers + re-planification (17.B)**
+- [ ] `list_files`, arborescence, projets 2-5 fichiers
+- [ ] `reflect.py` : re-planification sur échec répété, escalade NEEDS_USER
+
+**Étape 4 — UI temps réel (17.C)**
+- [ ] `AgentPanel.tsx` : plan cochable, timeline live ("j'écris main.py",
+      "je lance pytest", "1 test échoue → je corrige"), arborescence, diff
+- [ ] Streaming SSE de chaque `Step`
+- [ ] Bouton "stop" (annulation) + reprise
+
+**Étape 5 — Robustesse + éval**
+- [ ] Suite de tâches de référence (10-15 tâches variées sur la stack) pour
+      mesurer le taux de succès autonome (métrique clé de l'agent)
+- [ ] Persistance des sessions agent (historique, reprise)
 
 ### Garde-fous non négociables
 
