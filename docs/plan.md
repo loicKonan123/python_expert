@@ -733,6 +733,95 @@ déclencher si validation produit ou demande utilisateur le justifie.
 
 ---
 
+## Phase 17 — Mode Agent (environnement de dev agentique) 🎯 vision
+
+**Vision** : un vrai environnement de dev agentique dans Polaris. L'utilisateur
+demande une tâche ("crée-moi une API FastAPI de todos avec tests"), et l'agent
+**planifie, écrit les fichiers, exécute, lit les erreurs, se corrige** en
+autonomie — un peu comme Claude Code, mais **spécialisé uniquement dans les 22
+technos indexées**.
+
+### Principe directeur : grounding-first + execution-first
+
+Ce qui rend cet agent différent d'un "wrapper LLM de plus" et compense un
+modèle mid-tier (DeepSeek vs frontier) :
+
+1. **Doc-grounded** : avant d'écrire du code, l'agent RÉCUPÈRE la doc officielle
+   à jour du sujet (RAG existant) → il ne devine pas une API, il la consulte.
+   Sur SQLAlchemy 2.0 / Next 16 / .NET 9, avantage structurel vs mémoire figée.
+2. **Execution-first** : chaque bout de code est EXÉCUTÉ dans le sandbox →
+   erreur réelle → correction. Un modèle moyen qui voit ses erreurs bat un
+   modèle fort qui code à l'aveugle.
+3. **Spécialisé = discipline anti-hallucination étendue** : si la tâche sort
+   des 22 corpus (ex : "fais-moi du Vue" — non indexé), l'agent le DIT
+   ("hors de mon périmètre : Vue n'est pas dans mes corpus") au lieu de bluffer.
+   C'est le moat : un agent honnête sur son périmètre.
+
+### Architecture (boucle de tool-use)
+
+```
+User: "crée une API FastAPI de todos + tests pytest"
+  ↓
+1. RAG : récupère doc FastAPI + pytest pertinente
+2. PLAN : DeepSeek décompose (structure fichiers, étapes)
+3. LOOP (max N itérations, garde-fou coût + boucle infinie) :
+     - LLM choisit un tool : write_file / read_file / run_command
+     - backend exécute dans un WORKSPACE ISOLÉ
+     - résultat (stdout/erreur) renvoyé au LLM
+     - LLM observe, corrige ou passe à l'étape suivante
+4. DONE : l'agent résume ce qu'il a créé, l'utilisateur voit l'arborescence
+```
+
+### Tools de l'agent (MVP)
+
+| Tool | Rôle |
+|---|---|
+| `write_file(path, content)` | Écrit dans le workspace isolé de la session |
+| `read_file(path)` | Relit un fichier (pour se corriger) |
+| `run_command(cmd)` | Exécute dans le sandbox (réutilise `sandbox.py` / `sandbox_csharp.py`) |
+| `search_docs(query, corpus?)` | RAG explicite — l'agent consulte la doc quand il hésite |
+
+### ⚠️ Prérequis bloquant : isolation Docker
+
+Un agent qui **écrit des fichiers + lance des commandes en boucle** ne peut PAS
+tourner sur le sandbox subprocess+PEP578 actuel (suffisant pour un snippet
+one-shot, pas pour un agent qui boucle). Il FAUT un **conteneur Docker éphémère
+par session** (workspace jetable, pas de réseau, limites CPU/RAM). C'est le
+prérequis n°1 — cf Phase 11 abandonnée à ressortir, ou service type E2B.
+
+### Découpage prudent (anti rabbit-hole)
+
+- **17.A — MVP mono-fichier** : l'agent génère UN script + ses tests, les lance,
+  se corrige (loop run→erreur→fix, max 10 itérations). Périmètre : Python d'abord.
+  Valide la boucle de base. ~1 semaine.
+- **17.B — Multi-fichiers** : petits projets (2-5 fichiers), arborescence,
+  workspace Docker isolé. ~1-2 semaines.
+- **17.C — UI temps réel** : l'agent montre ses actions en direct ("j'écris
+  main.py", "je lance pytest", "1 test échoue → je corrige") comme un vrai
+  copilote. Streaming des étapes.
+
+### Garde-fous non négociables
+
+- **Max N itérations** (ex : 10) → coût LLM borné + pas de boucle infinie
+- **Cap de dépense** DeepSeek par session
+- **Workspace jetable** isolé par session (jamais d'accès au FS de l'hôte)
+- **Périmètre technos** : refuse/signale hors des 22 corpus (anti-bluff)
+
+### Pourquoi ça vaut le coup (portfolio)
+
+"J'ai construit un agent de code doc-grounded qui planifie, exécute et se
+corrige en autonomie, spécialisé sur une stack précise, avec grounding RAG +
+boucle d'exécution pour un code vérifié" — c'est exactement le profil que les
+boîtes IA recherchent en 2026. Bien plus fort qu'un chatbot.
+
+**Ne PAS viser un tueur de Cursor** (impossible avec un modèle mid-tier). Viser
+une **démo technique impressionnante et honnête** sur un périmètre maîtrisé.
+
+**Recommandation d'ordre** : finir README + déploiement (un agent inclonable
+que personne ne voit ne sert à rien) AVANT d'attaquer 17.A.
+
+---
+
 ## Naming — 5 candidats à valider
 
 Critères : court (≤ 8 lettres), prononçable EN + FR, évoque savoir / fiabilité /
