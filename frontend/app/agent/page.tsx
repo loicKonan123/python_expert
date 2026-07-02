@@ -9,6 +9,7 @@ import {
   agentDownloadUrl,
   type AgentStep,
   type AgentDone,
+  type AgentSource,
 } from "@/lib/api";
 
 /** Icône + couleur par tool, pour la timeline. */
@@ -288,6 +289,18 @@ function StepCard({ step }: { step: AgentStep }) {
             </button>
           )}
         </div>
+        {/* Références documentaires consultées (search_docs) */}
+        {step.sources && step.sources.length > 0 && (
+          <div className="mx-4 mb-4 rounded-lg border border-[#A78BFA]/25 bg-[#A78BFA]/[0.06] p-3 space-y-1.5">
+            <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-[#A78BFA]">
+              <MaterialIcon name="menu_book" className="text-[13px]" />
+              Doc officielle consultée
+            </div>
+            {step.sources.map((s) => (
+              <DocRef key={s.index} src={s} />
+            ))}
+          </div>
+        )}
         {/* Aperçu du code écrit — s'anime comme si l'agent le tapait */}
         {step.tool === "write_file" && typeof step.args.content === "string" && (
           <WrittenCode content={step.args.content as string} />
@@ -302,6 +315,26 @@ function StepCard({ step }: { step: AgentStep }) {
           </pre>
         )}
       </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Une référence documentaire consultée par l'agent (search_docs)
+// ---------------------------------------------------------------------------
+
+function DocRef({ src }: { src: AgentSource }) {
+  const pct = Math.round(src.score * 100);
+  return (
+    <div className="flex items-center gap-2 text-[11px] font-mono min-w-0">
+      <span className="px-1.5 py-0.5 rounded bg-[#A78BFA]/15 text-[#A78BFA] shrink-0">
+        {src.corpus}
+      </span>
+      <span className="text-on-surface-variant truncate">
+        {src.source}
+        {src.section ? ` §${src.section}` : ""}
+      </span>
+      <span className="ml-auto text-on-surface-variant/60 shrink-0">{pct}%</span>
     </div>
   );
 }

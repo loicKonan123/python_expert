@@ -14,11 +14,16 @@ class ToolCall:
 
 @dataclass
 class Observation:
-    """Résultat d'un tool, tel que ré-injecté au LLM (texte lisible + statut)."""
+    """Résultat d'un tool, tel que ré-injecté au LLM (texte lisible + statut).
+
+    ``sources`` : références documentaires (pour search_docs) — remontées à l'UI
+    pour afficher ce que l'agent a consulté pendant son cheminement.
+    """
 
     ok: bool
     content: str = ""
     error: str | None = None
+    sources: list[dict] | None = None
 
     def as_text(self) -> str:
         if self.ok:

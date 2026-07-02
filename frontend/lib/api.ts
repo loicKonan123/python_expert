@@ -217,6 +217,14 @@ export async function restartKernel(sessionId: string): Promise<void> {
 // Mode Agent (Phase 17) — streaming SSE des étapes
 // ---------------------------------------------------------------------------
 
+export type AgentSource = {
+  index: number;
+  corpus: string;
+  source: string;
+  section: string;
+  score: number;
+};
+
 export type AgentStep = {
   index: number;
   thought: string;
@@ -224,6 +232,7 @@ export type AgentStep = {
   args: Record<string, unknown>;
   ok: boolean;
   observation: string;
+  sources?: AgentSource[];
   done: boolean;
 };
 

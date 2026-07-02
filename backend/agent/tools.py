@@ -87,13 +87,27 @@ def dispatch(
             corpora = [corpus] if isinstance(corpus, str) and corpus else None
             chunks = rag.retrieve(query, k=3, corpora=corpora)
             if not chunks:
-                return Observation(True, "(aucun extrait trouvé)")
-            out = []
+                return Observation(True, "(aucun extrait trouvé dans la doc)")
+            # Texte pour le LLM : chaque extrait préfixé de sa RÉFÉRENCE, pour
+            # qu'il s'appuie dessus et puisse la citer dans ses commentaires.
+            out: list[str] = []
+            sources: list[dict] = []
             for i, c in enumerate(chunks, 1):
+                corpus_name = getattr(c, "corpus", "?")
                 src = getattr(c, "source", "?")
-                text = getattr(c, "text", "")[:600]
-                out.append(f"[{i}] {src}\n{text}")
-            return Observation(True, "\n\n".join(out))
+                section = getattr(c, "section", "")
+                score = getattr(c, "score", 0.0)
+                text = getattr(c, "text", "")[:700]
+                ref = f"[{i}] {corpus_name} · {src}" + (f" §{section}" if section else "")
+                out.append(f"{ref} (score {score:.2f})\n{text}")
+                sources.append({
+                    "index": i,
+                    "corpus": corpus_name,
+                    "source": src,
+                    "section": section,
+                    "score": round(float(score), 3),
+                })
+            return Observation(True, "\n\n".join(out), sources=sources)
 
         return Observation(False, error=f"outil inconnu : '{tool}'")
 

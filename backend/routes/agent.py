@@ -88,6 +88,7 @@ def _step_to_dict(s: Step) -> dict:
         "args": s.action.args if s.action else {},
         "ok": bool(s.observation.ok) if s.observation else True,
         "observation": s.observation.as_text() if s.observation else "",
+        "sources": (s.observation.sources if s.observation else None) or [],
         "done": s.done,
     }
 
