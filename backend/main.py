@@ -21,7 +21,7 @@ from .kernel import get_manager as get_kernel_manager
 from .llm_providers import get_provider
 from .logging_config import setup_logging
 from .rag import RAGEngine
-from .routes import ask, health, run, usage
+from .routes import agent, ask, health, run, usage
 from .sandbox_csharp import is_dotnet_script_available
 
 
@@ -142,6 +142,7 @@ app.include_router(ask.router)
 app.include_router(health.router)
 app.include_router(usage.router)
 app.include_router(run.router)
+app.include_router(agent.router)
 
 
 @app.get("/", tags=["root"])
