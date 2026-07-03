@@ -133,6 +133,9 @@ def agent(req: AgentRequest, request: Request) -> StreamingResponse:
             events.put((None, None))  # sentinelle de fin
 
     def generate():
+        # Padding initial (~2 Ko de commentaire SSE) : force les navigateurs à
+        # livrer immédiatement le flux au JS au lieu de bufferiser le début.
+        yield (":" + " " * 2048 + "\n\n").encode("utf-8")
         yield _sse("start", {"session_id": session_id, "task": req.task})
         threading.Thread(target=worker, daemon=True).start()
         while True:
@@ -142,7 +145,15 @@ def agent(req: AgentRequest, request: Request) -> StreamingResponse:
             yield _sse(kind, data)
         yield _sse("end", "")
 
-    return StreamingResponse(generate(), media_type="text/event-stream")
+    return StreamingResponse(
+        generate(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache, no-transform",
+            "X-Accel-Buffering": "no",   # désactive le buffering proxy (nginx)
+            "Connection": "keep-alive",
+        },
+    )
 
 
 def _open_workspace(session_id: str) -> Workspace:
