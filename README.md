@@ -1,12 +1,17 @@
 # Python Expert — tuteur RAG multi-corpus
 
-Un tuteur de développement web moderne qui répond à tes questions **en s'appuyant
-sur la documentation officielle** de 6 technologies, avec citations à la source.
+Un tuteur de développement moderne qui répond à tes questions **en s'appuyant
+sur la documentation officielle** de 26 technologies, avec citations à la source.
 
-**178 concepts** pré-rédigés répartis en 21 niveaux progressifs sur :
-- Python 3.14 · FastAPI · Pydantic · Next.js · TypeScript · Tailwind CSS
+**525 concepts** pré-rédigés répartis en 50 niveaux progressifs, et 7 piliers de corpus :
+- **Backend Python** — Python 3.14 · FastAPI · Pydantic · SQLAlchemy · HTTPX · pytest
+- **Frontend Web** — Next.js · TypeScript · Tailwind CSS · Zod · TanStack Query · Vitest
+- **Standards web (MDN)** — HTML · CSS · JavaScript
+- **Écosystème .NET** — C# · ASP.NET Core · EF Core
+- **Architecture & DevOps** — 12-Factor · Docker · GitHub Actions
+- **IA / Machine Learning** — NumPy · Pandas · scikit-learn · PyTorch · Hugging Face Transformers
 
-**19 821 chunks** indexés depuis les docs officielles (1.5 GB de connaissance brute).
+**100 962 chunks** indexés depuis les docs officielles (~700 MB de connaissance brute).
 
 ---
 
@@ -63,14 +68,20 @@ PYEXPERT_DEEPSEEK_MODEL=deepseek-chat
 ### 3. Récupérer les docs et construire l'index
 
 ```powershell
-# Télécharge les 5 corpus distants (~7 min)
+# Télécharge tous les corpus distants (~15 min)
 python -m backend.scripts.fetch_docs
+
+# Ou un seul corpus à la fois :
+python -m backend.scripts.fetch_docs --corpus pytorch
 
 # Télécharge aussi la doc Python 3.14 brute depuis docs.python.org
 # et extrais l'archive dans ./python-3.14-docs-text/
 
-# Construit l'index vectoriel (~10 min)
+# Construit l'index vectoriel complet (~30 min)
 python -m backend.scripts.build_index
+
+# Ou réindexe uniquement certains corpus (incrémental, le reste est conservé) :
+python -m backend.scripts.build_index --corpus numpy --corpus pytorch
 ```
 
 ### 4. Lancer (2 terminaux)
@@ -144,7 +155,7 @@ python_expert/
 ├── backend/
 │   ├── main.py                 # App FastAPI + lifespan
 │   ├── config.py               # Pydantic Settings (env: PYEXPERT_*)
-│   ├── corpora.py              # Manifeste des 6 corpus documentaires
+│   ├── corpora.py              # Manifeste des 26 corpus documentaires
 │   ├── chunker.py              # Découpe multi-format (sphinx, markdown, mdx)
 │   ├── rag.py                  # RAG Engine (embeddings + ChromaDB)
 │   ├── prompts.py              # Système + rewriting
@@ -167,7 +178,7 @@ python_expert/
 │   │   ├── CodeBlock.tsx       # Monaco + bouton Run + output sandbox
 │   │   ├── ConversationsMenu.tsx # Historique des threads + export MD
 │   │   ├── CorpusFilter.tsx    # Chips de filtre par techno
-│   │   ├── Sidebar.tsx         # Curriculum 21 niveaux × 178 concepts
+│   │   ├── Sidebar.tsx         # Curriculum 50 niveaux × 525 concepts
 │   │   └── TopBar.tsx          # Health, usage live, nouvelle conv
 │   └── lib/                    # api.ts, conversations.ts, curriculum.ts
 │

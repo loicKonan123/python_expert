@@ -29,6 +29,11 @@ const CORPUS_META: Record<Corpus, { label: string; color: string; icon: string }
   twelve_factor:  { label: "12 Factor App",  color: "text-[#79589F]", icon: "view_module" },
   docker:         { label: "Docker",         color: "text-[#2496ED]", icon: "deployed_code" },
   github_actions: { label: "GitHub Actions", color: "text-[#9E91F2]", icon: "play_circle" },
+  numpy:          { label: "NumPy",          color: "text-[#4DABCF]", icon: "data_array" },
+  pandas:         { label: "Pandas",         color: "text-[#E70488]", icon: "table_chart" },
+  sklearn:        { label: "scikit-learn",   color: "text-[#F7931E]", icon: "model_training" },
+  pytorch:        { label: "PyTorch",        color: "text-[#EE4C2C]", icon: "local_fire_department" },
+  transformers:   { label: "Transformers",   color: "text-[#FFD21E]", icon: "smart_toy" },
 };
 
 type Props = {

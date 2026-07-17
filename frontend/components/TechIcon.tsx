@@ -14,7 +14,8 @@ type TechKey =
   | "nextjs" | "typescript" | "tailwind" | "zod" | "tanstack_query" | "vitest"
   | "html" | "css" | "javascript"
   | "csharp" | "aspnet" | "efcore"
-  | "twelve_factor" | "docker" | "github_actions";
+  | "twelve_factor" | "docker" | "github_actions"
+  | "numpy" | "pandas" | "sklearn" | "pytorch" | "transformers";
 
 const SLUG: Record<TechKey, { slug: string; color: string } | { fallback: string; color: string }> = {
   python:         { slug: "python",        color: "FFD43B" },
@@ -38,6 +39,11 @@ const SLUG: Record<TechKey, { slug: string; color: string } | { fallback: string
   twelve_factor:  { fallback: "view_module", color: "79589F" },
   docker:         { slug: "docker",        color: "2496ED" },
   github_actions: { slug: "githubactions", color: "9E91F2" },
+  numpy:          { slug: "numpy",         color: "4DABCF" },
+  pandas:         { slug: "pandas",        color: "E70488" },
+  sklearn:        { slug: "scikitlearn",   color: "F7931E" },
+  pytorch:        { slug: "pytorch",       color: "EE4C2C" },
+  transformers:   { slug: "huggingface",   color: "FFD21E" },
 };
 
 type Props = {
@@ -102,6 +108,11 @@ export const TECH_LABELS: Record<TechKey, string> = {
   twelve_factor: "12 Factor App",
   docker: "Docker",
   github_actions: "GitHub Actions",
+  numpy: "NumPy",
+  pandas: "Pandas",
+  sklearn: "scikit-learn",
+  pytorch: "PyTorch",
+  transformers: "Transformers",
 };
 
 export type { TechKey };

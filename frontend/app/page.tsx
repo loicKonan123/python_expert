@@ -15,11 +15,11 @@ import { SnapScroll } from "@/components/SnapScroll";
 export const metadata = {
   title: "Polaris — Le tuteur dev qui ne ment pas",
   description:
-    "Chaque réponse est citée dans la doc officielle de Python, FastAPI, Pydantic, Next.js, TypeScript et Tailwind. Le code généré peut être exécuté en direct.",
+    "Chaque réponse est citée dans la doc officielle de 26 technologies — de Python à PyTorch, de Next.js aux Transformers. Le code généré peut être exécuté en direct.",
 };
 
 /**
- * 6 piliers de l'expertise full-stack Polaris.
+ * 7 piliers de l'expertise full-stack Polaris.
  * Chaque pilier groupe ses technos avec leurs icônes officielles.
  */
 const PILLARS: Array<{
@@ -71,9 +71,16 @@ const PILLARS: Array<{
     accent: "#2496ED",
     techs: ["docker", "github_actions"],
   },
+  {
+    title: "IA / Machine Learning",
+    subtitle: "Du calcul numérique aux LLM — docs officielles",
+    icon: "neurology",
+    accent: "#EE4C2C",
+    techs: ["numpy", "pandas", "sklearn", "pytorch", "transformers"],
+  },
 ];
 
-/** Liste plate des 21 technos pour la belt finale (préserve l'ordre des piliers). */
+/** Liste plate des technos pour la belt finale (préserve l'ordre des piliers). */
 const ALL_TECHS: TechKey[] = PILLARS.flatMap((p) => p.techs);
 
 /**
@@ -102,6 +109,11 @@ const TECH: Record<TechKey, { color: string; glyph: string; label: string }> = {
   twelve_factor:  { color: "#79589F", glyph: "12", label: "12-Factor" },
   docker:         { color: "#2496ED", glyph: "D",  label: "Docker" },
   github_actions: { color: "#3a8eff", glyph: "GH", label: "GitHub Actions" },
+  numpy:          { color: "#4DABCF", glyph: "Np", label: "NumPy" },
+  pandas:         { color: "#E70488", glyph: "Pa", label: "Pandas" },
+  sklearn:        { color: "#F7931E", glyph: "Sk", label: "scikit-learn" },
+  pytorch:        { color: "#EE4C2C", glyph: "Pt", label: "PyTorch" },
+  transformers:   { color: "#FFD21E", glyph: "HF", label: "Transformers" },
 };
 
 export default function Landing() {
@@ -165,10 +177,10 @@ export default function Landing() {
               <CountUp to={0} suffix="ms" />
             </Stat>
             <Stat label="Corpus indexés" color="var(--color-action)">
-              <CountUp to={22} />
+              <CountUp to={27} />
             </Stat>
             <Stat label="Chunks indexés" color="var(--color-on-surface)">
-              <CountUp to={86278} duration={1800} />
+              <CountUp to={100962} duration={1800} />
             </Stat>
           </div>
 
@@ -297,7 +309,7 @@ export default function Landing() {
         <Reveal>
           <SectionHeader
             kicker="Stack expert"
-            title="6 piliers, 21 technos, une seule étoile"
+            title="7 piliers, 26 technos, une seule étoile"
             subtitle="Polaris couvre tout ce dont un dev full-stack a besoin pour livrer en production : du code au déploiement, en passant par les tests et l'architecture."
           />
         </Reveal>
@@ -488,7 +500,7 @@ function ComparisonTable() {
     },
     {
       feature: "Couverture stack",
-      polaris: "Backend, frontend, .NET, archi, DevOps (21 technos)",
+      polaris: "Backend, frontend, .NET, archi, DevOps, IA (26 technos)",
       generic: "Réponses génériques, profondeur inégale",
     },
     {
@@ -498,12 +510,12 @@ function ComparisonTable() {
     },
     {
       feature: "Corpus",
-      polaris: "22 sources officielles (86 278 chunks vectorisés)",
+      polaris: "27 sources officielles (100 962 chunks vectorisés)",
       generic: "Données génériques mélangées",
     },
     {
       feature: "Curriculum guidé",
-      polaris: "465 concepts structurés en 45 niveaux pédagogiques",
+      polaris: "525 concepts structurés en 50 niveaux pédagogiques",
       generic: "Aucun parcours, l'utilisateur se débrouille",
     },
     {

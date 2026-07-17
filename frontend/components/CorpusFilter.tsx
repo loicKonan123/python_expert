@@ -32,6 +32,12 @@ const ALL_CORPORA: Corpus[] = [
   "twelve_factor",
   "docker",
   "github_actions",
+  // Phase 17 — IA / Machine Learning
+  "numpy",
+  "pandas",
+  "sklearn",
+  "pytorch",
+  "transformers",
 ];
 
 type Props = {

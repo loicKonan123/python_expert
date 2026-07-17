@@ -21,7 +21,7 @@ type CorpusKey =
   | "python"
   | "fastapi"
   | "javascript"
-  | "pydantic"
+  | "pytorch"
   | "nextjs"
   | "typescript"
   | "tailwind"
@@ -123,16 +123,16 @@ const SATELLITES: Satellite[] = [
     },
   },
   {
-    key: "pydantic",
-    label: "Pydantic",
-    color: "#E92063",
-    icon: "schema",
+    key: "pytorch",
+    label: "PyTorch",
+    color: "#EE4C2C",
+    icon: "local_fire_department",
     x: 85, y: 50,
     demo: {
-      question: "Validator async qui vérifie l'unicité d'un email ?",
-      intro: "field_validator async avec accès DB :",
-      code: `class UserCreate(BaseModel):\n    email: EmailStr\n\n    @field_validator("email")\n    async def unique(cls, v):\n        exists = await db.users.find_one({"email": v})\n        if exists:\n            raise ValueError("déjà pris")\n        return v`,
-      source: "docs.pydantic.dev/latest/concepts/validators/#async-validators",
+      question: "La boucle d'entraînement minimale en PyTorch ?",
+      intro: "zero_grad → forward → loss → backward → step :",
+      code: `for x, y in loader:\n    optimizer.zero_grad()\n    loss = criterion(model(x), y)\n    loss.backward()\n    optimizer.step()`,
+      source: "docs.pytorch.org/tutorials/beginner/basics/optimization_tutorial.html",
     },
   },
   {

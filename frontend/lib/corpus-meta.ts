@@ -152,6 +152,37 @@ export const CORPUS_META: Record<Corpus | "unknown", CorpusMeta> = {
     bgColor: "bg-[#2088FF]/15 border-[#2088FF]/40",
     icon: "play_circle",
   },
+  // ============ Phase 17 — IA / Machine Learning ============
+  numpy: {
+    label: "NumPy",
+    color: "text-[#4DABCF]",  // bleu clair NumPy officiel
+    bgColor: "bg-[#4DABCF]/15 border-[#4DABCF]/40",
+    icon: "data_array",
+  },
+  pandas: {
+    label: "Pandas",
+    color: "text-[#E70488]",  // rose Pandas (le violet #150458 est illisible en dark)
+    bgColor: "bg-[#E70488]/15 border-[#E70488]/40",
+    icon: "table_chart",
+  },
+  sklearn: {
+    label: "scikit-learn",
+    color: "text-[#F7931E]",  // orange scikit-learn officiel
+    bgColor: "bg-[#F7931E]/15 border-[#F7931E]/40",
+    icon: "model_training",
+  },
+  pytorch: {
+    label: "PyTorch",
+    color: "text-[#EE4C2C]",  // flamme PyTorch officielle
+    bgColor: "bg-[#EE4C2C]/15 border-[#EE4C2C]/40",
+    icon: "local_fire_department",
+  },
+  transformers: {
+    label: "Transformers",
+    color: "text-[#FFD21E]",  // jaune Hugging Face officiel
+    bgColor: "bg-[#FFD21E]/15 border-[#FFD21E]/40",
+    icon: "smart_toy",
+  },
   unknown: {
     label: "Inconnu",
     color: "text-on-surface-variant",
