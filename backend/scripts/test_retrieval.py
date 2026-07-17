@@ -81,6 +81,22 @@ TESTS: list[TestCase] = [
     TestCase("What are TypeScript best practices for typing",
              "EN-hard", "typescript", None),
 
+    # ============ IA / Machine Learning (Phase 17) ============
+    TestCase("NumPy broadcasting rules for arrays of different shapes",
+             "EN-easy", "numpy", "broadcasting"),
+    TestCase("How to merge and join two DataFrames in pandas",
+             "EN-easy", "pandas", "merging"),
+    TestCase("scikit-learn cross validation and train test split",
+             "EN-easy", "sklearn", "cross_validation"),
+    TestCase("PyTorch autograd automatic differentiation backward",
+             "EN-easy", "pytorch", "autograd"),
+    TestCase("Fine-tune a pretrained model with the Transformers Trainer API",
+             "EN-easy", "transformers", None),
+    TestCase("Comment entraîner un réseau de neurones avec PyTorch",
+             "FR", "pytorch", None),
+    TestCase("Pandas groupby agrégation de données par colonne",
+             "FR", "pandas", None),
+
     # ============ FR (test de la limite anglais-seul) ============
     TestCase("Comment fonctionne un décorateur Python avec exemple",
              "FR", "python", "reference/compound_stmts"),

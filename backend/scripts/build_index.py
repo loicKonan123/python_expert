@@ -6,7 +6,9 @@ Pipeline :
   3. Encode par lots avec sentence-transformers (local, CPU).
   4. Insère dans ChromaDB persistant (`chroma_db/`).
 
-Idempotent : recrée la collection à zéro à chaque exécution.
+Sans --corpus : recrée la collection à zéro (idempotent).
+Avec --corpus : incrémental — remplace uniquement les chunks des corpus ciblés,
+le reste de l'index est conservé (pas de ré-embedding global).
 
 Usage :
     python -m backend.scripts.build_index
@@ -95,17 +97,33 @@ def build_index(
 
     logger.info("Connexion à ChromaDB : %s", settings.chroma_dir)
     client = chromadb.PersistentClient(path=str(settings.chroma_dir))
-    try:
-        client.delete_collection(settings.collection_name)
-        logger.info("Ancienne collection '%s' supprimée.", settings.collection_name)
-    except (ValueError, chromadb.errors.NotFoundError):
-        pass
 
-    collection = client.create_collection(
-        name=settings.collection_name,
-        embedding_function=None,
-        metadata={"hnsw:space": "cosine"},
-    )
+    if corpora_names:
+        # Mode incrémental : on ne touche qu'aux corpus ciblés — les chunks
+        # des autres corpus restent en place (pas de ré-embedding global).
+        collection = client.get_or_create_collection(
+            name=settings.collection_name,
+            embedding_function=None,
+            metadata={"hnsw:space": "cosine"},
+        )
+        for name in corpora_names:
+            existing = collection.get(where={"corpus": name}, include=[])
+            if existing["ids"]:
+                collection.delete(where={"corpus": name})
+                logger.info("  %s : %d anciens chunks supprimés.",
+                            name, len(existing["ids"]))
+    else:
+        # Mode complet : on repart de zéro.
+        try:
+            client.delete_collection(settings.collection_name)
+            logger.info("Ancienne collection '%s' supprimée.", settings.collection_name)
+        except (ValueError, chromadb.errors.NotFoundError):
+            pass
+        collection = client.create_collection(
+            name=settings.collection_name,
+            embedding_function=None,
+            metadata={"hnsw:space": "cosine"},
+        )
 
     logger.info("Encodage + insertion par lots de %d...", batch_size)
     for batch in tqdm(

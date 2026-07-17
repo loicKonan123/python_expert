@@ -239,18 +239,26 @@ def chunk_file(path: Path, corpus: Corpus) -> list[Chunk]:
         logger.warning("Encodage non-UTF8 dans %s, fallback errors='replace'", path)
         text = path.read_text(encoding="utf-8", errors="replace")
 
-    if corpus.format == "mdx":
+    # Un corpus peut mélanger les extensions (ex. PyTorch : .rst + .md MyST).
+    # Le découpage en sections suit le format réel du fichier, pas celui du corpus.
+    fmt = corpus.format
+    if fmt == "rst" and path.suffix in (".md", ".mdx"):
+        fmt = "mdx"
+    elif fmt in ("markdown", "mdx") and path.suffix == ".rst":
+        fmt = "rst"
+
+    if fmt == "mdx":
         text = _strip_mdx_jsx(text)
 
     base_meta = _extract_path_metadata(path, corpus)
     # Ajoute le langage à la métadonnée pour les fichiers de code
-    if corpus.format == "code":
+    if fmt == "code":
         base_meta["language"] = _detect_language(path)
 
-    if corpus.format == "code":
+    if fmt == "code":
         sections = _chunk_code(text)
     else:
-        sections = _split_on_sections(text, corpus.format)
+        sections = _split_on_sections(text, fmt)
 
     chunks: list[Chunk] = []
     cursor = 0

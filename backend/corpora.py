@@ -315,6 +315,71 @@ CORPORA: dict[str, Corpus] = {
         source_subpath="content/actions",
     ),
 
+    # ============================================================
+    # Phase 17 — IA / Machine Learning (docs officielles uniquement)
+    # Piste complète : calcul numérique → data → ML classique → DL → LLM.
+    # ============================================================
+
+    # ---------------------------------------------------------------- NumPy
+    "numpy": Corpus(
+        name="numpy",
+        description="NumPy (calcul numérique, doc officielle)",
+        local_path=DOCS_ROOT / "numpy",
+        format="rst",
+        file_extensions=(".rst",),
+        source_repo="https://github.com/numpy/numpy.git",
+        source_branch="main",
+        source_subpath="doc/source",
+    ),
+
+    # ---------------------------------------------------------------- Pandas
+    "pandas": Corpus(
+        name="pandas",
+        description="Pandas (manipulation de données, doc officielle)",
+        local_path=DOCS_ROOT / "pandas",
+        format="rst",
+        file_extensions=(".rst",),
+        source_repo="https://github.com/pandas-dev/pandas.git",
+        source_branch="main",
+        source_subpath="doc/source",
+    ),
+
+    # ------------------------------------------------------------ scikit-learn
+    "sklearn": Corpus(
+        name="sklearn",
+        description="scikit-learn (machine learning, user guide officiel)",
+        local_path=DOCS_ROOT / "sklearn",
+        format="rst",
+        file_extensions=(".rst",),
+        source_repo="https://github.com/scikit-learn/scikit-learn.git",
+        source_branch="main",
+        source_subpath="doc",
+    ),
+
+    # ---------------------------------------------------------------- PyTorch
+    "pytorch": Corpus(
+        name="pytorch",
+        description="PyTorch (deep learning, doc officielle)",
+        local_path=DOCS_ROOT / "pytorch",
+        format="rst",
+        file_extensions=(".rst", ".md"),
+        source_repo="https://github.com/pytorch/pytorch.git",
+        source_branch="main",
+        source_subpath="docs/source",
+    ),
+
+    # ------------------------------------------------------------ Transformers
+    "transformers": Corpus(
+        name="transformers",
+        description="Hugging Face Transformers (LLM, doc officielle)",
+        local_path=DOCS_ROOT / "transformers",
+        format="mdx",  # .md avec balises JSX (<Tip>...) — parsé comme markdown
+        file_extensions=(".md", ".mdx"),
+        source_repo="https://github.com/huggingface/transformers.git",
+        source_branch="main",
+        source_subpath="docs/source/en",
+    ),
+
     # ---------------------------------------------------- Code du projet courant
     # Permet au tuteur de répondre à des questions sur le code que TU as écrit
     # (« regarde mon backend/rag.py », « est-ce que mon ChatMessage.tsx est

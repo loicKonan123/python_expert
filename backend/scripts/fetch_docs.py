@@ -14,7 +14,9 @@ from __future__ import annotations
 
 import argparse
 import logging
+import os
 import shutil
+import stat
 import subprocess
 import sys
 from pathlib import Path
@@ -27,6 +29,18 @@ from ..logging_config import setup_logging
 logger = logging.getLogger(__name__)
 
 REPOS_CACHE = PROJECT_ROOT / ".cache" / "repos"
+
+
+def _rmtree_force(path: Path) -> None:
+    """rmtree qui marche sur Windows : les objets .git sont en lecture seule,
+    ce qui fait échouer silencieusement shutil.rmtree(ignore_errors=True) et
+    laisse des clones morts dans .cache/repos."""
+    def _on_error(func, p, _exc_info):
+        os.chmod(p, stat.S_IWRITE)
+        func(p)
+
+    if path.exists():
+        shutil.rmtree(path, onerror=_on_error)
 
 
 def fetch_one(corpus: Corpus) -> None:
