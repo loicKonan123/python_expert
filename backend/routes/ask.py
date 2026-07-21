@@ -234,12 +234,22 @@ async def ask(req: AskRequest, request: Request) -> StreamingResponse:
             for c in chunks:
                 if c.corpus in boost_corpora:
                     c.score *= BOOST_FACTOR
-            chunks.sort(key=lambda c: c.score, reverse=True)
-            chunks = chunks[:k]
+            # On re-trie et coupe uniquement les chunks PRIMAIRES (issus de la
+            # recherche). Les chunks d'expansion "small-to-big" sont conservés
+            # tant que le fichier de leur parent survit au top-k.
+            primaries = [c for c in chunks if not c.expanded]
+            primaries.sort(key=lambda c: c.score, reverse=True)
+            primaries = primaries[:k]
+            kept_files = {(c.corpus, c.source) for c in primaries}
+            expansions = [
+                c for c in chunks
+                if c.expanded and (c.corpus, c.source) in kept_files
+            ]
+            chunks = primaries + expansions
             logger.info(
                 "[RETRIEVAL] boost %s appliqué → top_corpora=%s",
                 boost_corpora,
-                [c.corpus for c in chunks[:3]],
+                [c.corpus for c in primaries[:3]],
             )
 
         logger.info(

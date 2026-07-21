@@ -70,7 +70,18 @@ class Settings(BaseSettings):
     complexity_threshold: float = 0.4  # 0..1, au-dessus = reasoner
 
     # --- Retrieval ---
-    top_k: int = 7
+    top_k: int = 10
+    # Expansion "small-to-big" : nombre de fichiers distincts (les mieux classés)
+    # dont on injecte tout le contenu derrière leur meilleur chunk. Donne au LLM
+    # la page de doc entière plutôt que des fragments épars.
+    expand_top_files: int = 3
+    # Un fichier n'est injecté en entier que s'il tient dans ce budget (chars).
+    # Au-delà, on ne garde que ses 2 meilleurs chunks.
+    file_expansion_budget: int = 12_000
+    # À l'expansion, privilégier les fichiers qui contiennent des blocs de code
+    # (hors le top hit, toujours étendu). Pour un tuteur dev, l'utilisateur veut
+    # presque toujours voir du code, pas seulement des pages de survol.
+    expand_prefer_code: bool = True
 
     # --- Serveur ---
     host: str = "127.0.0.1"

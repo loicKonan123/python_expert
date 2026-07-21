@@ -17,6 +17,11 @@ from .config import settings
 
 logger = logging.getLogger(__name__)
 
+# Nombre de fichiers distincts (les mieux classés) examinés quand on privilégie
+# le code à l'expansion. Assez large pour atteindre les vrais tutos qui rankent
+# sous les pages de survol, sans multiplier les lectures ChromaDB.
+_CODE_PREF_WINDOW = 9
+
 
 @dataclass
 class RetrievedChunk:
@@ -26,6 +31,7 @@ class RetrievedChunk:
     section: str
     score: float  # similarité cosinus (1 - distance), arrondie à 3 décimales
     corpus: str   # nom du corpus d'origine ("python", "fastapi", ...)
+    expanded: bool = False  # True = injecté par l'expansion "small-to-big"
 
     def to_dict(self) -> dict:
         return {
@@ -74,22 +80,28 @@ class RAGEngine:
         query: str,
         k: int | None = None,
         corpora: list[str] | None = None,
-        expand_neighbors: bool = True,
+        expand_files: int | None = None,
+        prefer_code: bool | None = None,
     ) -> list[RetrievedChunk]:
         """Récupère les k chunks les plus pertinents pour la question.
 
         Si ``corpora`` est fourni et non vide, la recherche est restreinte
         à ces corpus (via le filtre ``where`` de ChromaDB).
 
-        Si ``expand_neighbors`` : le reste du fichier du top hit est injecté
-        derrière lui (pattern « small-to-big »). Une page de doc est cohérente
-        — l'exemple de code qui illustre une intro vit souvent plus loin dans
-        la même page, et les chunks de code pur s'embeddent mal face à une
-        question en langage naturel (ex : l'exemple TrainingArguments de
-        training.md score 0.32 quand son intro score 0.71). Si le fichier est
-        trop gros pour entrer entier, on n'injecte que ses 2 meilleurs chunks.
+        ``expand_files`` (défaut : settings.expand_top_files) : pour chacun des
+        N fichiers distincts les mieux classés, on injecte tout le reste du
+        fichier derrière son meilleur chunk (pattern « small-to-big »). Une page
+        de doc est cohérente — l'exemple de code qui illustre une intro vit
+        souvent plus loin dans la même page, et les chunks de code pur
+        s'embeddent mal face à une question en langage naturel (ex : l'exemple
+        TrainingArguments de training.md score 0.32 quand son intro score 0.71).
+        Un fichier trop gros n'injecte que ses 2 meilleurs chunks.
         """
         k = k or settings.top_k
+        if expand_files is None:
+            expand_files = settings.expand_top_files
+        if prefer_code is None:
+            prefer_code = settings.expand_prefer_code
 
         t0 = time.perf_counter()
         embedding = self.embed_model.encode(
@@ -132,13 +144,28 @@ class RAGEngine:
             for doc, meta, dist in zip(docs, metas, distances)
         ]
 
-        if expand_neighbors and chunks:
-            neighbors = self._file_neighbors(embedding, chunks[0], exclude_ids=set(ids))
-            chunks[1:1] = neighbors
-            if neighbors:
+        if expand_files and chunks:
+            seen_ids = set(ids)
+            files_to_expand = self._select_files_to_expand(chunks, expand_files, prefer_code)
+            done: set[tuple[str, str]] = set()
+            result: list[RetrievedChunk] = []
+            n_injected = 0
+            for base in chunks:
+                result.append(base)
+                fkey = (base.corpus, base.source)
+                if fkey in files_to_expand and fkey not in done:
+                    done.add(fkey)
+                    neighbors = self._file_neighbors(embedding, base, exclude_ids=seen_ids)
+                    for nb in neighbors:
+                        nb.expanded = True
+                    result.extend(neighbors)
+                    n_injected += len(neighbors)
+            chunks = result
+            if n_injected:
                 logger.info(
-                    "  +%d chunk(s) voisin(s) de %s injecté(s)",
-                    len(neighbors), chunks[0].source,
+                    "  +%d chunk(s) injecté(s) via expansion de %d fichier(s)%s",
+                    n_injected, len(done),
+                    " (code priorisé)" if prefer_code else "",
                 )
 
         top_score = chunks[0].score if chunks else 0.0
@@ -155,10 +182,54 @@ class RAGEngine:
 
         return chunks
 
-    # Taille max (chars) d'un fichier pour l'injecter en entier derrière son
-    # top hit. Au-delà, on retombe sur les 2 meilleurs chunks du fichier.
-    # 12k chars ≈ 3k tokens — négligeable pour le budget de contexte.
-    FILE_EXPANSION_BUDGET = 12_000
+    def _select_files_to_expand(
+        self,
+        chunks: list[RetrievedChunk],
+        expand_files: int,
+        prefer_code: bool,
+    ) -> set[tuple[str, str]]:
+        """Choisit les fichiers distincts à injecter en entier.
+
+        Sans ``prefer_code`` : les ``expand_files`` fichiers les mieux classés.
+        Avec : parmi une fenêtre élargie des mieux classés, on étend ceux qui
+        ont le plus gros VOLUME de code (caractères entre ``` ```). On mesure le
+        volume et non le nombre de blocs : une page de survol peut aligner 8
+        mini-snippets d'une ligne sans être une vraie ressource, là où un tuto
+        a moins de blocs mais bien plus substantiels. Le rang départage à
+        volume égal. Un top hit sans code n'occupe plus de slot ; il reste
+        présent via ses chunks primaires.
+        """
+        order: list[tuple[str, str]] = []
+        first_rank: dict[tuple[str, str], int] = {}
+        for rank, c in enumerate(chunks):
+            fkey = (c.corpus, c.source)
+            if fkey not in first_rank:
+                first_rank[fkey] = rank
+                order.append(fkey)
+
+        if not prefer_code or len(order) <= expand_files:
+            return set(order[:expand_files])
+
+        window = order[:_CODE_PREF_WINDOW]
+        volume = {f: self._file_code_volume(*f) for f in window}
+        window.sort(key=lambda f: (-volume[f], first_rank[f]))
+        return set(window[:expand_files])
+
+    def _file_code_volume(self, corpus: str, source: str) -> int:
+        """Nombre total de caractères DANS des blocs de code, sur le fichier
+        entier. Approximation : segments impairs d'un split sur ``` ```."""
+        try:
+            got = self.collection.get(
+                where={"$and": [{"corpus": corpus}, {"source": source}]},
+            )
+            total = 0
+            for doc in got["documents"]:
+                parts = doc.split("```")
+                for i in range(1, len(parts), 2):
+                    total += len(parts[i])
+            return total
+        except Exception:
+            return 0
 
     def _file_neighbors(
         self,
@@ -169,9 +240,9 @@ class RAGEngine:
     ) -> list[RetrievedChunk]:
         """Chunks du fichier du top hit à injecter derrière lui.
 
-        Fichier petit (≤ FILE_EXPANSION_BUDGET chars) : TOUT le fichier, dans
-        l'ordre du document — le LLM lit la page officielle complète.
-        Fichier gros : seulement ses ``max_extra`` chunks les plus pertinents.
+        Fichier petit (≤ settings.file_expansion_budget chars) : TOUT le
+        fichier, dans l'ordre du document — le LLM lit la page officielle
+        complète. Fichier gros : seulement ses ``max_extra`` chunks pertinents.
 
         Score affiché = celui du parent moins epsilon : ils restent collés à
         lui dans le ranking (y compris après le re-tri du boost par intent),
@@ -186,7 +257,7 @@ class RAGEngine:
                 for id_, doc, meta in zip(got["ids"], got["documents"], got["metadatas"])
             ]
 
-            if sum(len(doc) for _, _, doc, _ in rows) > self.FILE_EXPANSION_BUDGET:
+            if sum(len(doc) for _, _, doc, _ in rows) > settings.file_expansion_budget:
                 # Fichier trop gros — on ne garde que ses meilleurs chunks.
                 results = self.collection.query(
                     query_embeddings=embedding,

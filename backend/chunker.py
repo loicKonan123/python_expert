@@ -92,16 +92,58 @@ def _split_on_sections(text: str, fmt: str) -> list[tuple[str, str]]:
     return sections
 
 
+# Bloc de métadonnées YAML en tête de fichier markdown : "---\n…\n---".
+# Fréquent dans les docs Microsoft (title, ms.date, helpviewer_keywords, …).
+# C'est de la métadonnée, pas du contenu pédagogique → on la retire.
+_FRONTMATTER = re.compile(r"\A---\r?\n.*?\r?\n---[ \t]*\r?\n", re.DOTALL)
+
+
+def _strip_frontmatter(text: str) -> str:
+    """Retire un éventuel bloc frontmatter YAML en tête (non gourmand)."""
+    return _FRONTMATTER.sub("", text, count=1)
+
+
+def _paragraphs_preserving_code(text: str) -> list[str]:
+    """Découpe en paragraphes sur les lignes vides, MAIS garde chaque bloc de
+    code délimité par ``` d'un seul tenant.
+
+    Sans ça, une ligne vide À L'INTÉRIEUR d'un exemple de code servait de point
+    de coupe et scindait le bloc en deux chunks (code cassé, inexploitable).
+    """
+    blocks: list[str] = []
+    buf: list[str] = []
+    in_code = False
+    for line in text.split("\n"):
+        stripped = line.lstrip()
+        if stripped.startswith("```"):
+            in_code = not in_code
+            buf.append(line)
+            continue
+        if not in_code and stripped == "":
+            if buf:
+                blocks.append("\n".join(buf))
+                buf = []
+        else:
+            buf.append(line)
+    if buf:
+        blocks.append("\n".join(buf))
+    return blocks
+
+
 def _split_long_text(text: str) -> Iterator[str]:
-    """Découpe un bloc trop long en morceaux ~chunk_size avec chevauchement."""
+    """Découpe un bloc trop long en morceaux ~chunk_size avec chevauchement.
+
+    Les blocs de code ne sont jamais coupés en leur milieu : un exemple de code
+    plus gros que chunk_size est conservé entier (mieux qu'un code tronqué).
+    """
     if len(text) <= settings.chunk_size:
         yield text
         return
 
-    paragraphs = re.split(r"\n\s*\n", text)
+    blocks = _paragraphs_preserving_code(text)
     buffer = ""
-    for para in paragraphs:
-        candidate = f"{buffer}\n\n{para}" if buffer else para
+    for block in blocks:
+        candidate = f"{buffer}\n\n{block}" if buffer else block
         if len(candidate) <= settings.chunk_size:
             buffer = candidate
             continue
@@ -109,10 +151,18 @@ def _split_long_text(text: str) -> Iterator[str]:
         if buffer:
             yield buffer
             overlap = buffer[-settings.chunk_overlap:] if settings.chunk_overlap else ""
-            buffer = f"{overlap}\n\n{para}" if overlap else para
+            # Un overlap avec un nombre impair de ``` démarre au milieu d'un
+            # bloc de code → on le supprime pour ne pas laisser de fence orpheline.
+            if overlap.count("```") % 2 == 1:
+                overlap = ""
+            buffer = f"{overlap}\n\n{block}" if overlap else block
+        elif block.lstrip().startswith("```"):
+            # Bloc de code seul, plus gros que chunk_size : on le garde entier.
+            yield block
+            buffer = ""
         else:
-            for i in range(0, len(para), settings.chunk_size - settings.chunk_overlap):
-                yield para[i : i + settings.chunk_size]
+            for i in range(0, len(block), settings.chunk_size - settings.chunk_overlap):
+                yield block[i : i + settings.chunk_size]
             buffer = ""
 
     if buffer:
@@ -247,6 +297,8 @@ def chunk_file(path: Path, corpus: Corpus) -> list[Chunk]:
     elif fmt in ("markdown", "mdx") and path.suffix == ".rst":
         fmt = "rst"
 
+    if fmt in ("markdown", "mdx"):
+        text = _strip_frontmatter(text)
     if fmt == "mdx":
         text = _strip_mdx_jsx(text)
 
