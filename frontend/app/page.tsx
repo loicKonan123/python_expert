@@ -19,7 +19,7 @@ export const metadata = {
 };
 
 /**
- * 7 piliers de l'expertise full-stack Polaris.
+ * 7 piliers de l'expertise Polaris — du full-stack à l'IA.
  * Chaque pilier groupe ses technos avec leurs icônes officielles.
  */
 const PILLARS: Array<{
@@ -136,13 +136,13 @@ export default function Landing() {
         {/* Copie centrée — prend tout l'espace vertical du viewport */}
         <div className="text-center max-w-3xl mx-auto">
           <h1 className="text-[clamp(36px,6vw,72px)] font-extrabold tracking-[-0.02em] leading-[1.05] mb-5">
-            L&apos;expert full-stack
+            L&apos;expert dev, du full-stack à l&apos;IA
             <br />
             <span className="text-accent">qui ne ment pas.</span>
           </h1>
 
           <p className="text-[17px] sm:text-[19px] text-on-surface-variant leading-[1.55] mb-8 max-w-2xl mx-auto">
-            Python, .NET, Next.js, Docker, CI/CD —{" "}
+            Python, .NET, Next.js, Docker, CI/CD, PyTorch —{" "}
             <span className="text-on-surface font-medium">
               chaque réponse est citée dans la doc officielle
             </span>
@@ -260,18 +260,19 @@ export default function Landing() {
             </Tilt3D>
           </Reveal>
 
-          {/* Card 3 — Full-stack overview (col-span-12) */}
+          {/* Card 3 — Vue d'ensemble des corpus (col-span-12) */}
           <Reveal delay={240} className="md:col-span-12">
             <Tilt3D className="h-full" maxTilt={3}>
               <article className="glass-card-strong p-7 rounded-3xl space-y-5 hover:border-accent/30 transition-colors">
                 <div className="flex items-start gap-4">
                   <div className="flex-1 min-w-0">
                     <h2 className="text-[22px] font-semibold text-on-surface">
-                      L'expertise full-stack en 22 corpus
+                      L'expertise dev en 26 corpus
                     </h2>
                     <p className="text-[14px] text-on-surface-variant leading-[1.6] mt-1">
                       Du langage au framework, du frontend au .NET, de l'ORM
-                      aux tests, de l'archi au DevOps. Toutes les docs sont{" "}
+                      aux tests, de l'archi au DevOps, du calcul numérique à
+                      l'IA. Toutes les docs sont{" "}
                       <span className="text-on-surface font-medium">
                         officielles, à jour, et indexées localement
                       </span>
@@ -310,7 +311,7 @@ export default function Landing() {
           <SectionHeader
             kicker="Stack expert"
             title="7 piliers, 26 technos, une seule étoile"
-            subtitle="Polaris couvre tout ce dont un dev full-stack a besoin pour livrer en production : du code au déploiement, en passant par les tests et l'architecture."
+            subtitle="Polaris couvre tout ce dont un dev a besoin pour livrer en production : du code au déploiement, des tests à l'architecture, jusqu'au machine learning."
           />
         </Reveal>
         <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-5">

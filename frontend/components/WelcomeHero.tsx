@@ -17,8 +17,8 @@ export function WelcomeHero(_: Props) {
         Comment puis-je t&apos;aider ?
       </h2>
       <p className="mt-2 text-[14px] text-on-surface-variant max-w-md leading-[1.55]">
-        Pose ta question full-stack — chaque réponse cite la doc officielle et
-        le code peut être exécuté pour vérification.
+        Pose ta question, du full-stack à l&apos;IA — chaque réponse cite la
+        doc officielle et le code peut être exécuté pour vérification.
       </p>
     </div>
   );

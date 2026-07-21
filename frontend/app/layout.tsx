@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     template: "%s · Polaris",
   },
   description:
-    "Tuteur full-stack qui ne ment pas : chaque réponse est citée dans la doc officielle de Python, FastAPI, Pydantic, Next.js, TypeScript et Tailwind, et le code généré peut être exécuté en direct.",
+    "Tuteur dev qui ne ment pas, du full-stack à l'IA : chaque réponse est citée dans la doc officielle de 26 technologies — de Python à PyTorch, de Next.js aux Transformers — et le code généré peut être exécuté en direct.",
   keywords: [
     "Python",
     "FastAPI",
